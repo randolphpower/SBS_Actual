@@ -401,8 +401,8 @@ class PHPExcel_Reader_Excel2007 extends PHPExcel_Reader_Abstract implements PHPE
                         $docProps = $excel->getProperties();
                         $docProps->setCreator((string) self::getArrayItem($xmlCore->xpath("dc:creator")));
                         $docProps->setLastModifiedBy((string) self::getArrayItem($xmlCore->xpath("cp:lastModifiedBy")));
-                        $docProps->setCreated(strtotime(self::getArrayItem($xmlCore->xpath("dcterms:created")))); //! respect xsi:type
-                        $docProps->setModified(strtotime(self::getArrayItem($xmlCore->xpath("dcterms:modified")))); //! respect xsi:type
+                        $docProps->setCreated(date_default_timezone_set(self::getArrayItem($xmlCore->xpath("dcterms:created")))); //! respect xsi:type
+                        $docProps->setModified(date_default_timezone_set(self::getArrayItem($xmlCore->xpath("dcterms:modified")))); //! respect xsi:type
                         $docProps->setTitle((string) self::getArrayItem($xmlCore->xpath("dc:title")));
                         $docProps->setDescription((string) self::getArrayItem($xmlCore->xpath("dc:description")));
                         $docProps->setSubject((string) self::getArrayItem($xmlCore->xpath("dc:subject")));

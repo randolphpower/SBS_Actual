@@ -25,6 +25,12 @@
                         <span> Procesos Judiciales </span></a>
                 </li>
 
+				<li class="has_sub">
+                    <a href="carga_inicial.php" class="waves-effect"><i class="zmdi zmdi-upload"></i>
+                        <span> Carga Inicial de Juicios </span>
+                    </a>
+				</li>
+
                 <li class="has_sub">
                     <a href="carga_datos.php" class="waves-effect"><i class="zmdi zmdi-upload"></i>
                         <span> Carga de Archivos </span>
