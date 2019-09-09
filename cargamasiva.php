@@ -354,3 +354,14 @@ require 'includes/header_end.php';
 <?php require 'includes/footer_start.php' ?>
 <!-- extra js -->
 <?php require 'includes/footer_end.php' ?>
+
+<script type="text/javascript">
+
+	$(document).ready(function () {
+		$('#descargarDatosIniciales').click(function(e) {
+			e.preventDefault();  //stop the browser from following			
+			window.location.href = './descargar_datos_iniciales.php';
+		});
+	});
+
+</script>

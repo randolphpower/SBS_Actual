@@ -64,7 +64,8 @@ EXP12;Busqueda de Bienes (vehículos);21111<br><br>
 
 								<div class="form-group col-sm-6">
 										<button type="submit" class="btn btn-rounded btn-primary">Subir</button>
-										<button type="button" class="btn btn-rounded btn-danger" onClick="location='principal.php'">Volver</button>
+										<button type="button" class="btn btn-rounded btn-primary" id="preview">Previsualizar Carga</button>
+										<button type="button" class="btn btn-rounded btn-danger" onClick="location='principal.php'">Volver</button>										
 								</div>
 							</div>
 						</div>
@@ -88,3 +89,22 @@ EXP12;Busqueda de Bienes (vehículos);21111<br><br>
 <?php require 'includes/footer_start.php' ?>
 <!-- extra js -->
 <?php require 'includes/footer_end.php' ?>
+
+<script type="text/javascript">
+
+	$(document).ready(function () {
+		var archivo = "";
+
+		$('#archivo').change(function(e) {
+			archivo = e.target.files[0].name;
+			
+		});
+
+		$('#preview').click(function(e) {
+			
+			e.preventDefault();  //stop the browser from following			
+			window.location.href = './preview_carga_masiva.php?archivo=' + archivo;
+		});
+	});
+
+</script>

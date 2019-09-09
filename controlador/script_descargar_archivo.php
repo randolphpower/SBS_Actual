@@ -112,5 +112,5 @@
 	//	}		
 	//} 	
 	//echo $content;
-	header('Location: /servicobranza/visualizar_logs.php?filelist='.base64_encode(serialize($filelist)));
+	header('Location: ../visualizar_logs.php?filelist='.base64_encode(serialize($filelist)));
   ?>
