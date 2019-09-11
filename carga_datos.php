@@ -6,7 +6,7 @@
 <!-- ============================================================== -->
 <!-- Start right Content here -->
 <!-- ============================================================== -->
-<form role="form" name="form" action="cargamasiva.php" enctype="multipart/form-data" method="post" id="form1">
+<form role="form" name="form" action="preview_carga_masiva.php" enctype="multipart/form-data" method="post" id="form1">
 
 <div class="content-page">
     <!-- Start content -->
@@ -63,8 +63,8 @@ EXP12;Busqueda de Bienes (vehículos);21111<br><br>
 							<div class="row">
 
 								<div class="form-group col-sm-6">
-										<button type="submit" class="btn btn-rounded btn-primary">Subir</button>
-										<button type="button" class="btn btn-rounded btn-primary" id="preview">Previsualizar Carga</button>
+										<!--<button type="submit" class="btn btn-rounded btn-primary" id="subir">Subir</button>-->
+										<button type="submit" class="btn btn-rounded btn-primary" id="preview">Previsualizar Carga</button>
 										<button type="button" class="btn btn-rounded btn-danger" onClick="location='principal.php'">Volver</button>										
 								</div>
 							</div>
@@ -93,17 +93,11 @@ EXP12;Busqueda de Bienes (vehículos);21111<br><br>
 <script type="text/javascript">
 
 	$(document).ready(function () {
-		var archivo = "";
-
-		$('#archivo').change(function(e) {
-			archivo = e.target.files[0].name;
-			
-		});
-
 		$('#preview').click(function(e) {
-			
-			e.preventDefault();  //stop the browser from following			
-			window.location.href = './preview_carga_masiva.php?archivo=' + archivo;
+			if (archivo == "") {
+				alert("Debe seleccionar un archivo");
+				return false;
+			};
 		});
 	});
 

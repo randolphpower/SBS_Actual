@@ -4,12 +4,11 @@ session_start();
 
 include("modelo/conectarBD.php");
 
-$tipo = $_FILES['archivo']['type'];
-$tamanio = $_FILES['archivo']['size'];
-$archivotmp = $_FILES['archivo']['tmp_name'];
+$tipo = $_SESSION['tipo'];
+$archivotmp = 	$_SESSION['archivotmp'] ;
 $lineas = file($archivotmp);
 $i = 0;
-$tipo = $_POST["tipo"];
+
 
 if ($tipo == "1") {
 	
@@ -221,6 +220,7 @@ require 'includes/header_end.php';
 <!-- ============================================================== -->
 
 <div class="content-page">
+	
     <!-- Start content -->
     <div class="content">
         <div class="container">
@@ -354,14 +354,3 @@ require 'includes/header_end.php';
 <?php require 'includes/footer_start.php' ?>
 <!-- extra js -->
 <?php require 'includes/footer_end.php' ?>
-
-<script type="text/javascript">
-
-	$(document).ready(function () {
-		$('#descargarDatosIniciales').click(function(e) {
-			e.preventDefault();  //stop the browser from following			
-			window.location.href = './descargar_datos_iniciales.php';
-		});
-	});
-
-</script>
