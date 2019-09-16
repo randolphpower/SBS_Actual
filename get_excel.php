@@ -38,12 +38,14 @@ $sql .= "relacion_cliente_juicio.NUM_JUICIO,";
 $sql .= "relacion_cliente_juicio.ID_CLIENTE,";
 $sql .= "relacion_cliente_juicio.CECRTID,";
 $sql .= "relacion_cliente_juicio.CEDOSSIERID,";
-$sql .= "(SELECT etapas_procesales.CD_DESC ";
-$sql .= "	FROM etapas_procesales ";
-$sql .= "	WHERE etapas_procesales.CD_TYPE = op_eta_proce.CSTYPE AND etapas_procesales.CD_STGID = op_eta_proce.CSSTGID) AS DESC_STGID, ";    
+//$sql .= "(SELECT etapas_procesales.CD_DESC ";
+//$sql .= "	FROM etapas_procesales ";
+//$sql .= "	WHERE etapas_procesales.CD_TYPE = op_eta_proce.CSTYPE AND etapas_procesales.CD_STGID = op_eta_proce.CSSTGID) AS DESC_STGID, ";    
+$sql .= " etapas_procesales.CD_DESC AS DESC_STGID, ";
 $sql .= "op_eta_proce.CSSTDT,"; // fecha inicio
 $sql .= "op_eta_proce.CSENDDT,"; // fecha fin
-$sql .= "(SELECT codigo_accion.DESCRIPCION FROM codigo_accion WHERE codigo_accion.CODIGO = op_200_gestiones.ACACCODE) AS DESC_CODE,";
+//$sql .= "(SELECT codigo_accion.DESCRIPCION FROM codigo_accion WHERE codigo_accion.CODIGO = op_200_gestiones.ACACCODE) AS DESC_CODE,";
+$sql .= "codigo_accion.descripcion AS DESC_CODE,";
 $sql .= "op_200_gestiones.ACCOMN,";
 $sql .= "op_200_gestiones.DATE,";
 $sql .= "op_gastos.EXDESC,";
@@ -54,7 +56,12 @@ $sql .= "informe_datos.FECHA_INSERT,";
 $sql .= "op_gastos.EXSUPPLIER ";
 $sql .= "FROM informe_datos "; // table base
 $sql .= "LEFT JOIN op_eta_proce ON informe_datos.ID_ETA_PROCE = op_eta_proce.id ";
+$sql .= "LEFT JOIN etapas_procesales ";
+$sql .= "ON etapas_procesales.cd_type = op_eta_proce.cstype  ";
+$sql .= "AND etapas_procesales.cd_stgid = op_eta_proce.csstgid ";
 $sql .= "LEFT JOIN op_200_gestiones ON informe_datos.ID_200_GESTION = op_200_gestiones.id ";
+$sql .= "LEFT JOIN codigo_accion ";
+	$sql .= "ON codigo_accion.codigo = op_200_gestiones.acaccode ";
 $sql .= "LEFT JOIN op_gastos ON informe_datos.ID_GASTOS = op_gastos.id ";
 $sql .= "LEFT JOIN relacion_cliente_juicio ON informe_datos.ID_JUICIO = relacion_cliente_juicio.NUM_JUICIO ";
 // $sql .= "ORDER BY informe_datos.FECHA_INSERT DESC";
