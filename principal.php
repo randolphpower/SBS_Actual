@@ -101,7 +101,7 @@ $datosGastos=call_select($var_select_asterisk_from."op_gastos ".$var_where."EXSE
 			<div class="row">
             	<div class="col-sm-12">
 					<div class="card">
-						<div class="card-header">Reporte de Etapas Procesales</div>
+						<div class="card-header" style="background: #FBFBB3">Reporte de Etapas Procesales</div>
 						<div class="card-block">
 							<div class="table-responsive">
 									<?php
@@ -155,7 +155,7 @@ $datosGastos=call_select($var_select_asterisk_from."op_gastos ".$var_where."EXSE
             <div class="row">
             	<div class="col-sm-12">
 					<div class="card">
-						<div class="card-header">Reporte "200" Gestiones</div>
+						<div class="card-header"  style="background: #C4FBB5">Reporte "200" Gestiones</div>
 						<div class="card-block">
 							<div class="table-responsive">
 									<?php
@@ -206,7 +206,7 @@ $datosGastos=call_select($var_select_asterisk_from."op_gastos ".$var_where."EXSE
             <div class="row">
             	<div class="col-sm-12">
 					<div class="card">
-						<div class="card-header">Reporte de Gastos Judiciales</div>
+						<div class="card-header" style="background: #F8E4BB">Reporte de Gastos Judiciales</div>
 						<div class="card-block">
 							<div class="table-responsive">
 									<?php

@@ -6,7 +6,7 @@
 <!-- ============================================================== -->
 <!-- Start right Content here -->
 <!-- ============================================================== -->
-<form role="form" name="form" action="preview_carga_masiva.php" enctype="multipart/form-data" method="post" id="form1">
+<form role="form" name="form" action="cargamasiva.php" enctype="multipart/form-data" method="post" id="form1">
 
 <div class="content-page">
     <!-- Start content -->
@@ -63,11 +63,13 @@ EXP12;Busqueda de Bienes (vehículos);21111<br><br>
 							<div class="row">
 
 								<div class="form-group col-sm-6">
-										<!--<button type="submit" class="btn btn-rounded btn-primary" id="subir">Subir</button>-->
-										<button type="submit" class="btn btn-rounded btn-primary" id="preview">Previsualizar Carga</button>
+										<button type="submit" class="btn btn-rounded btn-primary" id="subir">Subir</button>
+										<!--<button type="button" class="btn btn-rounded btn-primary" id="preview" data-toggle="modal" data-target=".bd-example-modal-lg">Previsualizar Carga</button>!-->
 										<button type="button" class="btn btn-rounded btn-danger" onClick="location='principal.php'">Volver</button>										
 								</div>
+								
 							</div>
+							
 						</div>
         			</div>
         		</div>
@@ -81,6 +83,14 @@ EXP12;Busqueda de Bienes (vehículos);21111<br><br>
 </div>
 <!-- End content-page -->
 </form>
+<div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+    	<div class="modal-content">
+
+		</div> <!-- container -->
+	</div> <!-- content -->
+</div> <!-- End content-page -->
+
 
 <!-- ============================================================== -->
 <!-- End Right content here -->
@@ -90,15 +100,19 @@ EXP12;Busqueda de Bienes (vehículos);21111<br><br>
 <!-- extra js -->
 <?php require 'includes/footer_end.php' ?>
 
+
 <script type="text/javascript">
 
 	$(document).ready(function () {
-		$('#preview').click(function(e) {
+		var archivo = $('#archivo').val();
+		
+		$('#subir').click(function(e) {
 			if (archivo == "") {
 				alert("Debe seleccionar un archivo");
 				return false;
-			};
+			};				
 		});
+
 	});
 
 </script>

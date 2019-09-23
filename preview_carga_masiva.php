@@ -2,7 +2,7 @@
 	session_start();
 	require_once("/modelo/consultaSQL.php");
 	require_once("/modelo/conectarBD.php");	
-	$archivotmp = $_FILES['archivo']['tmp_name'];
+	$archivotmp = $_FILES['archivo']['tmp_name'];	
 	$lineas = file($archivotmp);
 	$tipo = $_POST["tipo"];
 	$_SESSION['tipo'] = $tipo;
