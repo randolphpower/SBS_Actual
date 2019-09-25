@@ -106,7 +106,7 @@
             <div class="row">
                 <div class="col-xs-12">
                     <div class="page-title-box">
-                        <h3 class="page-title">Carga Inicial de Juicios</h3>
+                        <h3 class="page-title">Carga Asignaciones</h3>
                         <div class="clearfix"></div>
                     </div>
                 </div>
