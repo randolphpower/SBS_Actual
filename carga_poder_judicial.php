@@ -1,7 +1,7 @@
 <?php 
 	session_start();
-	//require 'includes/header_start.php'; 
-	//require 'includes/header_end.php'; 
+	require 'includes/header_start.php'; 
+	require 'includes/header_end.php'; 
 	require_once("/modelo/consultaSQL.php");
 	require_once("/modelo/conectarBD.php");
 	require_once("/PHPExcel.php");
@@ -20,6 +20,7 @@
 		$worksheet = $excelObj->getSheet(3);
 		$lastRow = $worksheet->getHighestRow();
 		$rut_demandado = "";
+		$nombre_demandado = "";
 
 		for ($row = 5; $row <= $lastRow; $row++) {
 
@@ -28,25 +29,31 @@
 				$tipo_ligitante = $worksheet->getCell('I'.$row)->getValue();
 				if ($tipo_ligitante == "Demandado") {
 					$rut_demandado = $worksheet->getCell('J'.$row)->getValue();
+					$nombre_demandado = $worksheet->getCell('K'.$row)->getValue();
 				}
 				else {
 					$tipo_ligitante = $worksheet->getCell('L'.$row)->getValue();
 					if ($tipo_ligitante == "Demandado") {
 						$rut_demandado = $worksheet->getCell('M'.$row)->getValue();
+						$nombre_demandado = $worksheet->getCell('N'.$row)->getValue();
 					}
 					else {
 						$tipo_ligitante = $worksheet->getCell('O'.$row)->getValue();
 						if ($tipo_ligitante == "Demandado") {
 							$rut_demandado = $worksheet->getCell('P'.$row)->getValue();
+							$nombre_demandado = $worksheet->getCell('Q'.$row)->getValue();
 						}
 						else {
 							$tipo_ligitante = $worksheet->getCell('R'.$row)->getValue();
 							if ($tipo_ligitante == "Demandado") {
 								$rut_demandado = $worksheet->getCell('S'.$row)->getValue();
+								$nombre_demandado = $worksheet->getCell('T'.$row)->getValue();
 							}
 						}
 					}
 				}
+
+				$rut_demandado = substr($rut_demandado,0,strpos($rut_demandado, '-'));
 
 				$sql_search = "SELECT * FROM juicios_dato_inicial WHERE rut = '".$rut_demandado."';";
 				$datos = call_select($sql_search, "");	
@@ -55,7 +62,7 @@
 				$sql_search = "SELECT * FROM tribunales WHERE descripcion LIKE '%".$tribunal."%';";
 				$datosTribunal = call_select($sql_search, "");
 				$resultTribunal = mysql_fetch_array($datosTribunal['registros']);
-				
+				$fechaDemanda = $worksheet->getCell('E'.$row)->getValue();
 				if ($datos['num_filas'] > 1) { 
 					while($result=mysql_fetch_array($datos['registros'])){
 						$rol =  $worksheet->getCell('B'.$row)->getValue();
@@ -63,13 +70,17 @@
 						$rolPos3 = substr($rol, -4);
 						$rol = str_replace($rolPos1,$rolPos1."-",$rol);
 						$rol = str_replace($rolPos3,"-".$rolPos3,$rol);
+						$time = strtotime($result['fecha_asignacion']);
+						$myFormatForView = date("d/m/Y", $time);
 						$arrayDuplicados[$duplicados-1] = 
 							array($result['id_juicio'], 
 								  $rut_demandado, 
+								  $nombre_demandado, 
 								  $result['tipo_juicio'], 
 								  $resultTribunal['codigo'],
 								  $rol,
-								  "DUPLICADO");
+								  $myFormatForView,
+								  $fechaDemanda);
 						$duplicados++;		
 					}					
 				}	
@@ -80,13 +91,17 @@
 					$rolPos3 = substr($rol, -4);
 					$rol = str_replace($rolPos1,$rolPos1."-",$rol);
 					$rol = str_replace($rolPos3,"-".$rolPos3,$rol);
+					$time = strtotime($result['fecha_asignacion']);
+					$myFormatForView = date("d/m/Y", $time);
 					$arrayInsertados[$insertados-1] = 
 						array($result['id_juicio'], 
 							  $rut_demandado, 
+							  $nombre_demandado,
 							  $result['tipo_juicio'], 
 							  $resultTribunal['codigo'],
 							  $rol,
-							  "INSERTADO");
+							  $myFormatForView,
+							  $fechaDemanda);
 					$insertados++;
 				}	
 				else  { 
@@ -96,13 +111,17 @@
 					$rolPos3 = substr($rol, -4);
 					$rol = str_replace($rolPos1,$rolPos1."-",$rol);
 					$rol = str_replace($rolPos3,"-".$rolPos3,$rol);
+					$time = strtotime($result['fecha_asignacion']);
+					$myFormatForView = date("d/m/Y", $time);
 					$arrayNoEncontrados[$noEncontrados-1] = 
 						array($result['id_juicio'], 
 							  $rut_demandado, 
+							  $nombre_demandado,
 							  $result['tipo_juicio'], 
 							  $resultTribunal['codigo'],
 							  $rol,
-							  "NO ENCONTRADO");
+							  $myFormatForView,
+							  $fechaDemanda);
 					$noEncontrados++;					
 				}			
 			}						
@@ -115,30 +134,33 @@
 		$tableInsertados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Nro.</th>";
 		$tableInsertados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Identificador</th>";
 		$tableInsertados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Rut Cliente</th>";
+		$tableInsertados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Nombre Cliente</th>";
 		$tableInsertados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Tipo Juicio</th>";
 		$tableInsertados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Tribunal</th>";
 		$tableInsertados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Rol</th>";
-		$tableInsertados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Mensaje</th>";
+		$tableInsertados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Fecha Inicio</th>";
+		$tableInsertados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Fecha Demanda</th>";
 		$tableInsertados .= "</tr>";
 		$tableInsertados .= "</thead>";
 		$tableInsertados .= "<tbody>";
 	
-		$count = count($insertados);
-
-		array_multisort( array_column($arrayInsertados, 0), SORT_ASC, $arrayInsertados );
-		
-		for ($j = 0; $j < $insertados; $j++) {			
-			insertarJuicios($arrayInsertados[$j]);
-			$tableInsertados .= "<tr class='text-center text-muted' data-placement='top'>";
-			$tableInsertados .= "<td class='text-center' style='vertical-align:middle'>".($j+1)."</td>";
-			$tableInsertados .= "<td class='text-center' style='vertical-align:middle'>".$arrayInsertados[$j][0]."</td>";
-			$tableInsertados .= "<td class='text-center' style='vertical-align:middle'>".$arrayInsertados[$j][1]."</td>";
-			$tableInsertados .= "<td class='text-center' style='vertical-align:middle'>".$arrayInsertados[$j][2]."</td>";
-			$tableInsertados .= "<td class='text-center' style='vertical-align:middle'>".$arrayInsertados[$j][3]."</td>";
-			$tableInsertados .= "<td class='text-center' style='vertical-align:middle'>".$arrayInsertados[$j][4]."</td>";
-			$tableInsertados .= "<td class='text-center' style='vertical-align:middle'>".$arrayInsertados[$j][5]."</td>";
-			$tableInsertados .= "</tr>";			
-		}   
+		if (count($arrayInsertados) > 0) {
+			array_multisort( array_column($arrayInsertados, 0), SORT_ASC, $arrayInsertados );			
+			for ($j = 0; $j < $insertados; $j++) {			
+				insertarJuicios($arrayInsertados[$j]);
+				$tableInsertados .= "<tr class='text-center text-muted' data-placement='top'>";
+				$tableInsertados .= "<td class='text-center' style='vertical-align:middle'>".($j+1)."</td>";
+				$tableInsertados .= "<td class='text-center' style='vertical-align:middle'>".$arrayInsertados[$j][0]."</td>";
+				$tableInsertados .= "<td class='text-center' style='vertical-align:middle'>".$arrayInsertados[$j][1]."</td>";
+				$tableInsertados .= "<td class='text-center' style='vertical-align:middle'>".$arrayInsertados[$j][2]."</td>";
+				$tableInsertados .= "<td class='text-center' style='vertical-align:middle'>".$arrayInsertados[$j][3]."</td>";
+				$tableInsertados .= "<td class='text-center' style='vertical-align:middle'>".$arrayInsertados[$j][4]."</td>";
+				$tableInsertados .= "<td class='text-center' style='vertical-align:middle'>".$arrayInsertados[$j][5]."</td>";
+				$tableInsertados .= "<td class='text-center' style='vertical-align:middle'>".$arrayInsertados[$j][6]."</td>";
+				$tableInsertados .= "<td class='text-center' style='vertical-align:middle'>".$arrayInsertados[$j][7]."</td>";
+				$tableInsertados .= "</tr>";			
+			}   
+		}
 		$tableInsertados .= "</tbody>";
 		$tableInsertados .= "</table>";	
 
@@ -148,43 +170,87 @@
 		$tableDuplicados .= "<th class='col-md-1 text-center' style='vertical-align:middle'></th>";
 		$tableDuplicados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Identificador</th>";
 		$tableDuplicados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Rut Cliente</th>";
+		$tableDuplicados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Nombre Cliente</th>";
 		$tableDuplicados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Tipo Juicio</th>";
 		$tableDuplicados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Tribunal</th>";
 		$tableDuplicados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Rol</th>";
-		$tableDuplicados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Mensaje</th>";
+		$tableDuplicados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Fecha Inicio</th>";
+		$tableDuplicados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Fecha Demanda</th>";
 		$tableDuplicados .= "</tr>";
 		$tableDuplicados .= "</thead>";
 		$tableDuplicados .= "<tbody>";
 	
-		$count = count($duplicados);
-
-		array_multisort( array_column($arrayDuplicados, 1), SORT_ASC, $arrayDuplicados );
-		
-		for ($k = 0; $k < $duplicados; $k++) {
-			$tableDuplicados .= "<tr class='text-center text-muted' data-placement='top'>";
-			$tableDuplicados .= "<td class='text-center' style='vertical-align:middle'><input type='checkbox' name'check'></td>";
-			$tableDuplicados .= "<td class='text-center' style='vertical-align:middle'>".$arrayDuplicados[$k][0]."</td>";
-			$tableDuplicados .= "<td class='text-center' style='vertical-align:middle'>".$arrayDuplicados[$k][1]."</td>";
-			$tableDuplicados .= "<td class='text-center' style='vertical-align:middle'>".$arrayDuplicados[$k][2]."</td>";
-			$tableDuplicados .= "<td class='text-center' style='vertical-align:middle'>".$arrayDuplicados[$k][3]."</td>";
-			$tableDuplicados .= "<td class='text-center' style='vertical-align:middle'>".$arrayDuplicados[$k][4]."</td>";
-			$tableDuplicados .= "<td class='text-center' style='vertical-align:middle'>".$arrayDuplicados[$k][5]."</td>";
-			$tableDuplicados .= "</tr>";			
-		}   
+		if (count($arrayDuplicados) > 0) {
+			array_multisort(array_column($arrayDuplicados, 1), SORT_ASC, $arrayDuplicados );			
+			for ($k = 0; $k < $duplicados; $k++) {
+				$tableDuplicados .= "<tr class='text-center text-muted' data-placement='top'>";
+				$tableDuplicados .= "<td class='text-center' style='vertical-align:middle'><input type='checkbox' name'check'></td>";
+				$tableDuplicados .= "<td class='text-center' style='vertical-align:middle'>".$arrayDuplicados[$k][0]."</td>";
+				$tableDuplicados .= "<td class='text-center' style='vertical-align:middle'>".$arrayDuplicados[$k][1]."</td>";
+				$tableDuplicados .= "<td class='text-center' style='vertical-align:middle'>".$arrayDuplicados[$k][2]."</td>";
+				$tableDuplicados .= "<td class='text-center' style='vertical-align:middle'>".$arrayDuplicados[$k][3]."</td>";
+				$tableDuplicados .= "<td class='text-center' style='vertical-align:middle'>".$arrayDuplicados[$k][4]."</td>";
+				$tableDuplicados .= "<td class='text-center' style='vertical-align:middle'>".$arrayDuplicados[$k][5]."</td>";
+				$tableDuplicados .= "<td class='text-center' style='vertical-align:middle'>".$arrayDuplicados[$k][6]."</td>";
+				$tableDuplicados .= "<td class='text-center' style='vertical-align:middle'>".$arrayDuplicados[$k][7]."</td>";
+				$tableDuplicados .= "</tr>";			
+			}   
+		}
 		$tableDuplicados .= "</tbody>";
 		$tableDuplicados .= "</table>";	
+
+		$tableNoEncontrados = "<table class='table table-striped table-bordered table-hover' id='tableNoEncontrados'>";
+		$tableNoEncontrados .= "<thead>";
+		$tableNoEncontrados .= "<tr align='center' class='info text-center text-default' style='vertical-align:middle'>";
+		$tableNoEncontrados .= "<th class='col-md-1 text-center' style='vertical-align:middle'></th>";
+		$tableNoEncontrados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Identificador</th>";
+		$tableNoEncontrados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Rut Cliente</th>";
+		$tableNoEncontrados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Nombre Cliente</th>";
+		$tableNoEncontrados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Tipo Juicio</th>";
+		$tableNoEncontrados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Tribunal</th>";
+		$tableNoEncontrados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Rol</th>";
+		$tableNoEncontrados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Fecha Inicio</th>";
+		$tableNoEncontrados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Fecha Demanda</th>";
+		$tableNoEncontrados .= "</tr>";
+		$tableNoEncontrados .= "</thead>";
+		$tableNoEncontrados .= "<tbody>";
+	
+		if (count($arrayNoEncontrados) > 0) {
+			array_multisort(array_column($arrayNoEncontrados, 1), SORT_ASC, $arrayNoEncontrados);		
+			for ($k = 0; $k < $noEncontrados; $k++) {
+				$tableNoEncontrados .= "<tr class='text-center text-muted' data-placement='top'>";
+				$tableNoEncontrados .= "<td class='text-center' style='vertical-align:middle'><input type='checkbox' name'check'></td>";
+				$tableNoEncontrados .= "<td class='text-center' style='vertical-align:middle'>".$arrayNoEncontrados[$k][0]."</td>";
+				$tableNoEncontrados .= "<td class='text-center' style='vertical-align:middle'>".$arrayNoEncontrados[$k][1]."</td>";
+				$tableNoEncontrados .= "<td class='text-center' style='vertical-align:middle'>".$arrayNoEncontrados[$k][2]."</td>";
+				$tableNoEncontrados .= "<td class='text-center' style='vertical-align:middle'>".$arrayNoEncontrados[$k][3]."</td>";
+				$tableNoEncontrados .= "<td class='text-center' style='vertical-align:middle'>".$arrayNoEncontrados[$k][4]."</td>";
+				$tableNoEncontrados .= "<td class='text-center' style='vertical-align:middle'>".$arrayNoEncontrados[$k][5]."</td>";
+				$tableNoEncontrados .= "<td class='text-center' style='vertical-align:middle'>".$arrayNoEncontrados[$k][6]."</td>";
+				$tableNoEncontrados .= "<td class='text-center' style='vertical-align:middle'>".$arrayNoEncontrados[$k][7]."</td>";
+				$tableNoEncontrados .= "</tr>";			
+			}   
+		} 
+		$tableNoEncontrados .= "</tbody>";
+		$tableNoEncontrados .= "</table>";	
 	}	
 
 	function insertarJuicios($arrayInsertados){
 		$numjuicio = $arrayInsertados[0];
 		$rutcliente = $arrayInsertados[1];
-		$tipojuicio = $arrayInsertados[2];
-		$tribunal = $arrayInsertados[3];
-		$rol = $arrayInsertados[4];
+		$nombre = $arrayInsertados[2];
+		$tipojuicio = $arrayInsertados[3];
+		$tribunal = $arrayInsertados[4];
+		$rol = $arrayInsertados[5];
 		$nombre = "";
-		$fecha_inicio = "";
-		$fecha_demanda= "";
-		$sql_searh = "SELECT * FROM relacion_cliente_juicio WHERE NUM_JUICIO = ".$numjuicio." and ID_CLIENTE = ".$rutcliente.";";
+		$fecha_inicio = $arrayInsertados[6];
+		$fecha_inicio = split("/", $fecha_inicio);
+		$fecha_inicio = "{$fecha_inicio[2]}-{$fecha_inicio[1]}-{$fecha_inicio[0]}";
+		$fecha_demanda= $arrayInsertados[7];
+		$fecha_demanda = split("/", $fecha_demanda);
+		$fecha_demanda = "{$fecha_demanda[2]}-{$fecha_demanda[1]}-{$fecha_demanda[0]}";
+		$sql_searh = "SELECT * FROM relacion_cliente_juicio WHERE NUM_JUICIO = ".$numjuicio." and ID_CLIENTE = '".$rutcliente."';";
+		//echo $sql_searh."</br>";
 		$num = call_select2($sql_searh);
 
 		if ($num == 0) { // INSERT
@@ -305,7 +371,6 @@
 									<div class="form-group col-sm-6">
 											<button type="submit" class="btn btn-rounded btn-primary">Subir</button>
 											<button type="button" class="btn btn-rounded btn-danger" onClick="location='principal.php'">Volver</button>
-											<button type="button" class="btn btn-rounded btn-primary" id="descargarDatosIniciales">Descargar Datos Iniciales</button>
 									</div>
 								</div>
 							</div>
@@ -336,12 +401,12 @@
             		<div class="col-sm-12">
 						<div class="card">							
 							<div class="card-header">
-								<a data-toggle="collapse" href="#collapse-example" aria-expanded="true" aria-controls="collapse-example" id="heading-example" class="d-block">
+								<a data-toggle="collapse" href="#collapse-duplicados" aria-expanded="true" aria-controls="collapse-duplicados" id="heading-duplicados" class="d-block">
             					<i class="fa fa-chevron-down pull-right"></i>
             						Datos Duplicados
         						</a>
 							</div>
-							<div id="collapse-example" class="collapse show" aria-labelledby="heading-example">
+							<div id="collapse-duplicados" class="collapse show" aria-labelledby="heading-duplicados">
         						<div class="card-block">
 									<?php echo $tableDuplicados ?>
 								</div>
@@ -353,14 +418,29 @@
 					</div>
 				</div>				
 				<?php } ?>
+				<?php if ($noEncontrados > 0) { ?>
+				<div class="row">
+            		<div class="col-sm-12">
+						<div class="card">							
+							<div class="card-header">
+								<a data-toggle="collapse" href="#collapse-noEncontrados" aria-expanded="true" aria-controls="collapse-noEncontrados" id="heading-noEncontrados" class="d-block">
+            					<i class="fa fa-chevron-down pull-right"></i>
+            						Datos No Encontrados
+        						</a>
+							</div>
+							<div id="collapse-noEncontrados" class="collapse show" aria-labelledby="heading-noEncontrados">
+        						<div class="card-block">
+									<?php echo $tableNoEncontrados ?>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>				
+				<?php } ?>
 			</div>
 			<!-- end row -->
-
-
         </div> <!-- container -->
-
     </div> <!-- content -->
-
 </div>
 <!-- End content-page -->
 </form>
