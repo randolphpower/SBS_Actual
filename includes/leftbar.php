@@ -26,7 +26,7 @@
                 </li>
 
 				<li class="has_sub">
-                    <a href="carga_inicial.php" class="waves-effect"><i class="zmdi zmdi-upload"></i>
+                    <a href="carga_asignaciones.php" class="waves-effect"><i class="zmdi zmdi-upload"></i>
                         <span> Carga Asignaciones </span>
                     </a>
                 </li>
