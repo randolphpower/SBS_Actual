@@ -11,6 +11,7 @@
 	$fechaAsignacion = $_POST["fechaAsignacion"];
 	$fechaAsignacion = split("/", $fechaAsignacion);
 	$fechaAsignacion = "{$fechaAsignacion[2]}-{$fechaAsignacion[1]}-{$fechaAsignacion[0]}";
+	$errorEnHeader = false;
 	if ($tmpfname != ""){
 		$excelReader = PHPExcel_IOFactory::createReaderForFile($tmpfname);
 		$excelObj = $excelReader->load($tmpfname);
@@ -22,43 +23,54 @@
 			$worksheet = $excelObj->getSheet($sheetRow);
 			$lastRow = $worksheet->getHighestRow();
 	
-			for ($row = 2; $row <= $lastRow; $row++) {
-				
-				$id_juicio = $worksheet->getCell('A'.$row)->getValue();
-				$tipo_juicio = $worksheet->getCell('AA'.$row)->getValue();
-				$rut = substr($worksheet->getCell('C'.$row)->getValue(),0,strpos($worksheet->getCell('C'.$row)->getValue(), '-'));
-				
-				if ($tipo_juicio != "") {
-					$sql_search = "SELECT id FROM juicios_dato_inicial WHERE id_juicio = ".$id_juicio." and tipo_juicio = '".$tipo_juicio."';";				
-					$datos = call_select($sql_search, "");			
-					$id_tabla = mysql_fetch_array($datos['registros'])['id'];
-					//echo $id_tabla."</br>";
-					if ($datos['num_filas'] == 0) { // INSERT
-						$sql = "INSERT INTO juicios_dato_inicial (id_juicio, tipo_juicio, rut, fecha_asignacion)  ";
-						$sql .= "VALUES (".$id_juicio.",'".$tipo_juicio."','".$rut."','".$fechaAsignacion."');";
-						call_insert($sql, "");
-	
-						$arrnumjuicio[$i-1] = $id_juicio;
-						$arrrutcliente[$i-1] = $rut;
-						$arrtipojuicio[$i-1] = $tipo_juicio;
-						$arraccion[$i-1] = "INSERT";	
-						$instertados++;
-					} else { // UPDATE
-						$sql = "UPDATE juicios_dato_inicial SET ";
-						$sql .= "tipo_juicio='".$tipo_juicio."', ";				
-						$sql .= "rut='".$rut."', ";				
-						$sql .= "fecha_asignacion='".$fechaAsignacion."' ";						
-						$sql .= "WHERE (id='".$id_tabla."') ";
-						echo $sql;
-						call_update($sql);
-	
-						$arrnumjuicio[$i-1] = $id_juicio;
-						$arrrutcliente[$i-1] = $rut;
-						$arrtipojuicio[$i-1] = $tipo_juicio;
-						$arraccion[$i-1] = "UPDATE";	
-						$actualizados++;
-					 }
-				}	
+			for ($row = 1; $row <= $lastRow; $row++) {
+
+				if ($row = 1){
+					if ($worksheet->getCell('A'.$row)->getValue() != "ID JUICIO"){
+						$errorEnHeader = true;
+					}else if ($worksheet->getCell('AA'.$row)->getValue() != "TIPO JUICIO"){
+						$errorEnHeader = true;
+					}else if ($worksheet->getCell('C'.$row)->getValue() != "Rut_Deudor"){
+						$errorEnHeader = true;
+					}
+				}
+				else{
+					$id_juicio = $worksheet->getCell('A'.$row)->getValue();
+					$tipo_juicio = $worksheet->getCell('AA'.$row)->getValue();
+					$rut = substr($worksheet->getCell('C'.$row)->getValue(),0,strpos($worksheet->getCell('C'.$row)->getValue(), '-'));
+					
+					if ($tipo_juicio != "") {
+						$sql_search = "SELECT id FROM juicios_dato_inicial WHERE id_juicio = ".$id_juicio." and tipo_juicio = '".$tipo_juicio."';";				
+						$datos = call_select($sql_search, "");			
+						$id_tabla = mysql_fetch_array($datos['registros'])['id'];
+						//echo $id_tabla."</br>";
+						if ($datos['num_filas'] == 0) { // INSERT
+							$sql = "INSERT INTO juicios_dato_inicial (id_juicio, tipo_juicio, rut, fecha_asignacion)  ";
+							$sql .= "VALUES (".$id_juicio.",'".$tipo_juicio."','".$rut."','".$fechaAsignacion."');";
+							call_insert($sql, "");
+		
+							$arrnumjuicio[$i-1] = $id_juicio;
+							$arrrutcliente[$i-1] = $rut;
+							$arrtipojuicio[$i-1] = $tipo_juicio;
+							$arraccion[$i-1] = "INSERT";	
+							$instertados++;
+						} else { // UPDATE
+							$sql = "UPDATE juicios_dato_inicial SET ";
+							$sql .= "tipo_juicio='".$tipo_juicio."', ";				
+							$sql .= "rut='".$rut."', ";				
+							$sql .= "fecha_asignacion='".$fechaAsignacion."' ";						
+							$sql .= "WHERE (id='".$id_tabla."') ";
+							echo $sql;
+							call_update($sql);
+		
+							$arrnumjuicio[$i-1] = $id_juicio;
+							$arrrutcliente[$i-1] = $rut;
+							$arrtipojuicio[$i-1] = $tipo_juicio;
+							$arraccion[$i-1] = "UPDATE";	
+							$actualizados++;
+						}
+					}	
+				}				
 				$i++;		
 			}			
 		}	
@@ -149,6 +161,17 @@
 						</div>
         			</div>
 				</div>
+				<?php if ($errorEnHeader == true) { ?>
+				<div class="row">
+            		<div class="col-sm-12">
+						<div class="alert alert-danger alert-dismissible" role="alert" align="center">
+							<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+								<span aria-hidden="true">×</span>
+							</button>
+							<strong>¡ATENCION!</strong> Ingrese un rut valido.</div>
+					</div>
+				</div>
+				<?php } else { ?>
 				<?php if ($instertados > 0 || $actualizados > 0) { ?>
 				<div class="row">
             		<div class="col-sm-12">
@@ -161,7 +184,7 @@
 						</div>
 					</div>
 				</div>
-				<?php } ?>
+				<?php }} ?>
 			</div>
 			<!-- end row -->
 
