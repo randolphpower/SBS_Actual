@@ -9,7 +9,7 @@ mysql_close($conexion);
 $i=1;
 while ($reg = mysql_fetch_array($resultados))
 {
-   $var .= $reg["id_juicio"].";".$reg["tipo_juicio"].";".$reg["rut"].";\n";
+   $var .= $reg["id_juicio"].";".$reg["tipo_juicio"].";".$reg["rut"].";".$reg["fecha_asignacion"].";\n";
 
 	$i++;
 	
