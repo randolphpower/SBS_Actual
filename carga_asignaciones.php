@@ -11,7 +11,6 @@
 	$fechaAsignacion = $_POST["fechaAsignacion"];
 	$fechaAsignacion = split("/", $fechaAsignacion);
 	$fechaAsignacion = "{$fechaAsignacion[2]}-{$fechaAsignacion[1]}-{$fechaAsignacion[0]}";
-	$errorEnHeader = false;
 	if ($tmpfname != ""){
 		$excelReader = PHPExcel_IOFactory::createReaderForFile($tmpfname);
 		$excelObj = $excelReader->load($tmpfname);
@@ -22,19 +21,24 @@
 		for ($sheetRow = 0; $sheetRow <= $sheetCount-1; $sheetRow++) {				
 			$worksheet = $excelObj->getSheet($sheetRow);
 			$lastRow = $worksheet->getHighestRow();
-	
-			for ($row = 1; $row <= $lastRow; $row++) {
-
-				if ($row = 1){
-					if ($worksheet->getCell('A'.$row)->getValue() != "ID JUICIO"){
-						$errorEnHeader = true;
-					}else if ($worksheet->getCell('AA'.$row)->getValue() != "TIPO JUICIO"){
-						$errorEnHeader = true;
-					}else if ($worksheet->getCell('C'.$row)->getValue() != "Rut_Deudor"){
-						$errorEnHeader = true;
-					}
-				}
-				else{
+			
+			$tituloJuicio = $worksheet->getCell('A1')->getValue();
+			$tituloRut = $worksheet->getCell('C1')->getValue();
+			$tituloTipoJuicio = $worksheet->getCell('AA1')->getValue();
+			if ($tituloJuicio != "ID JUICIO"){
+				$error = "La columna ID JUICIO no esta en la posición correcta";
+				break;
+			} else if ($tituloRut != "Rut_Deudor"){
+				$error = "La columna Rut_Deudor no esta en la posición correcta";
+				break;
+			} else if ($tituloTipoJuicio != "TIPO JUICIO"){
+				$error = "La columna TIPO JUICIO no esta en la posición correcta";
+				break;
+			}
+			else {
+				echo "itera</br>";
+				for ($row = 2; $row <= $lastRow; $row++) {
+				
 					$id_juicio = $worksheet->getCell('A'.$row)->getValue();
 					$tipo_juicio = $worksheet->getCell('AA'.$row)->getValue();
 					$rut = substr($worksheet->getCell('C'.$row)->getValue(),0,strpos($worksheet->getCell('C'.$row)->getValue(), '-'));
@@ -60,7 +64,6 @@
 							$sql .= "rut='".$rut."', ";				
 							$sql .= "fecha_asignacion='".$fechaAsignacion."' ";						
 							$sql .= "WHERE (id='".$id_tabla."') ";
-							echo $sql;
 							call_update($sql);
 		
 							$arrnumjuicio[$i-1] = $id_juicio;
@@ -68,11 +71,12 @@
 							$arrtipojuicio[$i-1] = $tipo_juicio;
 							$arraccion[$i-1] = "UPDATE";	
 							$actualizados++;
-						}
+						 }
 					}	
-				}				
-				$i++;		
-			}			
+					$i++;		
+				}		
+			}
+				
 		}	
 	
 		$print = "<table class='table table-striped table-bordered table-hover'>";
@@ -161,17 +165,16 @@
 						</div>
         			</div>
 				</div>
-				<?php if ($errorEnHeader == true) { ?>
+				<?php if ($error != "") { ?>
 				<div class="row">
-            		<div class="col-sm-12">
-						<div class="alert alert-danger alert-dismissible" role="alert" align="center">
-							<button type="button" class="close" data-dismiss="alert" aria-label="Close">
-								<span aria-hidden="true">×</span>
-							</button>
-							<strong>¡ATENCION!</strong> Ingrese un rut valido.</div>
+					<div class="alert alert-danger alert-dismissible" role="alert" align="center">
+						<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+							<span aria-hidden="true">×</span>
+						</button>
+						<strong>¡ATENCION!</strong> <?php echo $error ?>
 					</div>
 				</div>
-				<?php } else { ?>
+				<?php } ?>
 				<?php if ($instertados > 0 || $actualizados > 0) { ?>
 				<div class="row">
             		<div class="col-sm-12">
@@ -184,7 +187,7 @@
 						</div>
 					</div>
 				</div>
-				<?php }} ?>
+				<?php } ?>
 			</div>
 			<!-- end row -->
 
