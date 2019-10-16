@@ -4,20 +4,21 @@
 	$filelist = unserialize(base64_decode($_GET['filelist']));
 	$content = "";
 	$content .= '<table width="100%" class="table table-striped table-bordered table-hover">';
-	
-	foreach ($filelist as $value){ 
-		$content .= '<div class="card mb-3">';	
-		$content .= "<div class='card-header' style='background: #F8E4BB'><span style='font-weight:bold'>Nombre de Archivo: </span>".basename(str_replace("./","./controlador/",$value)). "</div>";
-		$content .= "<div class='card-block'>";
-		$file902 = fopen(str_replace("./","./controlador/",$value), 'r') or die('Unable to open file!');
-		while(!feof($file902)) {		
-			$content .= fgets($file902). "</br>";
-		}		
-		$content .= "</div>";
-		$content .= "</div>";
-	} 		
-	
-	$content .= '</table>';
+	if ($filelist != ""){
+		foreach ($filelist as $value){ 
+			$content .= '<div class="card mb-3">';	
+			$content .= "<div class='card-header' style='background: #F8E4BB'><span style='font-weight:bold'>Nombre de Archivo: </span>".basename(str_replace("./","./controlador/",$value)). "</div>";
+			$content .= "<div class='card-block'>";
+			$file902 = fopen(str_replace("./","./controlador/",$value), 'r') or die('Unable to open file!');
+			while(!feof($file902)) {		
+				$content .= fgets($file902). "</br>";
+			}		
+			$content .= "</div>";
+			$content .= "</div>";
+		} 		
+		
+		$content .= '</table>';
+	}	
 ?>
 <link href="assets/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet">
 
@@ -122,8 +123,13 @@
 					return false;
 				}
 				e.preventDefault();  //stop the browser from following
-				
-				window.location.href = 'controlador/script_descargar_archivo.php?fecha='+ encodeURIComponent(min);
+				var newdate = new Date(min);
+    			newdate.setDate(newdate.getDate() + 1);
+				var dd = newdate.getDate();
+    			var mm = newdate.getMonth() + 1;
+    			var y = newdate.getFullYear();
+			    var someFormattedDate = mm + '/' + dd + '/' + y;
+				window.location.href = 'controlador/script_descargar_archivo.php?fecha='+ encodeURIComponent(min) +'&nextFecha='+ encodeURIComponent(someFormattedDate);
 			});
 
 			$('#min, #max').change(function () {

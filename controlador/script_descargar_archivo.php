@@ -4,6 +4,8 @@
 	if (trim($_GET['fecha']) != "") {
 		$arr = explode("/", $_GET['fecha']);
 		$fecha = $arr[2].$arr[0].$arr[1];
+		$arr = explode("/", $_GET['nextFecha']);
+		$fechaNext = $arr[2].$arr[0].$arr[1];
 	}
 	//echo $fecha;
 	function unzip($src_file, $dest_dir=false, $create_zip_name_dir=true, $overwrite=true) 
@@ -96,21 +98,8 @@
 	$directory = './';
 	$local_file_path=$directory.$zip_file_name;	
 	$sftp->get($zip_file_name, $local_file_path);
-	
 	unzip($local_file_path, false, true, true);
-	
+	$sftp->get('traSERVICOB_'.$fechaNext.'.bad', $directory.$folder_name.'/traSERVICOB_'.$fechaNext.'.bad');
 	$filelist = glob($directory.$folder_name."/*.bad");
-	//$content = "";
-	//foreach ($filelist as $value){ 
-		
-		//echo $value. "<br>";
-	//	$content .= $value;
-	//	$file902 = fopen($value, 'r') or die('Unable to open file!');
-	//	while(!feof($file902)) {
-			//echo fgets($file902) . "<br>";
-	//		$content .= fgets($file902);
-	//	}		
-	//} 	
-	//echo $content;
 	header('Location: ../visualizar_logs.php?filelist='.base64_encode(serialize($filelist)));
   ?>
