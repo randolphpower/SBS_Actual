@@ -30,10 +30,6 @@
 
 	$sql =  "SELECT ";
 
-	if ($v) {
-		$sql .= "MAX(informe_datos.id),";
-	}
-
 	$sql .= "relacion_cliente_juicio.NUM_JUICIO,";
 	$sql .= "relacion_cliente_juicio.ID_CLIENTE,";
 	$sql .= "relacion_cliente_juicio.CECRTID,";
@@ -50,7 +46,12 @@
 	$sql .= "codigo_accion.descripcion AS DESC_CODE,";
 
 	$sql .= "op_200_gestiones.ACCOMN,";
-	$sql .= "op_200_gestiones.DATE,";
+	if ($v) {
+		$sql .= "MAX(op_200_gestiones.DATE) AS date,";
+	}
+	else{
+		$sql .= "op_200_gestiones.DATE,";
+	}
 	$sql .= "op_gastos.EXDESC,";
 	$sql .= "op_gastos.EXAMT,";
 	$sql .= "op_gastos.EXINVOICE,";
@@ -96,9 +97,12 @@
 
 	if ($v) {
 		$sql .= "GROUP BY informe_datos.ID_JUICIO ";
+		$sql .= "ORDER BY relacion_cliente_juicio.num_juicio ";
 	}
-
-	$sql .= "ORDER BY informe_datos.FECHA_INSERT DESC, op_200_gestiones.DATE DESC ";
+	else{
+		$sql .= "ORDER BY informe_datos.FECHA_INSERT DESC, op_200_gestiones.DATE DESC ";
+	}
+	
 
 	// sql just to count records
 

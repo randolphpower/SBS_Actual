@@ -31,9 +31,6 @@ if ($v == "1") {
 }
 
 $sql =  "SELECT ";
-if ($v) {
-    $sql .= "MAX(informe_datos.id),";
-}
 $sql .= "relacion_cliente_juicio.NUM_JUICIO,";
 $sql .= "relacion_cliente_juicio.ID_CLIENTE,";
 $sql .= "relacion_cliente_juicio.CECRTID,";
@@ -47,7 +44,13 @@ $sql .= "op_eta_proce.CSENDDT,"; // fecha fin
 //$sql .= "(SELECT codigo_accion.DESCRIPCION FROM codigo_accion WHERE codigo_accion.CODIGO = op_200_gestiones.ACACCODE) AS DESC_CODE,";
 $sql .= "codigo_accion.descripcion AS DESC_CODE,";
 $sql .= "op_200_gestiones.ACCOMN,";
-$sql .= "op_200_gestiones.DATE,";
+if ($v) {
+    $sql .= "MAX(op_200_gestiones.DATE) AS DATE,";
+}
+else{
+    $sql .= "op_200_gestiones.DATE,";
+}
+
 $sql .= "op_gastos.EXDESC,";
 $sql .= "op_gastos.EXAMT,";
 $sql .= "op_gastos.EXINVOICE,";
@@ -90,10 +93,12 @@ if (trim($_GET['max']) != "") {
 
 if ($v) {
     $sql .= "GROUP BY informe_datos.ID_JUICIO ";
+    $sql .= "ORDER BY relacion_cliente_juicio.num_juicio ";
+}
+else{
+    $sql .= "ORDER BY informe_datos.FECHA_INSERT DESC, op_200_gestiones.DATE DESC ";
 }
 
-// $sql .= "ORDER BY informe_datos.FECHA_INSERT DESC";
-$sql .= "ORDER BY informe_datos.FECHA_INSERT DESC, op_gastos.EXSUPPLIER ASC";
 
 // $sql = "LIMIT 0,100";
 // echo $sql;
@@ -113,7 +118,9 @@ $spreadsheet->getProperties()->setCreator("Intranet Servicobranza")
 							//  ->setSubject("Office 2007 XLSX Test Document")
                             //  ->setDescription("Min: {$min}, Max: {$max}")
 							//  ->setKeywords("office 2007 openxml php")
-							//  ->setCategory("Test result file");
+                            //  ->setCategory("Test result file");
+                            
+                             
 
 $spreadsheet->setActiveSheetIndex(0)
             ->setCellValue('A1', 'Nro Juicio')
@@ -125,31 +132,64 @@ $spreadsheet->setActiveSheetIndex(0)
             ->setCellValue('G1', 'Fecha Fin')
             ->setCellValue('H1', 'Codigo Accion')
             ->setCellValue('I1', 'Comentario')
-            ->setCellValue('J1', 'Fecha')
+            ->setCellValue('J1', 'Fecha Comentario')
             ->setCellValue('K1', 'Desc. del Gasto')
             ->setCellValue('L1', 'Monto Gasto')
             ->setCellValue('M1', 'Nro Factura')
             ->setCellValue('N1', 'Fecha Autorizacion')
             ->setCellValue('O1', 'Fecha Inserción')
             ->setCellValue('P1', 'Nombre Proveedor');
-            
+
+$spreadsheet->getActiveSheet()->getStyle("F1")->getNumberFormat()->setFormatCode("dd-mm-yyyy");
+$spreadsheet->getActiveSheet()->getStyle("G1")->getNumberFormat()->setFormatCode("dd-mm-yyyy");
+$spreadsheet->getActiveSheet()->getStyle("J1")->getNumberFormat()->setFormatCode("dd-mm-yyyy");
+$spreadsheet->getActiveSheet()->getStyle("O1")->getNumberFormat()->setFormatCode("dd-mm-yyyy");             
             
 $pos = 1;
 while($row = mysql_fetch_array($q)) { 
 
     $fia = explode("-", $row["FECHA_INSERT"]);
-    $fecha_insert = $fia[2]."/".$fia[1]."/".$fia[0];
+    $fecha_insert = $fia[2]."-".$fia[1]."-".$fia[0];       
 
     $fia = explode("-", $row["CSSTDT"]);
-    $csstdt = $fia[2]."/".$fia[1]."/".$fia[0];
+    $csstdt = $fia[2]."-".$fia[1]."-".$fia[0];
 
     $fia = explode("-", $row["CSENDDT"]);
-    $csenddt = $fia[2]."/".$fia[1]."/".$fia[0];
+    $csenddt = $fia[2]."-".$fia[1]."-".$fia[0];
 
     $fia = explode("-", $row["DATE"]);
-    $date = $fia[2]."/".$fia[1]."/".$fia[0];
+    $date = $fia[2]."-".$fia[1]."-".$fia[0];
 
+    if ($csstdt == "--"){
+        $csstdt = "";
+    }
+    else{
+        $csstdt = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($csstdt);
+    }
+    if ($csenddt == "--"){
+        $csenddt = "";
+    }
+    else{
+        $csenddt = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($csenddt);
+    }
+    if ($date == "--"){
+        $date = "";
+    }
+    else{
+        $date = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($date);
+    }
+    if ($fecha_insert == "--"){
+        $fecha_insert = "";
+    }
+    else{
+        $fecha_insert = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($fecha_insert);
+    }
     $pos++;
+    $spreadsheet->getActiveSheet()->getStyle("F".$pos)->getNumberFormat()->setFormatCode("dd-mm-yyyy");
+    $spreadsheet->getActiveSheet()->getStyle("G".$pos)->getNumberFormat()->setFormatCode("dd-mm-yyyy");
+    $spreadsheet->getActiveSheet()->getStyle("J".$pos)->getNumberFormat()->setFormatCode("dd-mm-yyyy");
+    $spreadsheet->getActiveSheet()->getStyle("O".$pos)->getNumberFormat()->setFormatCode("dd-mm-yyyy");    
+
     $spreadsheet->setActiveSheetIndex(0)
             ->setCellValue("A".$pos, $row["NUM_JUICIO"])
             ->setCellValue("B".$pos, $row["ID_CLIENTE"])
