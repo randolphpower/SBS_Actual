@@ -110,7 +110,7 @@ function importar(){
                        		<form name="form" role="form" enctype="multipart/form-data" class="formulario">
                        			<div class="row">
                        				<div class="form-group col-sm-8">
-                       					<label>Seleccione el archivo *.xls</label>
+                       					<label>Seleccione el archivo *.xlsx</label>
                        					<input type="file" class="form-control" name="archivo" id="Archivo_up" >
                        				</div>
                        				<div class="form-group col-sm-2">

@@ -2,7 +2,8 @@
 	include("modelo/conectarBD.php");
 	include("modelo/consultaSQL.php");
 
-	$sql = $var_select." b.NOMBRE_EMPRESA, a.*, c.NOMBRE_ESTADO ".$var_from."registros_custodia a, empresas_afiliadas b, estado_custodia c ".$var_where."(a.ID_EMPRESA=b.ID) ".$var_and."(a.ID_ESTADO=c.ID_ESTADO)";
+  $sql = $var_select." b.NOMBRE_EMPRESA, a.*, c.NOMBRE_ESTADO,dias_en_custodia(a.id) AS dias ".$var_from."registros_custodia a, empresas_afiliadas b, estado_custodia c ".$var_where."(a.ID_EMPRESA=b.ID) ".$var_and."(a.ID_ESTADO=c.ID_ESTADO)";
+  echo $sql;
 	$datosx=array();
 	$datosx = call_select($sql, "");
 	$reg_fil = $datosx['num_registros'];
@@ -19,6 +20,7 @@
 
 <!-- extra css -->
 <?php require 'includes/header_end.php'; ?>
+<script type="text/javascript" src="js/ajax_usuario.js"></script>
 
 
 <!-- ============================================================== -->
@@ -46,16 +48,15 @@
                             <table id="datatable2" class="table table-striped table-bordered" width="100%">
                                 <thead>
 									<tr>
-										<th>Empresa</th>
-										<th>ID</th>
+										<th>Mandante</th>
 										<th>Nro. Pagare</th>
 										<th>Estado</th>
 										<th>Rut</th>
 										<th>Dv</th>
-										<th>Nombre</th>
-										<th>Direcci&oacute;n</th>
-										<th>Comuna</th>
-										<th>Distrito</th>
+                    <th>Nombre</th>
+                    <th>Procurador</th>
+                    <th>Dias en Custodia</th>
+                    <th>Documento</th>
 									</tr>
                                 </thead>
                                 <tbody>
@@ -63,17 +64,16 @@
                                    	while($resul=mysql_fetch_array($datosx['registros'])){
 										
 								 ?>
-									<tr data-toggle="modal" data-target="#exampleModal" data-whatever="<?php echo $resul["URL"] ?>|<?php echo $resul["NRO_PAGARE_ORIGINAL"] ?>" style="cursor: pointer;">
+									<tr >
 										<td><?php echo $resul["NOMBRE_EMPRESA"] ?></td>
-										<td><?php echo $resul["ID_REFERENCIA"] ?></td>
 										<td><?php echo $resul["NRO_PAGARE_ORIGINAL"] ?></td>
-										<td><?php echo $resul["NOMBRE_ESTADO"] ?></td>
+										<td data-toggle="modal" data-target="#modalEstado"data-whatever="<?php echo $resul["ID"] ?>|<?php echo $resul["NRO_PAGARE_ORIGINAL"] ?>" style="cursor: pointer;"><?php echo $resul["NOMBRE_ESTADO"] ?></td>
 										<td><?php echo $resul["RUT_SIN_DV"] ?></td>
 										<td><?php echo $resul["DV_RUT"] ?></td>
-										<td><?php echo $resul["NOMBRE"] ?></td>
-										<td><?php echo $resul["DIRECCION"] ?></td>
-										<td><?php echo $resul["COMUNA"] ?></td>
-										<td><?php echo $resul["DISTRITO"] ?></td>
+                    <td><?php echo $resul["NOMBRE"] ?></td>
+                    <td><?php echo $resul["USUSUARIO"] ?></td>
+                    <td><?php echo $resul["dias"] ?></td>
+                    <td align="center" data-toggle="modal" data-target="#exampleModal" data-whatever="<?php echo $resul["URL"] ?>|<?php echo $resul["NRO_PAGARE_ORIGINAL"] ?>" style="cursor: pointer;"><img src="./images/pdf.png"></td>                    
 									</tr>
                                	<?php
 									}
@@ -107,7 +107,25 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalEstado" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document" style="width: 75%;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel"></h5>
+      </div>
+      <div class="modal-body" style="height: 570px">
+        <div class="">
+        	
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
       </div>
     </div>
   </div>
@@ -144,7 +162,7 @@
             //Buttons examples
             var table = $('#datatable2').DataTable({
                 responsive: true,
-				buttons: ['copy', 'excel', 'pdf', 'colvis']/*,
+				        buttons: ['copy', 'excel', 'pdf', 'colvis']/*,
 				columnDefs:[
 				{
 					targets:[15],
@@ -167,6 +185,23 @@
 		  // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
 		  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
 		  $("#id_pdf").attr("src",datos[0]+"#toolbar=0");
+		});
+
+    $('#modalEstado').on('show.bs.modal', function (event) {
+      var button = $(event.relatedTarget) // Button that triggered the modal
+		  var recipient = button.data('whatever') // Extract info from data-* attributes
+      var datos = recipient.split("|");
+      var modal = $(this);
+      modal.find('.modal-title').text('Informacion Pagare');
+
+      ajax=objetoAjax_Global();
+		  ajax.open("GET", 'controlador/script_custodia.php?id_custodia='+datos[0]+'&opcion=6');
+		  ajax.onreadystatechange=function() {
+        if (ajax.readyState==4) {
+					modal.find('.modal-body').html(ajax.responseText);					
+        }
+      }      
+		  ajax.send(null)
 		});
 
     </script>

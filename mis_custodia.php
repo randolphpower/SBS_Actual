@@ -3,7 +3,8 @@
 	include("modelo/consultaSQL.php");
 
 	$sql = $var_select."  a.*, c.NOMBRE_ESTADO ".$var_from."custodia_up a, estado_custodia c ".$var_where.
-	"(a.ESTADO=c.ID_ESTADO)".$var_and."(a.USUSUARIO='".$_SESSION['username']."')";
+  "(a.ESTADO=c.ID_ESTADO)".$var_and."(a.USUSUARIO='".$_SESSION['username']."')";
+  
 	$datosx=array();
 	$datosx = call_select($sql, "");
 	$reg_fil = $datosx['num_registros'];
@@ -47,16 +48,12 @@
                             <table id="datatable2" class="table table-striped table-bordered" width="100%">
                                 <thead>
 									<tr>
-										
-										<th>ID</th>
 										<th>Nro. Pagare</th>
 										<th>Estado</th>
 										<th>Rut</th>
 										<th>Dv</th>
-										<th>Nombre</th>
-										<th>Direcci&oacute;n</th>
-										<th>Comuna</th>
-										<th>Distrito</th>
+                    <th>Nombre</th>
+                    <th>Documento</th>
 									</tr>
                                 </thead>
                                 <tbody>
@@ -64,17 +61,13 @@
                                    	while($resul=mysql_fetch_array($datosx['registros'])){
 										
 								 ?>
-									<tr data-toggle="modal" data-target="#exampleModal" data-whatever="<?php echo $resul["URL"] ?>|<?php echo $resul["NRO_PAGARE_ORIGINAL"] ?>" style="cursor: pointer;">
-										
-										<td><?php echo $resul["ID_REFERENCIA"] ?></td>
+									<tr >										
 										<td><?php echo $resul["NRO_PAGARE_ORIGINAL"] ?></td>
-										<td><?php echo $resul["NOMBRE_ESTADO"] ?></td>
+										<td data-toggle="modal" data-target="#modalEstado" style="cursor: pointer;"><?php echo $resul["NOMBRE_ESTADO"] ?></td>
 										<td><?php echo $resul["RUT_SIN_DV"] ?></td>
 										<td><?php echo $resul["DV_RUT"] ?></td>
-										<td><?php echo $resul["NOMBRE"] ?></td>
-										<td><?php echo $resul["DIRECCION"] ?></td>
-										<td><?php echo $resul["COMUNA"] ?></td>
-										<td><?php echo $resul["DISTRITO"] ?></td>
+                    <td><?php echo $resul["NOMBRE"] ?></td>
+                    <td align="center" data-toggle="modal" data-target="#exampleModal" data-whatever="<?php echo $resul["URL"] ?>|<?php echo $resul["NRO_PAGARE_ORIGINAL"] ?>" style="cursor: pointer;"><img src="./images/pdf.png"></td>                    
 									</tr>
                                	<?php
 									}

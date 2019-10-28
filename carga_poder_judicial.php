@@ -5,6 +5,7 @@
 	require_once("/modelo/consultaSQL.php");
 	require_once("/modelo/conectarBD.php");
 	require_once("/PHPExcel.php");
+	require_once("controlador/script_general.php");
 	$tipo = $_FILES['archivo']['type'];
 	$tamanio = $_FILES['archivo']['size'];
 	$tmpfname = $_FILES['archivo']['tmp_name'];
@@ -38,10 +39,10 @@
 		$tableInsertados .= "<tbody>";
 	
 		if (count($arrayInsertados) > 0) {
-			array_multisort( array_column($arrayInsertados, 0), SORT_ASC, $arrayInsertados );						
-			for ($j = 0; $j < $insertados; $j++) {		
-				
-				insertarJuicios($arrayInsertados[$j]);
+			array_multisort( array_column($arrayInsertados, 0), SORT_ASC, $arrayInsertados );	
+			$fecha_actual=fecha_actual();					
+			for ($j = 0; $j < $insertados; $j++) {						
+				insertarJuicios($arrayInsertados[$j], $fecha_actual);
 				$tableInsertados .= "<tr class='text-center text-muted' data-placement='top'>";
 				$tableInsertados .= "<td class='text-center' style='vertical-align:middle'>".($j+1)."</td>";
 				$tableInsertados .= "<td class='text-center' style='vertical-align:middle'>".$arrayInsertados[$j][0]."</td>";
@@ -115,6 +116,7 @@
 					$datosTribunal = call_select($sql_search, "");
 					$resultTribunal = mysql_fetch_array($datosTribunal['registros']);
 					$fechaDemanda = $worksheet->getCell('E'.$row)->getValue();
+					$procurador = $worksheet->getCell('U'.$row)->getValue();
 					if ($datos['num_filas'] > 1) { 
 						while($result=mysql_fetch_array($datos['registros'])){
 							$rol =  $worksheet->getCell('B'.$row)->getValue();
@@ -132,7 +134,8 @@
 									  $resultTribunal['codigo'],
 									  $rol,
 									  $myFormatForView,
-									  $fechaDemanda);
+									  $fechaDemanda,
+									  $procurador);
 							$duplicados++;		
 						}					
 					}	
@@ -153,7 +156,8 @@
 								  $resultTribunal['codigo'],
 								  $rol,
 								  $myFormatForView,
-								  $fechaDemanda);
+								  $fechaDemanda,
+								  $procurador);
 						$insertados++;
 					}	
 					else  { 
@@ -173,7 +177,8 @@
 								  $resultTribunal['codigo'],
 								  $rol,
 								  $myFormatForView,
-								  $fechaDemanda);
+								  $fechaDemanda,
+								  $procurador);
 						$noEncontrados++;					
 					}			
 				}						
@@ -198,8 +203,9 @@
 		
 			if (count($arrayInsertados) > 0) {
 				array_multisort( array_column($arrayInsertados, 0), SORT_ASC, $arrayInsertados );			
-				for ($j = 0; $j < $insertados; $j++) {			
-					insertarJuicios($arrayInsertados[$j]);
+				$fecha_actual=fecha_actual();
+				for ($j = 0; $j < $insertados; $j++) {								
+					insertarJuicios($arrayInsertados[$j], $fecha_actual);
 					$tableInsertados .= "<tr class='text-center text-muted' data-placement='top'>";
 					$tableInsertados .= "<td class='text-center' style='vertical-align:middle'>".($j+1)."</td>";
 					$tableInsertados .= "<td class='text-center' style='vertical-align:middle'>".$arrayInsertados[$j][0]."</td>";
@@ -289,7 +295,7 @@
 	}
 	
 
-	function insertarJuicios($arrayInsertados){
+	function insertarJuicios($arrayInsertados, $fecha_actual){
 		$numjuicio = $arrayInsertados[0];		
 		$rutcliente = $arrayInsertados[1];
 		$nombre = $arrayInsertados[2];
@@ -302,6 +308,7 @@
 		$fecha_demanda= $arrayInsertados[7];
 		$fecha_demanda = split("/", $fecha_demanda);
 		$fecha_demanda = "{$fecha_demanda[2]}-{$fecha_demanda[1]}-{$fecha_demanda[0]}";
+		$procurador= $arrayInsertados[8];
 		$sql_searh = "SELECT * FROM relacion_cliente_juicio WHERE NUM_JUICIO = ".$numjuicio." and ID_CLIENTE = '".$rutcliente."';";		
 		$num = call_select2($sql_searh);
 
@@ -316,6 +323,30 @@
 			$sql .= "('902','".$rol."','".$numjuicio."','".$rutcliente."','".$tribunal."','".$tipojuicio."','".$_SESSION['username']."', 'MA', 'IJ', '{$fecha_demanda}')";
 			call_insert2($sql, "");
 
+			//Se asigna procurador a pagare en custodia
+			$sql_search = "SELECT * FROM custodia_up WHERE RUT_SIN_DV = '".$rutcliente."';";	
+			$datos = call_select($sql_search, "");			
+			$id_tabla = mysql_fetch_array($datos['registros'])['ID'];
+			if ($datos['num_filas'] > 0) { // INSERT
+				$sql =  "UPDATE custodia_up SET ";
+				$sql .= "USUSUARIO='".$procurador."', ";
+				$sql .= "ESTADO=5 ";
+				$sql .= "WHERE ID=".$id_tabla;
+				call_update2($sql);
+			}
+			$sql_search = "SELECT * FROM registros_custodia WHERE RUT_SIN_DV = '".$rutcliente."';";	
+			$datos = call_select($sql_search, "");			
+			$id_tabla = mysql_fetch_array($datos['registros'])['ID'];
+			if ($datos['num_filas'] > 0) { // INSERT
+				$sql =  "UPDATE registros_custodia SET ";
+				$sql .= "USUSUARIO='".$procurador."', ";
+				$sql .= "ESTADO=5 ";
+				$sql .= "WHERE ID=".$id_tabla;
+				call_update2($sql);
+				$sql ="INSERT INTO pagare_historial_custodia (id_registros_custodia, id_estado_custodia, fecha_estado) ";
+				$sql .="VALUES (".$id_tabla.",5,'".$fecha_actual."')";
+				call_insert2($sql, "");
+			}
 		} else if ($num == 1) { // UPDATE
 			$sql = "UPDATE relacion_cliente_juicio SET ";
 			$sql .= "CECRTID='".$tribunal."', ";
@@ -339,7 +370,32 @@
 				$sql .= "CELWSTDT = '{$fecha_demanda}' ";
 				$sql .= "WHERE (CNCASENO='".$numjuicio."' AND CESSNUM='".$rutcliente."') ";
 				call_update2($sql);
-			}			
+			}	
+			
+			//Se asigna procurador a pagare en custodia
+			$sql_search = "SELECT * FROM custodia_up WHERE RUT_SIN_DV = '".$rutcliente."';";	
+			$datos = call_select($sql_search, "");			
+			$id_tabla = mysql_fetch_array($datos['registros'])['ID'];
+			if ($datos['num_filas'] > 0) { // INSERT
+				$sql =  "UPDATE custodia_up SET ";
+				$sql .= "USUSUARIO='".$procurador."', ";
+				$sql .= "ESTADO=5 ";
+				$sql .= "WHERE ID=".$id_tabla;
+				call_update2($sql);
+			}
+			$sql_search = "SELECT * FROM registros_custodia WHERE RUT_SIN_DV = '".$rutcliente."';";	
+			$datos = call_select($sql_search, "");			
+			$id_tabla = mysql_fetch_array($datos['registros'])['ID'];
+			if ($datos['num_filas'] > 0) { // INSERT
+				$sql =  "UPDATE registros_custodia SET ";
+				$sql .= "USUSUARIO='".$procurador."', ";
+				$sql .= "ID_ESTADO=5 ";
+				$sql .= "WHERE ID=".$id_tabla;
+				call_update2($sql);
+				$sql ="INSERT INTO pagare_historial_custodia (id_registros_custodia, id_estado_custodia, fecha_estado) ";
+				$sql .="VALUES (".$id_tabla.",5,'".$fecha_actual."')";
+				call_insert2($sql, "");
+			}
 		}	
 	}
 

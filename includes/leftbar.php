@@ -76,7 +76,6 @@
 				</li>
                 <?php } ?>
 
-            <?php if (false) { ?>
  		
 		           	
             	<li class="has_sub">
@@ -89,8 +88,6 @@
 						<li><a href="mis_custodia.php">Mis Custodias</a></li>
                     </ul>    
                 </li>
-                 
-            <?php } ?>
 
             </ul>
             <div class="clearfix"></div>

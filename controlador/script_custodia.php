@@ -9,7 +9,7 @@ switch ($_GET["opcion"]) {
 		
 case "1":
 
-//comprobamos que sea una petición ajax
+//comprobamos que sea una peticiï¿½n ajax
 if(!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') 
 {
 	$archivo = $_FILES['archivo']['name'];
@@ -50,21 +50,20 @@ if(!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
 					
 					
 					
-					$nodo["ID"]=$sheet->getCell("A".$row)->getValue();
-					
+					$nodo["ID"]=0;
 					//$num_pagare1=trim($sheet->getCell("B".$row)->getValue());
-					$num_pagare2=str_replace("-", "", $sheet->getCell("B".$row)->getValue());
-					$num_pagare=str_replace(".", "CON", $num_pagare2);				
+					//$num_pagare2=str_replace("-", "", $sheet->getCell("B".$row)->getValue());
+					//$num_pagare=str_replace(".", "CON", $num_pagare2);				
 					
-					$nodo["NRO_PAGARE_ORIGINAL"]=$sheet->getCell("B".$row)->getValue();
-					$nodo["NRO_PAGARE_ALTERADO"]=$num_pagare;
-					$nodo["RUT_COMPLETO"]=$sheet->getCell("C".$row)->getValue().$sheet->getCell("D".$row)->getValue();
-					$nodo["RUT_SIN_DV"]=$sheet->getCell("C".$row)->getValue();
-					$nodo["DV_RUT"]=$sheet->getCell("D".$row)->getValue();
-					$nodo["NOMBRE"]=$sheet->getCell("E".$row)->getValue();
-					$nodo["DIRECCION"]=$sheet->getCell("F".$row)->getValue();
-					$nodo["COMUNA"]=$sheet->getCell("G".$row)->getValue();
-					$nodo["DISTRITO"]=$sheet->getCell("H".$row)->getValue();
+					$nodo["NRO_PAGARE_ORIGINAL"]=$sheet->getCell("A".$row)->getValue();
+					//$nodo["NRO_PAGARE_ALTERADO"]=$num_pagare;
+					$nodo["RUT_COMPLETO"]=$sheet->getCell("B".$row)->getValue().$sheet->getCell("C".$row)->getValue();
+					$nodo["RUT_SIN_DV"]=$sheet->getCell("B".$row)->getValue();
+					$nodo["DV_RUT"]=$sheet->getCell("C".$row)->getValue();
+					$nodo["NOMBRE"]=$sheet->getCell("D".$row)->getValue();
+					$nodo["DIRECCION"]="";
+					$nodo["COMUNA"]="";
+					$nodo["DISTRITO"]="";
 					$contador++;
 					/*echo $sheet->getCell("A".$row)->getValue()." | ";
 					echo $sheet->getCell("B".$row)->getValue()." | ";
@@ -144,10 +143,10 @@ $raiz="../".$direc."/";
 $raiz2=$direc."/";
 $total_arch = count(glob($raiz.'{*.pdf}',GLOB_BRACE));
 
-if($num_reg!=$total_arch){
-	//echo 1;
+/*if($num_reg!=$total_arch){
+	echo $num_reg.$total_arch;
 	exit();
-}
+}*/
 		
 $sql_consulta=$var_select_asterisk_from."custodia_up ".$var_where."(ID_CUSTODIA_INFO='".$num_carga."')";
 $datos = array();
@@ -188,8 +187,8 @@ $disable="";
 					   
 					   if($result['ESTADO']==0){
 						   $bool_existe_pdf_null=true;
-						   $url=$raiz2.$result['NRO_PAGARE_ALTERADO'].'.pdf';
-						   $encontrado=count(glob($raiz.$result['NRO_PAGARE_ALTERADO'].'.pdf',GLOB_BRACE));
+						   $url=$raiz2.$result['NRO_PAGARE_ORIGINAL'].'.pdf';
+						   $encontrado=count(glob($raiz.$result['NRO_PAGARE_ORIGINAL'].'.pdf',GLOB_BRACE));
 
 
 						   if($encontrado==1){
@@ -549,7 +548,7 @@ case "4n":
 	$datos = array();
 	$datos = call_select($sql_consulta,"");
 	$num_reg=$datos["num_registros"];
-
+	$fecha_actual=fecha_actual();
 	while($result=mysql_fetch_assoc($datos['registros'])){
 
 		$sql=$var_select_asterisk_from."registros_custodia ".$var_where." (NRO_PAGARE_ORIGINAL='".$result["NRO_PAGARE_ORIGINAL"]."') ".$var_and."(ID_EMPRESA='".$result["ID_EMPRESA"]."') ";
@@ -582,7 +581,14 @@ case "4n":
 		}else if($datos_consulta["num_registros"]==0){
 			
 			$sql_insert=$var_insert_into." registros_custodia (ID_CUSTODIA_INFO, ID_EMPRESA, ID_REFERENCIA, NRO_PAGARE_ORIGINAL, NRO_PAGARE_ALTERADO, RUT_COMPLETO, RUT_SIN_DV, DV_RUT, NOMBRE, DIRECCION, COMUNA, DISTRITO, URL, ID_ESTADO) ".$var_values."('".$result["ID_CUSTODIA_INFO"]."','".$result["ID_EMPRESA"]."','".$result["ID_REFERENCIA"]."','".$result["NRO_PAGARE_ORIGINAL"]."','".$num_pagare."','".$result["RUT_COMPLETO"]."','".$result["RUT_SIN_DV"]."','".$result["DV_RUT"]."','".utf8_encode($result["NOMBRE"])."','".utf8_encode($result["DIRECCION"])."','".utf8_encode($result["COMUNA"])."','".utf8_encode($result["DISTRITO"])."','".substr($destino,3)."',1)";
+			//call_insert($sql_insert, "");
+			$datos_eta = call_insert($sql_insert,"SELECT LAST_INSERT_ID() AS 'ID'");
+			$result_proce = mysql_fetch_array($datos_eta["ultimo_id"]);	
+			$id_insert = $result_proce['ID'];
+
+			$sql_insert=$var_insert_into." pagare_historial_custodia (id_registros_custodia, id_estado_custodia, fecha_estado) ".$var_values."(".$id_insert.",1,'".$fecha_actual."')";
 			call_insert($sql_insert, "");
+
 			$bool_copiar=true;
 			
 		}
@@ -643,7 +649,76 @@ $datos = call_select($sql_consulta,"");
 <?php
 break;
 		
+case "6": //Actualizacion de estado
+		
+$id_custodia=$_GET["id_custodia"];
 
+$sql_consulta = $var_select." b.NOMBRE_EMPRESA, a.*, c.NOMBRE_ESTADO,dias_en_custodia(a.id) AS dias ".$var_from."registros_custodia a, empresas_afiliadas b, estado_custodia c "
+.$var_where."(a.ID_EMPRESA=b.ID) ".$var_and."(a.ID_ESTADO=c.ID_ESTADO)".$var_and." (a.ID='".$id_custodia."')";
+
+$datos = array();
+$datos = call_select($sql_consulta,"");
+$result=mysql_fetch_array($datos['registros']);
+
+$sql_estados = "SELECT estado_custodia.NOMBRE_ESTADO,pagare_historial_custodia.fecha_estado,pagare_historial_custodia.observacion FROM pagare_historial_custodia INNER JOIN estado_custodia ON pagare_historial_custodia.id_estado_custodia = estado_custodia.ID_ESTADO ".$var_where."(pagare_historial_custodia.id_registros_custodia=".$id_custodia.") ORDER BY pagare_historial_custodia.fecha_estado DESC;";
+$datos_historia = call_select($sql_estados,"");
+
+?>
+<div class="row">
+	<div class="form-group col-sm-2">
+		<label>No. Pagare</label>
+		<input value="<?php echo $result['NRO_PAGARE_ORIGINAL'] ?>" disabled="disabled" class="form-control">
+	</div>
+	<div class="form-group col-sm-1">
+		<label >Rut</label>
+		<input value="<?php echo $result['RUT_SIN_DV'] ?>" disabled="disabled"  class="form-control">
+	</div>
+	<div class="form-group col-sm-1">
+		<label >DV</label>
+		<input value="<?php echo $result['DV_RUT'] ?>" disabled="disabled"  class="form-control">
+	</div>
+	<div class="form-group col-sm-6">
+		<label >Nombre</label>
+		<input value="<?php echo $result['NOMBRE'] ?>" disabled="disabled"  class="form-control">
+	</div>	
+	<div class="form-group col-sm-2">
+		<label >Estado</label>
+		<input value="<?php echo $result['NOMBRE_ESTADO'] ?>" disabled="disabled"  class="form-control">
+	</div>
+</div>
+<div class="row">
+	<div class="form-group col-sm-2">
+		<label>Procurador</label>
+		<input value="<?php echo $result['USUSUARIO'] ?>" disabled="disabled" class="form-control">
+	</div>
+</div>
+<br/>
+<h5>Historial de Estados</h5>
+<?php 
+	$table = "<table class='table table-striped table-bordered table-hover'>";
+	$table .= "<thead>";
+	$table .= "<tr align='center' class='info text-center text-default' style='vertical-align:middle'>";
+	$table .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Estado</th>";
+	$table .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Fecha</th>";
+	$table .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Observacion</th>";
+	$table .= "</tr>";
+	$table .= "</thead>";
+	$table .= "<tbody>";
+	
+	while($result=mysql_fetch_array($datos_historia['registros'])){ 
+		$table .= "<tr class='text-center text-muted' data-placement='top'>";
+		$table .= "<td class='text-center' style='vertical-align:middle'>".$result['NOMBRE_ESTADO']."</td>";
+		$table .= "<td class='text-center' style='vertical-align:middle'>".$result['fecha_estado']."</td>";
+		$table .= "<td class='text-center' style='vertical-align:middle'>".$result['observacion']."</td>";
+		$table .= "</tr>";		
+	} 
+	$table .= "</tbody>";
+	$table .= "</table>";	
+	echo $table;
+?>
+<?php
+break;
+		
 		
 }
 
