@@ -4,6 +4,9 @@
 
 	$sql = $var_select."  a.*, c.NOMBRE_ESTADO ".$var_from."custodia_up a, estado_custodia c ".$var_where.
   "(a.ESTADO=c.ID_ESTADO)".$var_and."(a.USUSUARIO='".$_SESSION['username']."')";
+
+  $sql = $var_select." b.NOMBRE_EMPRESA, a.*, c.NOMBRE_ESTADO,dias_en_custodia(a.id) AS dias ".$var_from."registros_custodia a, empresas_afiliadas b, estado_custodia c "
+  .$var_where."(a.ID_EMPRESA=b.ID) ".$var_and."(a.ID_ESTADO=c.ID_ESTADO)".$var_and."(a.USUSUARIO='".$_SESSION['username']."')";
   
 	$datosx=array();
 	$datosx = call_select($sql, "");
@@ -34,7 +37,7 @@
             <div class="row">
                 <div class="col-xs-12">
                     <div class="page-title-box">
-                        <h4 class="page-title">Mi Custodia</h4>
+                        <h4 class="page-title">Mis Custodias</h4>
                         <div class="clearfix"></div>
                     </div>
                 </div>
@@ -47,34 +50,36 @@
                            <div>
                             <table id="datatable2" class="table table-striped table-bordered" width="100%">
                                 <thead>
-									<tr>
-										<th>Nro. Pagare</th>
-										<th>Estado</th>
-										<th>Rut</th>
-										<th>Dv</th>
-                    <th>Nombre</th>
-                    <th>Documento</th>
-									</tr>
-                                </thead>
-                                <tbody>
-                                 <?php
-                                   	while($resul=mysql_fetch_array($datosx['registros'])){
-										
-								 ?>
-									<tr >										
-										<td><?php echo $resul["NRO_PAGARE_ORIGINAL"] ?></td>
-										<td data-toggle="modal" data-target="#modalEstado" style="cursor: pointer;"><?php echo $resul["NOMBRE_ESTADO"] ?></td>
-										<td><?php echo $resul["RUT_SIN_DV"] ?></td>
-										<td><?php echo $resul["DV_RUT"] ?></td>
-                    <td><?php echo $resul["NOMBRE"] ?></td>
-                    <td align="center" data-toggle="modal" data-target="#exampleModal" data-whatever="<?php echo $resul["URL"] ?>|<?php echo $resul["NRO_PAGARE_ORIGINAL"] ?>" style="cursor: pointer;"><img src="./images/pdf.png"></td>                    
-									</tr>
-                               	<?php
-									}
-								?>
+                                  <tr>
+                                    <th>ID</th>
+                                    <th>Nro. Pagare</th>
+                                    <th>Estado</th>
+                                    <th>Rut</th>
+                                    <th>Dv</th>
+                                    <th>Nombre</th>
+                                    <th>Documento</th>
+                                  </tr>
+                                  </thead>
+                                  <tbody>
+                                  <?php
+                                  while($resul=mysql_fetch_array($datosx['registros'])){                                    
+                                  ?>
+                                    <tr >										
+                                    <td><?php echo $resul["ID"] ?></td>
+                                      <td><?php echo $resul["NRO_PAGARE_ORIGINAL"] ?></td>
+                                      <td ><?php if ($resul["NOMBRE_ESTADO"] == "POR ACEPTAR"){ echo "<input type='checkbox' name'check'>"; } echo " ".$resul["NOMBRE_ESTADO"] ?></td>
+                                      <td><?php echo $resul["RUT_SIN_DV"] ?></td>
+                                      <td><?php echo $resul["DV_RUT"] ?></td>
+                                      <td><?php echo $resul["NOMBRE"] ?></td>
+                                      <td align="center" data-toggle="modal" data-target="#exampleModal" data-whatever="<?php echo $resul["URL"] ?>|<?php echo $resul["NRO_PAGARE_ORIGINAL"] ?>" style="cursor: pointer;"><img src="./images/pdf.png"></td>                    
+                                    </tr>
+                                                  <?php
+                                    }
+                                  ?>
                                 </tbody>
                             </table>
                             </div>
+                            <div align="left"><button type="button" onClick="GuardarAceptados();" class="btn btn-success boton_guardar" >Aceptar Pagares <i class="zmdi zmdi-folder zmdi-hc-lg"></i></button></div>
                         </div>
                     </div>
                 </div>
@@ -86,6 +91,7 @@
     </div> <!-- content -->
 
 </div>
+
 <!-- End content-page -->
 
 <!-- Modal -->
@@ -149,20 +155,45 @@
             });
 			
            
-		});
-		
-		$('#exampleModal').on('show.bs.modal', function (event) {
-		  var button = $(event.relatedTarget) // Button that triggered the modal
-		  var recipient = button.data('whatever') // Extract info from data-* attributes
-		  var datos = recipient.split("|");
-		  
-		  var modal = $(this);
-		  modal.find('.modal-title').text('PDF - '+datos[1]);
-		  // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
-		  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
-		  $("#id_pdf").attr("src",datos[0]+"#toolbar=0");
-		});
+        });
+        
+        $('#exampleModal').on('show.bs.modal', function (event) {
+          var button = $(event.relatedTarget) // Button that triggered the modal
+          var recipient = button.data('whatever') // Extract info from data-* attributes
+          var datos = recipient.split("|");
+          
+          var modal = $(this);
+          modal.find('.modal-title').text('PDF - '+datos[1]);
+          // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+          // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+          $("#id_pdf").attr("src",datos[0]+"#toolbar=0");
+        });
+        function GuardarAceptados() {
+          var grid = document.getElementById("datatable2");
+          var checkBoxes = grid.getElementsByTagName("INPUT");
+          var item = "";
 
+          for (var i = 0; i < checkBoxes.length; i++) {
+            if (checkBoxes[i].checked) {
+                var row = checkBoxes[i].parentNode.parentNode;
+                item += row.cells[0].innerHTML + ";";
+              }
+          }
+          if (item != ""){
+            ajax=objetoAjax();
+            ajax.open("GET", 'controlador/script_custodia.php?ids='+item+'&opcion=8');
+            ajax.onreadystatechange=function() {
+            if (ajax.readyState==4) {
+                var resp = ajax.statusText;
+                if(resp=="OK"){
+                  alert("¡Bien hecho! Aceptación de Pagare(s) exitoso.");						
+                  location.reload();  
+                }
+              } 
+            }
+            ajax.send(null)      
+          }
+        }
     </script>
 
 <?php require 'includes/footer_end.php' ?>

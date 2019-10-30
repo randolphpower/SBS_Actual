@@ -649,7 +649,7 @@ $datos = call_select($sql_consulta,"");
 <?php
 break;
 		
-case "6": //Actualizacion de estado
+case "6": //Formulario para actualizacion de estado
 		
 $id_custodia=$_GET["id_custodia"];
 
@@ -660,10 +660,17 @@ $datos = array();
 $datos = call_select($sql_consulta,"");
 $result=mysql_fetch_array($datos['registros']);
 
-$sql_estados = "SELECT estado_custodia.NOMBRE_ESTADO,pagare_historial_custodia.fecha_estado,pagare_historial_custodia.observacion FROM pagare_historial_custodia INNER JOIN estado_custodia ON pagare_historial_custodia.id_estado_custodia = estado_custodia.ID_ESTADO ".$var_where."(pagare_historial_custodia.id_registros_custodia=".$id_custodia.") ORDER BY pagare_historial_custodia.fecha_estado DESC;";
-$datos_historia = call_select($sql_estados,"");
+$sql_estados_historia = "SELECT estado_custodia.NOMBRE_ESTADO,pagare_historial_custodia.fecha_estado,pagare_historial_custodia.observacion,pagare_historial_custodia.usuario ";
+$sql_estados_historia .= "FROM pagare_historial_custodia INNER JOIN estado_custodia ON pagare_historial_custodia.id_estado_custodia = estado_custodia.ID_ESTADO ";
+$sql_estados_historia .= "WHERE (pagare_historial_custodia.id_registros_custodia=".$id_custodia.") ORDER BY pagare_historial_custodia.fecha_estado DESC LIMIT 5;";
+$datos_historia = call_select($sql_estados_historia,"");
+
+$sql_estados = "SELECT * FROM estado_custodia;";
+$datos_estado = call_select($sql_estados,"");
 
 ?>
+<h5>Datos</h5>
+<input value="<?php echo $id_custodia ?>" type="hidden" id="idCustodia">
 <div class="row">
 	<div class="form-group col-sm-2">
 		<label>No. Pagare</label>
@@ -682,25 +689,47 @@ $datos_historia = call_select($sql_estados,"");
 		<input value="<?php echo $result['NOMBRE'] ?>" disabled="disabled"  class="form-control">
 	</div>	
 	<div class="form-group col-sm-2">
-		<label >Estado</label>
-		<input value="<?php echo $result['NOMBRE_ESTADO'] ?>" disabled="disabled"  class="form-control">
-	</div>
-</div>
-<div class="row">
-	<div class="form-group col-sm-2">
 		<label>Procurador</label>
 		<input value="<?php echo $result['USUSUARIO'] ?>" disabled="disabled" class="form-control">
 	</div>
 </div>
-<br/>
+
+<hr/>
+<h5>Cambio de Estado</h5>
+<div class="row">
+	<div class="form-group col-sm-2">
+	<label>Estado</label>
+		<select class="form-control" id="selectorestado" name="selectorestado">
+			 <option value="0">----Seleccione----</option>
+			 <?php 
+			 while($resultEstado=mysql_fetch_array($datos_estado['registros'])){ 
+				 if ($resultEstado['NOMBRE_ESTADO'] != $result['NOMBRE_ESTADO']){
+					echo "<option value='".$resultEstado['ID_ESTADO']."' >".$resultEstado['NOMBRE_ESTADO']."</option>";
+				 }				
+			 } 
+			 ?>
+		</select>
+	</div>
+	<div class="form-group col-sm-4">
+		<label >Observacion</label>
+		<input class="form-control" id="observacion" name="observacion"> 
+	</div>
+</div>
+<div class="row">
+	<div class="form-group col-sm-1">
+		<button type="button" class="btn btn-rounded btn-primary form-control" onClick="GrabarModificacionEstado();">Guardar</button>
+	</div>
+</div>
+<hr/>
 <h5>Historial de Estados</h5>
 <?php 
-	$table = "<table class='table table-striped table-bordered table-hover'>";
+	$table = "<div class='card-box table-responsive'><div><table id='tableHistorialEstados' class='table table-striped table-bordered' width='100%'>";
 	$table .= "<thead>";
 	$table .= "<tr align='center' class='info text-center text-default' style='vertical-align:middle'>";
 	$table .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Estado</th>";
 	$table .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Fecha</th>";
 	$table .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Observacion</th>";
+	$table .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Usuario</th>";
 	$table .= "</tr>";
 	$table .= "</thead>";
 	$table .= "<tbody>";
@@ -710,16 +739,53 @@ $datos_historia = call_select($sql_estados,"");
 		$table .= "<td class='text-center' style='vertical-align:middle'>".$result['NOMBRE_ESTADO']."</td>";
 		$table .= "<td class='text-center' style='vertical-align:middle'>".$result['fecha_estado']."</td>";
 		$table .= "<td class='text-center' style='vertical-align:middle'>".$result['observacion']."</td>";
+		$table .= "<td class='text-center' style='vertical-align:middle'>".$result['usuario']."</td>";
 		$table .= "</tr>";		
 	} 
 	$table .= "</tbody>";
-	$table .= "</table>";	
+	$table .= "</table></div></div>";	
 	echo $table;
 ?>
 <?php
 break;
-		
-		
+
+case 7: //Actualizacion de estado
+
+$selector_estado=$_GET["selector_estado"];
+$observacion=$_GET["observacion"];
+$id_custodia=$_GET["id_custodia"];
+$fecha_actual=fecha_actual();
+
+$sql_consulta=$var_update."registros_custodia ".$var_set." ID_ESTADO=".$selector_estado." ".$var_where." ID='".$id_custodia."'";
+call_update($sql_consulta);
+
+$sql_insert=$var_insert_into." pagare_historial_custodia (id_registros_custodia, id_estado_custodia, fecha_estado, observacion, usuario) "
+.$var_values."(".$id_custodia.",".$selector_estado.",'".$fecha_actual."','".$observacion."','".$_SESSION['username']."')";
+call_insert($sql_insert, "");
+
+break;	
+
+case 8: //Actualizacion de estado
+
+$ids=$_GET["ids"];
+$ids = explode(";", $ids);			
+$fecha_actual=fecha_actual();
+
+foreach	($ids as $item){
+	echo $item;
+	if ($item != ""){
+		$sql_consulta=$var_update." registros_custodia ".$var_set." ID_ESTADO=2 ".$var_where." ID=".$item.";";
+		echo $sql_consulta;
+		call_update($sql_consulta);
+
+		$sql_insert=$var_insert_into." pagare_historial_custodia (id_registros_custodia, id_estado_custodia, fecha_estado, observacion, usuario) "
+		.$var_values."(".$item.",2,'".$fecha_actual."','".$observacion."','".$_SESSION['username']."')";
+		call_insert($sql_insert, "");
+	}				
+}
+
+break;
+
 }
 
 ?>

@@ -67,7 +67,7 @@
 									<tr >
 										<td><?php echo $resul["NOMBRE_EMPRESA"] ?></td>
 										<td><?php echo $resul["NRO_PAGARE_ORIGINAL"] ?></td>
-										<td data-toggle="modal" data-target="#modalEstado"data-whatever="<?php echo $resul["ID"] ?>|<?php echo $resul["NRO_PAGARE_ORIGINAL"] ?>" style="cursor: pointer;"><?php echo $resul["NOMBRE_ESTADO"] ?></td>
+										<td data-toggle="modal" data-target="#modalEstado"data-whatever="<?php echo $resul["ID"] ?>|<?php echo $resul["NRO_PAGARE_ORIGINAL"] ?>|<?php echo $resul["NOMBRE_ESTADO"] ?>" style="cursor: pointer;"><?php echo $resul["NOMBRE_ESTADO"] ?></td>
 										<td><?php echo $resul["RUT_SIN_DV"] ?></td>
 										<td><?php echo $resul["DV_RUT"] ?></td>
                     <td><?php echo $resul["NOMBRE"] ?></td>
@@ -119,7 +119,7 @@
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel"></h5>
       </div>
-      <div class="modal-body" style="height: 570px">
+      <div class="modal-body" style="height: 700px">
         <div class="">
         	
         </div>
@@ -157,53 +157,78 @@
 	<script src="assets/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
   	
     <script type="text/javascript">
-        $(document).ready(function () {
-
-            //Buttons examples
+        $(document).ready(function () {          
             var table = $('#datatable2').DataTable({
                 responsive: true,
-				        buttons: ['copy', 'excel', 'pdf', 'colvis']/*,
-				columnDefs:[
-				{
-					targets:[15],
-					visible: false,
-					searchable: false
-				}
-				]*/
+				        buttons: ['copy', 'excel', 'pdf', 'colvis']
             });
-			
-           
-		});
+            
+        });
 		
-		$('#exampleModal').on('show.bs.modal', function (event) {
-		  var button = $(event.relatedTarget) // Button that triggered the modal
-		  var recipient = button.data('whatever') // Extract info from data-* attributes
-		  var datos = recipient.split("|");
-		  
-		  var modal = $(this);
-		  modal.find('.modal-title').text('PDF - '+datos[1]);
-		  // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
-		  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
-		  $("#id_pdf").attr("src",datos[0]+"#toolbar=0");
-		});
+        $('#exampleModal').on('show.bs.modal', function (event) {
+          var button = $(event.relatedTarget) // Button that triggered the modal
+          var recipient = button.data('whatever') // Extract info from data-* attributes
+          var datos = recipient.split("|");
+          
+          var modal = $(this);
+          modal.find('.modal-title').text('PDF - '+datos[1]);
+          // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+          // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+          $("#id_pdf").attr("src",datos[0]+"#toolbar=0");
+        });
 
-    $('#modalEstado').on('show.bs.modal', function (event) {
-      var button = $(event.relatedTarget) // Button that triggered the modal
-		  var recipient = button.data('whatever') // Extract info from data-* attributes
-      var datos = recipient.split("|");
-      var modal = $(this);
-      modal.find('.modal-title').text('Informacion Pagare');
+        $('#modalEstado').on('show.bs.modal', function (event) {
+          var tableHistorialEstados = $('#tableHistorialEstados').DataTable({
+                responsive: true,
+				        buttons: ['copy', 'excel', 'pdf', 'colvis']
+            });
+          var button = $(event.relatedTarget) // Button that triggered the modal
+          var recipient = button.data('whatever') // Extract info from data-* attributes
+          var datos = recipient.split("|");
+          var modal = $(this);
+          modal.find('.modal-title').text('Informacion Pagare (' + datos[1] + ") - Estado (" + datos [2] + ")");
 
-      ajax=objetoAjax_Global();
-		  ajax.open("GET", 'controlador/script_custodia.php?id_custodia='+datos[0]+'&opcion=6');
-		  ajax.onreadystatechange=function() {
-        if (ajax.readyState==4) {
-					modal.find('.modal-body').html(ajax.responseText);					
+          ajax=objetoAjax_Global();
+          ajax.open("GET", 'controlador/script_custodia.php?id_custodia='+datos[0]+'&opcion=6');
+          ajax.onreadystatechange=function() {
+            if (ajax.readyState==4) {
+              modal.find('.modal-body').html(ajax.responseText);					
+            }
+          }      
+          ajax.send(null)
+        });
+
+        function GrabarModificacionEstado(){	
+          var selector_estado=document.getElementById("selectorestado").value;
+	        var observacion=document.getElementById("observacion").value;
+          var id_custodia=document.getElementById("idCustodia").value;
+
+          if(selector_estado==0){
+            alert("¡ERROR! Ingrese el estado a modificar");
+            document.getElementById("selectorestado").focus();
+            return;
+          }
+
+          if(observacion==""){
+            alert("¡ERROR! Debe ingresar la observación de la modificación del estado.");
+            document.getElementById("observacion").focus();
+            return;
+          }
+
+          ajax=objetoAjax();
+		      ajax.open("GET", 'controlador/script_custodia.php?selector_estado='+selector_estado+"&id_custodia="+id_custodia+"&observacion="+observacion+'&opcion=7');
+		      ajax.onreadystatechange=function() {
+          if (ajax.readyState==4) {
+              var resp = ajax.statusText;
+              if(resp=="OK"){
+                alert("¡Bien hecho! Actualización de Estado de Pagare exitoso.");						
+                $('#modalEstado').modal('hide');
+                location.reload();  
+              }
+            } 
+		      }
+		      ajax.send(null)                  
         }
-      }      
-		  ajax.send(null)
-		});
-
     </script>
 
 <?php require 'includes/footer_end.php' ?>
