@@ -171,9 +171,6 @@ $disable="";
 						<th>Rut</th>
 						<th>dv</th>
 						<th>Nombre</th>
-						<th>Direcci&oacute;n</th>
-						<th>Comuna</th>
-						<th>Distrito</th>
 						<th>PDF</th>
 					</tr>
 				   </thead>   
@@ -181,22 +178,28 @@ $disable="";
 				   <?php
 					$i=1;
 					$bool_existe_pdf_null=false;
-				   while($result=mysql_fetch_array($datos['registros'])){
+					$ficheros = scandir($raiz);
+				   	while($result=mysql_fetch_array($datos['registros'])){
 
-					   $bool_url=false;
+					   	$bool_url=false;
 					   
-					   if($result['ESTADO']==0){
-						   $bool_existe_pdf_null=true;
-						   $url=$raiz2.$result['NRO_PAGARE_ORIGINAL'].'.pdf';
-						   $encontrado=count(glob($raiz.$result['NRO_PAGARE_ORIGINAL'].'.pdf',GLOB_BRACE));
-
-
-						   if($encontrado==1){
-							   $bool_url=true;
-							   $sql_consulta=$var_update."custodia_up ".$var_set." ESTADO=1, URL='".$url."' ".$var_where."(ID='".$result['ID']."')";
-							   call_update($sql_consulta);
-						   }
-
+					   	if($result['ESTADO']==0){
+						   	$bool_existe_pdf_null=true;
+						   	$url=$raiz2.$result['RUT_SIN_DV'].'.pdf';
+						   	//$encontrado=count(glob($raiz.$result['RUT_SIN_DV']."*.pdf",GLOB_BRACE));												   
+						   	foreach ($ficheros as $item){
+								$pos = strpos($item, $result['RUT_SIN_DV']);
+								if ($pos === false) {
+									$encontrado=0;
+								} else {
+									$encontrado=1;
+								}
+								if($encontrado==1){
+									$bool_url=true;
+									$sql_consulta=$var_update."custodia_up ".$var_set." ESTADO=1, URL='".$raiz2.$item."' ".$var_where."(ID='".$result['ID']."')";
+									call_update($sql_consulta);
+								}
+	    				   	}						
 					   }else{
 						   $bool_url=true;
 						   $url=$result['URL'];
@@ -211,9 +214,6 @@ $disable="";
 						<td><?php echo $result['RUT_SIN_DV']; ?></td>
 						<td><?php echo $result['DV_RUT']; ?></td>
 						<td><?php echo $result['NOMBRE']; ?></td>
-						<td><?php echo $result['DIRECCION']; ?></td>
-						<td><?php echo $result['COMUNA']; ?></td>
-						<td><?php echo $result['DISTRITO']; ?></td>
 						<td align="center">
 						<?php
 						   if($bool_url==true){
@@ -260,10 +260,9 @@ $disable="";
 					while ($archivo = readdir($directorio)) //obtenemos un archivo y luego otro sucesivamente
 					{
 						if ((!is_dir($archivo)) && (pathinfo( strtolower($archivo), PATHINFO_EXTENSION )=="pdf"))//verificamos si es o no un directorio
-						{
-							$cadena=substr($archivo,0,-4);   
-
-							$sql_consulta=$var_select_asterisk_from."custodia_up ".$var_where."(ID_CUSTODIA_INFO='".$num_carga."') ".$var_and."(NRO_PAGARE_ALTERADO='".$cadena."')";
+						{							
+							$cadena = explode(' ',trim($archivo))[0];
+							$sql_consulta=$var_select_asterisk_from."custodia_up ".$var_where."(ID_CUSTODIA_INFO='".$num_carga."') ".$var_and."(RUT_SIN_DV='".$cadena."')";
 							$datosx = array();
 							$datosx = call_select($sql_consulta,"");
 
@@ -474,7 +473,7 @@ case "4":
 	$sql_insert_datos="";
 		
 	$raiz="../archivos/".fecha_actual_con_piso()."/";
-	
+	/*
 	$bool=false;
 	
 	if(!is_dir($raiz)){
@@ -487,25 +486,19 @@ case "4":
 		echo 2;
 		exit();
 	}
-
-	while($result=mysql_fetch_array($datos['registros'])){
-
-		
-		
-	$url="../".$result["URL"];
-	$destino=$raiz.$result["NRO_PAGARE_ALTERADO"].'.pdf';
-		
-	if($bool==true){	
-		//comprobamos si el archivo ha subido
-		if (copy($url,$destino))
-		{
-			//chmod($url, 0755);
-			//unlink($url);
-		}
-	}//Fin mover archivo
-		
-		$sql_insert_datos=$sql_insert_datos." ('".$result["ID_CUSTODIA_INFO"]."','".$result["ID_EMPRESA"]."','".$result["ID_REFERENCIA"]."','".$result["NRO_PAGARE_ORIGINAL"]."','".$result["NRO_PAGARE_ALTERADO"]."','".$result["RUT_COMPLETO"]."','".$result["RUT_SIN_DV"]."','".$result["DV_RUT"]."','".utf8_encode($result["NOMBRE"])."','".utf8_encode($result["DIRECCION"])."','".utf8_encode($result["COMUNA"])."','".utf8_encode($result["DISTRITO"])."','".substr($destino,3)."',1),";
-
+	*/
+	while($result=mysql_fetch_array($datos['registros'])){				
+		$url="../".$result["URL"];
+		/*$destino=$raiz.$result["NRO_PAGARE_ALTERADO"].'.pdf';			
+		if($bool==true){	
+			//comprobamos si el archivo ha subido
+			if (copy($url,$destino))
+			{
+				//chmod($url, 0755);
+				//unlink($url);
+			}
+		}//Fin mover archivo			*/
+		$sql_insert_datos=$sql_insert_datos." ('".$result["ID_CUSTODIA_INFO"]."','".$result["ID_EMPRESA"]."','".$result["ID_REFERENCIA"]."','".$result["NRO_PAGARE_ORIGINAL"]."','".$result["NRO_PAGARE_ALTERADO"]."','".$result["RUT_COMPLETO"]."','".$result["RUT_SIN_DV"]."','".$result["DV_RUT"]."','".utf8_encode($result["NOMBRE"])."','".utf8_encode($result["DIRECCION"])."','".utf8_encode($result["COMUNA"])."','".utf8_encode($result["DISTRITO"])."','".$url."',1),";
 	}
 
 	$sql_insert_datos=substr($sql_insert_datos,1,-1);

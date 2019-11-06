@@ -71,7 +71,7 @@
                                       <td><?php echo $resul["RUT_SIN_DV"] ?></td>
                                       <td><?php echo $resul["DV_RUT"] ?></td>
                                       <td><?php echo $resul["NOMBRE"] ?></td>
-                                      <td align="center" data-toggle="modal" data-target="#exampleModal" data-whatever="<?php echo $resul["URL"] ?>|<?php echo $resul["NRO_PAGARE_ORIGINAL"] ?>" style="cursor: pointer;"><img src="./images/pdf.png"></td>                    
+                                      <td align="center"><a target="_blank" onclick="window.open('<?php echo $resul["URL"];?>', '<?php echo "Archivo: ".$resul['NRO_PAGARE_ALTERADO']; ?>', 'directories=no, location=no, menubar=no, scrollbars=yes, statusbar=no, tittlebar=no, width=600, height=800')" style="cursor:pointer;"><i class="zmdi zmdi-collection-pdf zmdi-hc-2x"></i></a></td></td>                    
                                     </tr>
                                                   <?php
                                     }
@@ -144,7 +144,7 @@
             //Buttons examples
             var table = $('#datatable2').DataTable({
                 responsive: true,
-				buttons: ['copy', 'excel', 'pdf', 'colvis']/*,
+				        buttons: ['copy', 'excel', 'pdf', 'colvis']/*,
 				columnDefs:[
 				{
 					targets:[15],

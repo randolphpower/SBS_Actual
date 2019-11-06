@@ -3,14 +3,33 @@
 	include("modelo/consultaSQL.php");
 
   $sql = $var_select." b.NOMBRE_EMPRESA, a.*, c.NOMBRE_ESTADO,dias_en_custodia(a.id) AS dias ".$var_from."registros_custodia a, empresas_afiliadas b, estado_custodia c ".$var_where."(a.ID_EMPRESA=b.ID) ".$var_and."(a.ID_ESTADO=c.ID_ESTADO)";
-  echo $sql;
 	$datosx=array();
 	$datosx = call_select($sql, "");
 	$reg_fil = $datosx['num_registros'];
 
 
 ?>
+<style>
+.divTopRow{
+  style="width: 100%; overflow: hidden;"
+}
+  .dt-buttons{
+    width: 600px; float: left;
+  }
+  .datatable2_filter{
+    margin-left: 620px;
+  }
 
+.divBottomRow{
+  style="width: 100%; overflow: hidden;"
+}
+  .dataTables2_length{
+    width: 600px; float: left;
+  }
+  .dataTables2_paginate{
+    margin-left: 620px;
+  }
+</style>
 <?php require 'includes/header_start.php'; ?>
 <!-- DataTables -->
     <link href="assets/plugins/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css"/>
@@ -49,11 +68,11 @@
                                 <thead>
 									<tr>
 										<th>Mandante</th>
-										<th>Nro. Pagare</th>
-										<th>Estado</th>
+										<th>Nro. Pagare</th>										
 										<th>Rut</th>
 										<th>Dv</th>
                     <th>Nombre</th>
+                    <th>Estado</th>
                     <th>Procurador</th>
                     <th>Dias en Custodia</th>
                     <th>Documento</th>
@@ -66,14 +85,14 @@
 								 ?>
 									<tr >
 										<td><?php echo $resul["NOMBRE_EMPRESA"] ?></td>
-										<td><?php echo $resul["NRO_PAGARE_ORIGINAL"] ?></td>
-										<td data-toggle="modal" data-target="#modalEstado"data-whatever="<?php echo $resul["ID"] ?>|<?php echo $resul["NRO_PAGARE_ORIGINAL"] ?>|<?php echo $resul["NOMBRE_ESTADO"] ?>" style="cursor: pointer;"><?php echo $resul["NOMBRE_ESTADO"] ?></td>
+										<td><?php echo $resul["NRO_PAGARE_ORIGINAL"] ?></td>										
 										<td><?php echo $resul["RUT_SIN_DV"] ?></td>
 										<td><?php echo $resul["DV_RUT"] ?></td>
                     <td><?php echo $resul["NOMBRE"] ?></td>
+                    <td data-toggle="modal" data-target="#modalEstado"data-whatever="<?php echo $resul["ID"] ?>|<?php echo $resul["NRO_PAGARE_ORIGINAL"] ?>|<?php echo $resul["NOMBRE_ESTADO"] ?>" style="cursor: pointer;"><?php echo $resul["NOMBRE_ESTADO"] ?></td>
                     <td><?php echo $resul["USUSUARIO"] ?></td>
-                    <td><?php echo $resul["dias"] ?></td>
-                    <td align="center" data-toggle="modal" data-target="#exampleModal" data-whatever="<?php echo $resul["URL"] ?>|<?php echo $resul["NRO_PAGARE_ORIGINAL"] ?>" style="cursor: pointer;"><img src="./images/pdf.png"></td>                    
+                    <td><?php echo $resul["dias"] ?></td>                    
+                    <td align="center"><a target="_blank" onclick="window.open('<?php echo $resul["URL"];?>', '<?php echo "Archivo: ".$resul['NRO_PAGARE_ALTERADO']; ?>', 'directories=no, location=no, menubar=no, scrollbars=yes, statusbar=no, tittlebar=no, width=600, height=800')" style="cursor:pointer;"><i class="zmdi zmdi-collection-pdf zmdi-hc-2x"></i></a></td></td>                    
 									</tr>
                                	<?php
 									}
@@ -159,10 +178,23 @@
     <script type="text/javascript">
         $(document).ready(function () {          
             var table = $('#datatable2').DataTable({
-                responsive: true,
-				        buttons: ['copy', 'excel', 'pdf', 'colvis']
+                dom: '<"divTopRow"Bf>t<"divTopRow"pl>',
+                buttons: [ 'excel' ],
+                language: {                  
+                  "zeroRecords": "Registros no encontrados",
+                  "info": "Mostrando pagina _PAGE_ de _PAGES_",
+                  "infoEmpty": "No hay registros disponible",
+                  "infoFiltered": "(filtered from _MAX_ total records)",
+                  "paginate": {
+                      "first":      "Primero",
+                      "last":       "Ultimo",
+                      "next":       "Siguiente",
+                      "previous":   "Anterior"
+                  },
+                  "lengthMenu":     "Mostrando _MENU_ registros por pagina",
+                  "search":         "Buscar:",
+                }
             });
-            
         });
 		
         $('#exampleModal').on('show.bs.modal', function (event) {
