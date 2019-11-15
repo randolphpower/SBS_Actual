@@ -480,6 +480,12 @@ case "11":
 				}
 			}
 		}
+		$sql = "SELECT * FROM op_eta_proce WHERE CSCASENO='".$numJuicio."' AND CSSTGID='".$idEtapa."'";
+		$q = call_select($sql, "");
+		if ($q["num_filas"] > 0) {
+			echo "duplicate data";
+			exit;
+		}
 
 		$sql = "INSERT INTO op_eta_proce (CSCASENO, CSTYPE, CSSTGID, CSSTDT, CSENDDT, USUSUARIO) VALUES ";
 		$sql .= "('".$numJuicio."', '".$idenJuicio."', '".$idEtapa."', '".cambiafechaNormal_a_MySQL($fechaInicio)."', '".cambiafechaNormal_a_MySQL($fechaFin)."', '".$_SESSION['username']."')";

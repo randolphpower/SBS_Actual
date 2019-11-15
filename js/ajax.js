@@ -518,7 +518,11 @@ function funcion_guarda_info(getparams, nomb_div) {
 
 				} 
 
-			} else {
+			} else if (data == 'duplicate data') {
+				divResultado = document.getElementById(nomb_div);
+				divResultado.innerHTML = "";
+				alert("Etapa de la demanda ya existe");				
+			}else {
 				if (nomb_div != "") {				
 					divResultado = document.getElementById(nomb_div);
 					divResultado.innerHTML = data;
@@ -601,5 +605,8 @@ function loadDates(obj) {
 		document.getElementById('fechaInicio').value = tmp_fechaInicio;
 		document.getElementById('fechaFin').value = tmp_fechaDemanda;
 	}
-
+	else{
+		document.getElementById('fechaInicio').value = "";
+		document.getElementById('fechaFin').value = "";
+	}
 }

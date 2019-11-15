@@ -5,8 +5,9 @@
 	$sql = $var_select."  a.*, c.NOMBRE_ESTADO ".$var_from."custodia_up a, estado_custodia c ".$var_where.
   "(a.ESTADO=c.ID_ESTADO)".$var_and."(a.USUSUARIO='".$_SESSION['username']."')";
 
-  $sql = $var_select." b.NOMBRE_EMPRESA, a.*, c.NOMBRE_ESTADO,dias_en_custodia(a.id) AS dias ".$var_from."registros_custodia a, empresas_afiliadas b, estado_custodia c "
-  .$var_where."(a.ID_EMPRESA=b.ID) ".$var_and."(a.ID_ESTADO=c.ID_ESTADO)".$var_and."(a.USUSUARIO='".$_SESSION['username']."')";
+  $sql = $var_select." b.NOMBRE_EMPRESA, a.*, c.NOMBRE_ESTADO,dias_en_custodia(a.id) AS dias, DATE_FORMAT(d.FECHA, '%d/%m/%Y') AS FECHA "
+  .$var_from."registros_custodia a, empresas_afiliadas b, estado_custodia c, custodia_up_info d "
+  .$var_where."(a.ID_EMPRESA=b.ID) ".$var_and."(a.ID_ESTADO=c.ID_ESTADO)".$var_and."(a.USUSUARIO='".$_SESSION['username']."')".$var_and."(a.ID_CUSTODIA_INFO=d.ID)";
   
 	$datosx=array();
 	$datosx = call_select($sql, "");
@@ -53,6 +54,7 @@
                                   <tr>
                                     <th>ID</th>
                                     <th>Nro. Pagare</th>
+                                    <th>Fecha</th>
                                     <th>Estado</th>
                                     <th>Rut</th>
                                     <th>Dv</th>
@@ -67,7 +69,8 @@
                                     <tr >										
                                     <td><?php echo $resul["ID"] ?></td>
                                       <td><?php echo $resul["NRO_PAGARE_ORIGINAL"] ?></td>
-                                      <td ><?php if ($resul["NOMBRE_ESTADO"] == "POR ACEPTAR"){ echo "<input type='checkbox' name'check'>"; } echo " ".$resul["NOMBRE_ESTADO"] ?></td>
+                                      <td><?php echo $resul["FECHA"] ?></td>
+                                      <td ><?php if ($resul["NOMBRE_ESTADO"] == "POR ACEPTAR"){ echo "<input type='checkbox' name'check' onchange='checkAll(this)'>"; } echo " ".$resul["NOMBRE_ESTADO"] ?></td>
                                       <td><?php echo $resul["RUT_SIN_DV"] ?></td>
                                       <td><?php echo $resul["DV_RUT"] ?></td>
                                       <td><?php echo $resul["NOMBRE"] ?></td>
@@ -140,21 +143,23 @@
   	
     <script type="text/javascript">
         $(document).ready(function () {
-
-            //Buttons examples
-            var table = $('#datatable2').DataTable({
-                responsive: true,
-				        buttons: ['copy', 'excel', 'pdf', 'colvis']/*,
-				columnDefs:[
-				{
-					targets:[15],
-					visible: false,
-					searchable: false
-				}
-				]*/
+          var table = $('#datatable2').DataTable({                
+                buttons: [ 'excel' ],
+                language: {                  
+                  "zeroRecords": "Registros no encontrados",
+                  "info": "Mostrando pagina _PAGE_ de _PAGES_",
+                  "infoEmpty": "No hay registros disponible",
+                  "infoFiltered": "(filtered from _MAX_ total records)",
+                  "paginate": {
+                      "first":      "Primero",
+                      "last":       "Ultimo",
+                      "next":       "Siguiente",
+                      "previous":   "Anterior"
+                  },
+                  "lengthMenu":     "Mostrando _MENU_ registros por pagina",
+                  "search":         "Buscar:",
+                }
             });
-			
-           
         });
         
         $('#exampleModal').on('show.bs.modal', function (event) {
@@ -168,6 +173,23 @@
           // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
           $("#id_pdf").attr("src",datos[0]+"#toolbar=0");
         });
+        function checkAll(ele) {
+            var checkboxes = document.getElementsByTagName('INPUT');
+            if (ele.checked) {
+                for (var i = 0; i < checkboxes.length; i++) {
+                    if (checkboxes[i].type == 'checkbox') {
+                        checkboxes[i].checked = true;
+                    }
+                }
+            } else {
+                for (var i = 0; i < checkboxes.length; i++) {
+                    console.log(i)
+                    if (checkboxes[i].type == 'checkbox') {
+                        checkboxes[i].checked = false;
+                    }
+                }
+            }
+        }
         function GuardarAceptados() {
           var grid = document.getElementById("datatable2");
           var checkBoxes = grid.getElementsByTagName("INPUT");

@@ -201,7 +201,7 @@
 			$tableInsertados .= "</tr>";
 			$tableInsertados .= "</thead>";
 			$tableInsertados .= "<tbody>";
-		
+			$countMail = 0;
 			if (count($arrayInsertados) > 0) {
 				array_multisort( array_column($arrayInsertados, 0), SORT_ASC, $arrayInsertados );			
 				$fecha_actual=fecha_actual();
@@ -219,6 +219,9 @@
 					$tableInsertados .= "<td class='text-center' style='vertical-align:middle'>".$arrayInsertados[$j][7]."</td>";
 					$tableInsertados .= "</tr>";			
 				}   
+				for ($j = 0; $j < count($datoPagare); $j++) {
+					//enviarMail("rpower@servicobranza.cl", $arrayMail[$j][0]);
+				}
 			}
 			$tableInsertados .= "</tbody>";
 			$tableInsertados .= "</table>";	
@@ -309,7 +312,8 @@
 		$fecha_demanda= $arrayInsertados[7];
 		$fecha_demanda = split("/", $fecha_demanda);
 		$fecha_demanda = "{$fecha_demanda[2]}-{$fecha_demanda[1]}-{$fecha_demanda[0]}";
-		$procurador= $arrayInsertados[8];
+		$procurador = $arrayInsertados[8];
+		$nro_pagare = "";
 		$sql_searh = "SELECT * FROM relacion_cliente_juicio WHERE NUM_JUICIO = ".$numjuicio." and ID_CLIENTE = '".$rutcliente."';";		
 		$num = call_select2($sql_searh);
 
@@ -324,32 +328,6 @@
 			$sql .= "('902','".$rol."','".$numjuicio."','".$rutcliente."','".$tribunal."','".$tipojuicio."','".$_SESSION['username']."', 'MA', 'IJ', '{$fecha_demanda}')";
 			call_insert2($sql, "");
 
-			//Se asigna procurador a pagare en custodia
-			$sql_search = "SELECT * FROM custodia_up WHERE RUT_SIN_DV = '".$rutcliente."';";	
-			$datos = call_select($sql_search, "");			
-			$id_tabla = mysql_fetch_array($datos['registros'])['ID'];
-			if ($datos['num_filas'] > 0) { // INSERT
-				$sql =  "UPDATE custodia_up SET ";
-				$sql .= "USUSUARIO='".$procurador."' ";
-				$sql .= "WHERE ID=".$id_tabla;
-				call_update2($sql);
-			}
-			$sql_search = "SELECT * FROM registros_custodia WHERE RUT_SIN_DV = '".$rutcliente."';";	
-			$datos = call_select($sql_search, "");			
-			$registros = mysql_fetch_array($datos['registros']);
-			$id_tabla = $registros['ID'];
-			$nro_Pagare = $registros['NRO_PAGARE_ORIGINAL'];
-			if ($datos['num_filas'] > 0) { // INSERT
-				$sql =  "UPDATE registros_custodia SET ";
-				$sql .= "USUSUARIO='".$procurador."', ";
-				$sql .= "ID_ESTADO=5 ";
-				$sql .= "WHERE ID=".$id_tabla;
-				call_update2($sql);
-				$sql ="INSERT INTO pagare_historial_custodia (id_registros_custodia, id_estado_custodia, fecha_estado) ";
-				$sql .="VALUES (".$id_tabla.",5,'".$fecha_actual."')";
-				call_insert2($sql, "");
-				enviarMail("rpower@servicobranza.cl", $nro_Pagare);
-			}
 		} else if ($num == 1) { // UPDATE
 			$sql = "UPDATE relacion_cliente_juicio SET ";
 			$sql .= "CECRTID='".$tribunal."', ";
@@ -375,32 +353,6 @@
 				call_update2($sql);
 			}	
 			
-			//Se asigna procurador a pagare en custodia
-			$sql_search = "SELECT * FROM custodia_up WHERE RUT_SIN_DV = '".$rutcliente."';";	
-			$datos = call_select($sql_search, "");			
-			$id_tabla = mysql_fetch_array($datos['registros'])['ID'];
-			if ($datos['num_filas'] > 0) { // INSERT
-				$sql =  "UPDATE custodia_up SET ";
-				$sql .= "USUSUARIO='".$procurador."' ";
-				$sql .= "WHERE ID=".$id_tabla;
-				call_update2($sql);
-			}
-			$sql_search = "SELECT * FROM registros_custodia WHERE RUT_SIN_DV = '".$rutcliente."';";	
-			$datos = call_select($sql_search, "");			
-			$registros = mysql_fetch_array($datos['registros']);
-			$id_tabla = $registros['ID'];
-			$nro_Pagare = $registros['NRO_PAGARE_ORIGINAL'];
-			if ($datos['num_filas'] > 0) { // INSERT
-				$sql =  "UPDATE registros_custodia SET ";
-				$sql .= "USUSUARIO='".$procurador."', ";
-				$sql .= "ID_ESTADO=5 ";
-				$sql .= "WHERE ID=".$id_tabla;
-				call_update2($sql);
-				$sql ="INSERT INTO pagare_historial_custodia (id_registros_custodia, id_estado_custodia, fecha_estado) ";
-				$sql .="VALUES (".$id_tabla.",5,'".$fecha_actual."')";
-				call_insert2($sql, "");
-				enviarMail("rpower@servicobranza.cl", $nro_Pagare);
-			}
 		}	
 	}
 

@@ -33,7 +33,7 @@
                 
                 <li class="has_sub">
                     <a href="carga_poder_judicial.php" class="waves-effect"><i class="zmdi zmdi-upload"></i>
-                        <span> Carga Poder Judicial </span>
+                        <span> Carga de Poder Judicial </span>
                     </a>
 				</li>
 
@@ -83,7 +83,7 @@
                         <span> Custodia </span> <span class="menu-arrow"></span></a>
                     <ul class="list-unstyled">
                     	<li><a href="ingresar_doc_custodia.php">Carga de datos</a></li>
-                    	<li><a href="comparar_arch_custodia.php">Por revisi&oacute;n</a></li>
+                    	<li><a href="comparar_arch_custodia.php">Por Revisi&oacute;n</a></li>
                     	<li><a href="resumen_custodia.php">Resumen de Cargas</a></li>
 						<li><a href="mis_custodia.php">Mis Custodias</a></li>
                     </ul>    

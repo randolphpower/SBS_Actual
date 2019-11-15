@@ -121,7 +121,8 @@ case "2":
 
 $direc="documentos/".$_GET["direc"];
 $num_carga=$_GET["num_carga"];
-
+$archivos=$_GET["archivos"];
+echo count($_FILES['upload']['name']);
 $sql_consulta=$var_select_asterisk_from."custodia_up ".$var_where."(ID_CUSTODIA_INFO='".$num_carga."')";
 $datos = array();
 $datos = call_select($sql_consulta,"");

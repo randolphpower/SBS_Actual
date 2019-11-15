@@ -126,7 +126,7 @@ function importar(){
                        					<label>Subir</label>
                        					<button type="button" class="form-control btn btn-info botones" onClick="importar()"><i class="zmdi zmdi-mail-send"></i></button>
                        				</div>
-                       			</div>
+                             </div>
                        			<div class="row">
                        				<div class="col-sm-12">
                        					<div id="div_muestra"></div>

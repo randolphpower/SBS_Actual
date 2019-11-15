@@ -2,11 +2,31 @@
 	include("modelo/conectarBD.php");
 	include("modelo/consultaSQL.php");
 
-  $sql = $var_select." b.NOMBRE_EMPRESA, a.*, c.NOMBRE_ESTADO,dias_en_custodia(a.id) AS dias ".$var_from."registros_custodia a, empresas_afiliadas b, estado_custodia c ".$var_where."(a.ID_EMPRESA=b.ID) ".$var_and."(a.ID_ESTADO=c.ID_ESTADO)";
+  $sql = $var_select." b.NOMBRE_EMPRESA, a.*, c.NOMBRE_ESTADO,dias_en_custodia(a.id) AS dias, DATE_FORMAT(d.FECHA, '%d/%m/%Y') AS FECHA ".$var_from."registros_custodia a, empresas_afiliadas b, estado_custodia c, custodia_up_info d ".$var_where."(a.ID_EMPRESA=b.ID) ".$var_and."(a.ID_ESTADO=c.ID_ESTADO)".$var_and."(a.ID_CUSTODIA_INFO=d.ID)";
+  
 	$datosx=array();
 	$datosx = call_select($sql, "");
 	$reg_fil = $datosx['num_registros'];
 
+  $sql_search = "SELECT COUNT(NRO_PAGARE_ORIGINAL) AS EnCustodia FROM registros_custodia WHERE ID_ESTADO=1";
+  $datos1 = call_select($sql_search, "");			
+  $count_en_custodia = mysql_fetch_array($datos1['registros'])['EnCustodia'];
+  
+  $sql_search = "SELECT COUNT(NRO_PAGARE_ORIGINAL) AS Asignado FROM registros_custodia WHERE ID_ESTADO=2";
+  $datos2 = call_select($sql_search, "");			
+  $count_asignado = mysql_fetch_array($datos2['registros'])['Asignado'];
+  
+  $sql_search = "SELECT COUNT(NRO_PAGARE_ORIGINAL) AS Devuelto FROM registros_custodia WHERE ID_ESTADO=3";
+  $datos3 = call_select($sql_search, "");			
+  $count_devuelto = mysql_fetch_array($datos3['registros'])['Devuelto'];
+
+  $sql_search = "SELECT COUNT(NRO_PAGARE_ORIGINAL) AS Reingreso FROM registros_custodia WHERE ID_ESTADO=4";
+  $datos4 = call_select($sql_search, "");			
+  $count_reingreso = mysql_fetch_array($datos4['registros'])['Reingreso'];
+
+  $sql_search = "SELECT COUNT(NRO_PAGARE_ORIGINAL) AS PorAceptar FROM registros_custodia WHERE ID_ESTADO=5";
+  $datos5 = call_select($sql_search, "");			
+  $count_por_aceptar = mysql_fetch_array($datos5['registros'])['PorAceptar'];
 
 ?>
 <style>
@@ -53,7 +73,39 @@
             <div class="row">
                 <div class="col-xs-12">
                     <div class="page-title-box">
-                        <h4 class="page-title">Reporte Custodia</h4>
+                        <h4 class="page-title">Resumen de Cargas</h4>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="row align-items-center">
+                <div class="col-xs-1 col-xs-offset-7" >
+                    <div class="page-title-box" style="background-color:#FBFBB3;padding:8px">
+                        <h5 class="page-title"><?php echo "En Custodia: ".$count_en_custodia ?></h5>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+                <div class="col-xs-1">
+                    <div class="page-title-box" style="background-color:#FA673F;padding:8px">
+                        <h5 class="page-title"><?php echo "Por Aceptar: ".$count_por_aceptar ?></h5>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+                <div class="col-xs-1">
+                    <div class="page-title-box" style="background-color:#C4FBB5;padding:8px">
+                        <h5 class="page-title"><?php echo "Asignado: ".$count_asignado ?></h5>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+                <div class="col-xs-1">
+                    <div class="page-title-box" style="background-color:#F8E4BB;padding:8px">
+                        <h5 class="page-title"><?php echo "Devuelto: ".$count_devuelto ?></h5>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+                <div class="col-xs-1">
+                    <div class="page-title-box" style="background-color:#B0E0E6;padding:8px">
+                        <h5 class="page-title"><?php echo "Reingreso: ".$count_reingreso ?></h5>
                         <div class="clearfix"></div>
                     </div>
                 </div>
@@ -68,7 +120,8 @@
                                 <thead>
 									<tr>
 										<th>Mandante</th>
-										<th>Nro. Pagare</th>										
+                    <th>Nro. Pagare</th>										
+                    <th>Fecha</th>										
 										<th>Rut</th>
 										<th>Dv</th>
                     <th>Nombre</th>
@@ -85,7 +138,8 @@
 								 ?>
 									<tr >
 										<td><?php echo $resul["NOMBRE_EMPRESA"] ?></td>
-										<td><?php echo $resul["NRO_PAGARE_ORIGINAL"] ?></td>										
+                    <td><?php echo $resul["NRO_PAGARE_ORIGINAL"] ?></td>										
+                    <td><?php echo $resul["FECHA"] ?></td>
 										<td><?php echo $resul["RUT_SIN_DV"] ?></td>
 										<td><?php echo $resul["DV_RUT"] ?></td>
                     <td><?php echo $resul["NOMBRE"] ?></td>
