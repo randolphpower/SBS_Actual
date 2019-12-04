@@ -21,67 +21,11 @@
 		$v = False;
 	}
 
-	// $sql_select = $var_select."op_eta_proce.*, op_200_gestiones.*, op_gastos.*, relacion_cliente_juicio.*, informe_datos.FECHA_INSERT, (SELECT etapas_procesales.CD_DESC FROM etapas_procesales WHERE etapas_procesales.CD_TYPE=op_eta_proce.CSTYPE AND etapas_procesales.CD_STGID=op_eta_proce.CSSTGID) AS DESC_STGID, (SELECT codigo_accion.DESCRIPCION FROM codigo_accion WHERE codigo_accion.CODIGO=op_200_gestiones.ACACCODE) AS DESC_CODE ".$var_from."informe_datos LEFT JOIN op_eta_proce ON informe_datos.ID_ETA_PROCE = op_eta_proce.id LEFT JOIN op_200_gestiones ON informe_datos.ID_200_GESTION = op_200_gestiones.id LEFT JOIN op_gastos ON informe_datos.ID_GASTOS = op_gastos.id LEFT JOIN relacion_cliente_juicio ON informe_datos.ID_JUICIO = relacion_cliente_juicio.NUM_JUICIO";
-	// $datos = call_select($sql_select, "");
-	// Consulta ADMIN
-	// $sql_select = $var_select;
-	// $sql_select .= "op_eta_proce.*, op_200_gestiones.*, op_gastos.*, relacion_cliente_juicio.*, informe_datos.FECHA_INSERT, (SELECT etapas_procesales.CD_DESC FROM etapas_procesales WHERE etapas_procesales.CD_TYPE=op_eta_proce.CSTYPE AND etapas_procesales.CD_STGID=op_eta_proce.CSSTGID) AS DESC_STGID, (SELECT codigo_accion.DESCRIPCION FROM codigo_accion WHERE codigo_accion.CODIGO=op_200_gestiones.ACACCODE) AS DESC_CODE ".$var_from."informe_datos LEFT JOIN op_eta_proce ON informe_datos.ID_ETA_PROCE = op_eta_proce.id LEFT JOIN op_200_gestiones ON informe_datos.ID_200_GESTION = op_200_gestiones.id LEFT JOIN op_gastos ON informe_datos.ID_GASTOS = op_gastos.id LEFT JOIN relacion_cliente_juicio ON informe_datos.ID_JUICIO = relacion_cliente_juicio.NUM_JUICIO";
-	// $datos = get_select($sql_select);
-
-	$sql =  "SELECT ";
-
-	$sql .= "relacion_cliente_juicio.NUM_JUICIO,";
-	$sql .= "relacion_cliente_juicio.ID_CLIENTE,";
-	$sql .= "relacion_cliente_juicio.CECRTID,";
-	$sql .= "relacion_cliente_juicio.CEDOSSIERID,";
-
-	//$sql .= "(SELECT etapas_procesales.CD_DESC ";
-	//$sql .= "	FROM etapas_procesales ";
-	$sql .= " etapas_procesales.CD_DESC AS DESC_STGID, ";
-	
-	$sql .= "op_eta_proce.CSSTDT,"; // fecha inicio
-	$sql .= "op_eta_proce.CSENDDT,"; // fecha fin
-	
-	//$sql .= "(SELECT codigo_accion.DESCRIPCION FROM codigo_accion WHERE codigo_accion.CODIGO = op_200_gestiones.ACACCODE) AS DESC_CODE,";
-	$sql .= "codigo_accion.descripcion AS DESC_CODE,";
-	
-	if ($v) {
-		$sql .= "MAX(op_200_gestiones.ACCOMN) AS ACCOMN,";
-		$sql .= "MAX(op_200_gestiones.DATE) AS date,";
-	}
-	else{
-		$sql .= "op_200_gestiones.ACCOMN,";
-		$sql .= "op_200_gestiones.DATE,";
-	}
-	$sql .= "op_gastos.EXDESC,";
-	$sql .= "op_gastos.EXAMT,";
-	$sql .= "op_gastos.EXINVOICE,";
-	$sql .= "op_gastos.EXAUTDT,";
-	$sql .= "informe_datos.FECHA_INSERT,";
-	$sql .= "op_gastos.EXSUPPLIER ";
-
-	$sql .= "FROM informe_datos "; // table base
-	
-	$sql .= "LEFT JOIN op_eta_proce ON informe_datos.ID_ETA_PROCE = op_eta_proce.id ";
-	$sql .= "LEFT JOIN etapas_procesales ";
-	$sql .= "ON etapas_procesales.cd_type = op_eta_proce.cstype  ";
-	$sql .= "AND etapas_procesales.cd_stgid = op_eta_proce.csstgid ";
-	$sql .= "LEFT JOIN op_200_gestiones ON informe_datos.ID_200_GESTION = op_200_gestiones.id ";
-	$sql .= "LEFT JOIN codigo_accion ";
-	$sql .= "ON codigo_accion.codigo = op_200_gestiones.acaccode ";
-	$sql .= "LEFT JOIN op_gastos ON informe_datos.ID_GASTOS = op_gastos.id ";
-	$sql .= "LEFT JOIN relacion_cliente_juicio ON informe_datos.ID_JUICIO = relacion_cliente_juicio.NUM_JUICIO ";
-
-	// filter by min & max
-
+	$sql =  "SELECT DISTINCT(op_200_gestiones.ACACCT) AS ACACCT ";
+	$sql .= "FROM op_200_gestiones ";
+	$sql .= "INNER JOIN informe_datos ";
+	$sql .= "ON op_200_gestiones.id = informe_datos.ID_200_GESTION ";
 	$sql .= "WHERE True ";
-
-	if ($reg_fil == 0) {
-		$sql .= "AND (";
-		$sql .= "op_eta_proce.USUSUARIO = '".$_SESSION['username']."' ";
-		$sql .= "OR op_200_gestiones.USUSUARIO = '".$_SESSION['username']."' ";
-		$sql .= "OR op_gastos.USUSUARIO ='".$_SESSION['username']."') ";
-	}
 	
 	if (trim($_GET['min']) != "") {
 
@@ -96,58 +40,37 @@
 		$sql .= "AND informe_datos.FECHA_INSERT <= '{$max}' ";
 	}
 
-	if ($v) {
-		$sql .= "GROUP BY informe_datos.ID_JUICIO ";
-		$sql .= "ORDER BY relacion_cliente_juicio.num_juicio ";
+	if (trim($_GET['nrojuicio']) != "") {
+		$sql .= "AND informe_datos.ID_JUICIO =".$_GET['nrojuicio']." ";
 	}
-	else{
-		$sql .= "ORDER BY informe_datos.FECHA_INSERT DESC, op_200_gestiones.DATE DESC ";
-	}
+
+	$sql_count =  "SELECT COUNT(op_200_gestiones.ACACCT) ";
+	$sql_count .= "FROM op_200_gestiones ";
+	$sql_count .= "INNER JOIN informe_datos ";
+	$sql_count .= "ON op_200_gestiones.id = informe_datos.ID_200_GESTION ";
+	$sql_count .= "WHERE True ";
 	
-
-	// sql just to count records
-
-	$count_sql = "SELECT ";
-	
-	if ($v) {
-		$count_sql .= "COUNT(DISTINCT(informe_datos.ID_JUICIO)) ";
-	} else {
-		$count_sql .= "COUNT(informe_datos.FECHA_INSERT) ";
-	}
-
-	$count_sql .= "FROM informe_datos ";
-	$count_sql .= "LEFT JOIN op_eta_proce ON informe_datos.ID_ETA_PROCE = op_eta_proce.id ";
-	$count_sql .= "LEFT JOIN op_200_gestiones ON informe_datos.ID_200_GESTION = op_200_gestiones.id ";
-	$count_sql .= "LEFT JOIN op_gastos ON informe_datos.ID_GASTOS = op_gastos.id ";
-	$count_sql .= "LEFT JOIN relacion_cliente_juicio ON informe_datos.ID_JUICIO = relacion_cliente_juicio.NUM_JUICIO ";
-
-	$count_sql .= "WHERE True ";
-
 	if ($reg_fil == 0) {
-		$count_sql .= "AND (";
-		$count_sql .= "op_eta_proce.USUSUARIO = '".$_SESSION['username']."' ";
-		$count_sql .= "OR op_200_gestiones.USUSUARIO = '".$_SESSION['username']."' ";
-		$count_sql .= "OR op_gastos.USUSUARIO ='".$_SESSION['username']."') ";
+		$sql .= "AND op_200_gestiones.USUSUARIO = '".$_SESSION['username']."' ";	
 	}
-	
+
 	if (trim($_GET['min']) != "") {
+
 		$arr = explode("/", $_GET['min']);
 		$min = $arr[2]."-".$arr[1]."-".$arr[0];
-		$count_sql .= "AND informe_datos.FECHA_INSERT >= '{$min}' ";
+		$sql_count .= "AND informe_datos.FECHA_INSERT >= '{$min}' ";
 	}
 	
 	if (trim($_GET['max']) != "") {
 		$arr = explode("/", $_GET['max']);
 		$max = $arr[2]."-".$arr[1]."-".$arr[0];
-		$count_sql .= "AND informe_datos.FECHA_INSERT <= '{$max}' ";
+		$sql_count .= "AND informe_datos.FECHA_INSERT <= '{$max}' ";
 	}
 
-	// if ($v) {
-	// 	$count_sql .= "GROUP BY informe_datos.ID_JUICIO ";
-	// }
-	//echo $sql;
-	//echo $count_sql;
-	$datos = get_select($sql, $count_sql);
+	if (trim($_GET['nrojuicio']) != "") {
+		$sql .= "AND informe_datos.ID_JUICIO =".$_GET['nrojuicio']." ";
+	}	
+	$datos = get_select($sql, $sql_count);
 
 ?>
 <link href="assets/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet">
@@ -193,7 +116,12 @@
 										<tr height="40px;">
 											<td>Fecha inicial:</td>
 											<td>
-												<input class="form-control" name="min" id="min" type="text" value="<?php echo $_GET['min']; ?>">
+												<input autocomplete="off" class="form-control" name="min" id="min" type="text" value="<?php echo $_GET['min']; ?>">
+											</td>
+											<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+											<td>Nro. Juicio:</td>
+											<td>
+												<input class="form-control" name="txtjuicio" id="txtjuicio" type="text">
 											</td>
 											<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 											<td>
@@ -203,12 +131,9 @@
 										<tr>
 											<td>Fecha Final:</td>
 											<td>
-												<input class="form-control" name="max" id="max" type="text" value="<?php echo $_GET['max']; ?>">
+												<input autocomplete="off" class="form-control" name="max" id="max" type="text" value="<?php echo $_GET['max']; ?>">
 											</td>
 											<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-											<td>
-												<input type="checkbox" name="lastComment" id="lastComment" value="1" onClick="javascript: onlyLast(this);" <?php if ($v) echo "checked"; ?>/> Ver sólo último comentario
-											</td>
 										</tr>
 									</thead>
 								</table>
@@ -234,42 +159,51 @@
 										<th bgcolor="#5B9BD5">Rut</th>
 										<th bgcolor="#5B9BD5">Juzgado</th>
 										<th bgcolor="#5B9BD5">Rol</th>
-										<th bgcolor="#FFFF00">Iden. Etapa</th>
-										<th bgcolor="#FFFF00">Fecha Inicio</th>
-										<th bgcolor="#FFFF00">Fecha Fin</th>
 										<th bgcolor="#C6E0B4">Codigo Accion</th>
+										<th bgcolor="#C6E0B4">Accion</th>
+										<th bgcolor="#C6E0B4">Codigo Respuesta</th>
+										<th bgcolor="#C6E0B4">Respuesta</th>
 										<th bgcolor="#C6E0B4">Comentario</th>
-										<th bgcolor="#C6E0B4">Fecha</th>
-										<th bgcolor="#FFD966">Desc. del Gasto</th>
-										<th bgcolor="#FFD966">Monto Gasto</th>
-										<th bgcolor="#FFD966">Nro Factura</th>
-										<th bgcolor="#FFD966">Fecha Autorizacion</th>
-										<th bgcolor="#FFD966">Iden. del Proveedor</th>
-
+										<th bgcolor="#C6E0B4">Fecha</th>			
 									</tr>
                                 </thead>
                                 <tbody>
                                  <?php
                                    	while($resul=mysql_fetch_array($datos['registros'])){
+										$sql = "SELECT op_200_gestiones.ACACCODE AS CODIGO_ACCION,codigo_accion.DESCRIPCION AS ACCION, ";
+										$sql .= "op_200_gestiones.ACRCCODE AS CODIGO_RESPUESTA, ";
+										$sql .= "codigo_result.DESCRIPCION AS RESPUESTA, op_200_gestiones.ACCOMN AS COMENTARIO,op_200_gestiones.DATE ";
+										$sql .= "FROM op_200_gestiones ";
+										$sql .= "INNER JOIN codigo_accion ";
+										$sql .= "ON op_200_gestiones.ACACCODE = codigo_accion.CODIGO ";
+										$sql .= "INNER JOIN codigo_result ";
+										$sql .= "ON op_200_gestiones.ACRCCODE = codigo_result.CODIGO ";
+										$sql .= "WHERE ACACCT='".$resul["ACACCT"]."' ";
+										$sql .= "ORDER BY DATE DESC ";
+										$sql .= "LIMIT 1;";
+										$datoComentario = call_select($sql, "");
+										while($resulComentario=mysql_fetch_array($datoComentario['registros'])){
+											$sql = "SELECT NUM_JUICIO,ID_CLIENTE,CECRTID,CEDOSSIERID ";
+											$sql .= "FROM relacion_cliente_juicio  ";
+											$sql .= "WHERE NUM_JUICIO=".substr($resul["ACACCT"],1);
+											$datoJuicio = call_select($sql, "");
+											while($resulJuicio=mysql_fetch_array($datoJuicio['registros'])){
 								 ?>
 									<tr>
-										<td><?php echo $resul["NUM_JUICIO"] ?></td>
-										<td><?php echo $resul["ID_CLIENTE"] ?></td>
-										<td><?php echo $resul["CECRTID"] ?></td>
-										<td><?php echo $resul["CEDOSSIERID"] ?></td>
-										<td><?php echo $resul["DESC_STGID"] ?></td>
-										<td><?php echo $resul["CSSTDT"] ?></td>
-										<td><?php echo $resul["CSENDDT"] ?></td>
-										<td><?php echo $resul["DESC_CODE"] ?></td>
-										<td><?php echo $resul["ACCOMN"] ?></td>
-										<td><?php echo $resul["DATE"] ?></td>
-										<td><?php echo $resul["EXDESC"] ?></td>
-										<td><?php echo $resul["EXAMT"] ?></td>
-										<td><?php echo $resul["EXINVOICE"] ?></td>
-										<td><?php echo $resul["EXAUTDT"] ?></td>
-										<td> <div style="display: none;" ><?php echo $resul["FECHA_INSERT"].'|'; ?></div> <?php echo $resul["EXSUPPLIER"] ?> </td>
+										<td><?php echo substr($resul["ACACCT"],1) ?></td>
+										<td><?php echo $resulJuicio["ID_CLIENTE"] ?></td>
+										<td><?php echo $resulJuicio["CECRTID"] ?></td>
+										<td><?php echo $resulJuicio["CEDOSSIERID"] ?></td>										
+										<td><?php echo $resulComentario["CODIGO_ACCION"] ?></td>
+										<td><?php echo $resulComentario["ACCION"] ?></td>
+										<td><?php echo $resulComentario["CODIGO_RESPUESTA"] ?></td>
+										<td><?php echo $resulComentario["RESPUESTA"] ?></td>
+										<td><?php echo $resulComentario["COMENTARIO"] ?></td>
+										<td><?php echo $resulComentario["DATE"] ?></td>
 									</tr>
                                	<?php
+											}
+										}
 									}
 								?>
                                 </tbody>
@@ -328,14 +262,6 @@
 
     <script type="text/javascript">
 
-		function onlyLast(obj) {
-			var v = 0;
-			if (obj.checked) v = 1;
-			var min = $("[name='min']").val();
-			var max = $("[name='max']").val();
-			window.location.href = 'reporte.php?v=' + v + '&min=' + encodeURIComponent(min) + '&max=' + encodeURIComponent(max);
-		}
-
         $(document).ready(function () {
 
 			$('#getExcel').click(function(e) {
@@ -344,17 +270,17 @@
 				var max = $("[name='max']").val();
 				var obj = document.getElementById('lastComment');
 				var v = 0;
-				if (obj.checked) v = 1;
-				window.location.href = 'get_excel.php?v=' + v + '&min=' + encodeURIComponent(min) + '&max=' + encodeURIComponent(max);
+				window.location.href = 'get_excel_ultimo_comentario.php?v=' + v + '&min=' + encodeURIComponent(min) + '&max=' + encodeURIComponent(max);
 			});
 
-			$('#min, #max').change(function () {
+			$('#min, #max, #txtjuicio, #txtrut').change(function () {
 				var min = $("[name='min']").val();
 				var max = $("[name='max']").val();
 				var obj = document.getElementById('lastComment');
 				var v = 0;
-				if (obj.checked) v = 1;
-				window.location = '?v=' + v + '&min=' + encodeURIComponent(min) + '&max=' + encodeURIComponent(max);
+				var nrojuicio = $("[name='txtjuicio']").val();
+				var rut = $("[name='txtrut']").val();
+				window.location = '?v=' + v + '&min=' + encodeURIComponent(min) + '&max=' + encodeURIComponent(max) + '&nrojuicio=' + encodeURIComponent(nrojuicio);
 			 });
 
 		});
