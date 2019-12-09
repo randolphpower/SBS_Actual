@@ -21,18 +21,26 @@ $reg_fil = mysql_num_rows($q);
 $min = 'N/A';
 $max = 'N/A';
 
-$v = trim($_GET['v']);
-if ($v == "1") {
-    $v = True;
-} else {
-    $v = False;
+$mysqli = new mysqli($host, $usuario, $password, $basedatos);
+if (!$mysqli->query("CALL sp_ulitmo_comentario")) {
+    echo "Falló CALL: (" . $mysqli->errno . ") " . $mysqli->error;
 }
 
-$sql =  "SELECT DISTINCT(op_200_gestiones.ACACCT) AS ACACCT ";
-$sql .= "FROM op_200_gestiones ";
-$sql .= "INNER JOIN informe_datos ";
-$sql .= "ON op_200_gestiones.id = informe_datos.ID_200_GESTION ";
-$sql .= "WHERE True ";
+$sql = "SELECT num, ACACCT, DATE, CODIGO_ACCION, COMENTARIO, CODIGO_RESPUESTA, `temp_comentario`.ID_JUICIO, ";
+$sql .= "informe_datos.FECHA_INSERT, ";
+$sql .= "codigo_accion.DESCRIPCION AS ACCION, ";
+$sql .= "codigo_result.DESCRIPCION AS RESPUESTA, "; 
+$sql .= "NUM_JUICIO,ID_CLIENTE,CECRTID,CEDOSSIERID ";
+$sql .= "FROM `temp_comentario`, ";
+$sql .= "informe_datos, ";
+$sql .= "codigo_accion, ";
+$sql .= "codigo_result, ";
+$sql .= "relacion_cliente_juicio ";
+$sql .= "WHERE `temp_comentario`.num=1 ";
+$sql .= "AND `temp_comentario`.id = informe_datos.ID_200_GESTION ";
+$sql .= "AND `temp_comentario`.CODIGO_ACCION = codigo_accion.CODIGO ";
+$sql .= "AND `temp_comentario`.CODIGO_RESPUESTA = codigo_result.CODIGO ";
+$sql .= "AND informe_datos.ID_JUICIO = relacion_cliente_juicio.NUM_JUICIO ";
 
 if (trim($_GET['min']) != "") {
 
@@ -47,7 +55,9 @@ if (trim($_GET['max']) != "") {
     $sql .= "AND informe_datos.FECHA_INSERT <= '{$max}' ";
 }
 
-$q = call_select($sql, "") or die(mysql_error());
+if (!($resultado = $mysqli->query($sql))) {
+    echo "Falló SELECT: (" . $mysqli->errno . ") " . $mysqli->error;
+}
 
 $title = "Reporte Documentos - Fecha de Inicio: {$min}, Termino: {$max}";
 
@@ -79,49 +89,28 @@ $spreadsheet->setActiveSheetIndex(0)
 $spreadsheet->getActiveSheet()->getStyle("J1")->getNumberFormat()->setFormatCode("dd-mm-yyyy");
             
 $pos = 1;
-while($row = mysql_fetch_array($q['registros'])) { 
-    
-    $sql = "SELECT op_200_gestiones.ACACCODE AS CODIGO_ACCION,codigo_accion.DESCRIPCION AS ACCION, ";
-    $sql .= "op_200_gestiones.ACRCCODE AS CODIGO_RESPUESTA, ";
-    $sql .= "codigo_result.DESCRIPCION AS RESPUESTA, op_200_gestiones.ACCOMN AS COMENTARIO,op_200_gestiones.DATE ";
-    $sql .= "FROM op_200_gestiones ";
-    $sql .= "INNER JOIN codigo_accion ";
-    $sql .= "ON op_200_gestiones.ACACCODE = codigo_accion.CODIGO ";
-    $sql .= "INNER JOIN codigo_result ";
-    $sql .= "ON op_200_gestiones.ACRCCODE = codigo_result.CODIGO ";
-    $sql .= "WHERE ACACCT='".$row["ACACCT"]."' ";
-    $sql .= "ORDER BY DATE DESC ";
-    $sql .= "LIMIT 1;";        
-    $datoComentario = call_select($sql, "");
-    while($resulComentario=mysql_fetch_array($datoComentario['registros'])){        
-        $sql = "SELECT NUM_JUICIO,ID_CLIENTE,CECRTID,CEDOSSIERID ";
-        $sql .= "FROM relacion_cliente_juicio  ";
-        $sql .= "WHERE NUM_JUICIO=".substr($row["ACACCT"],1);
-        $datoJuicio = call_select($sql, "");
-        while($resulJuicio=mysql_fetch_array($datoJuicio['registros'])){
-            $fia = explode("-", $resulComentario["DATE"]);
-            $date = $fia[2]."-".$fia[1]."-".$fia[0];
-            if ($date == "--"){
-                $date = "";
-            }
-            else{
-                $date = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($date);
-            }
-            $pos++;
-            $spreadsheet->getActiveSheet()->getStyle("J".$pos)->getNumberFormat()->setFormatCode("dd-mm-yyyy");    
-            $spreadsheet->setActiveSheetIndex(0)
-                ->setCellValue("A".$pos, substr($row["ACACCT"],1))
-                ->setCellValue("B".$pos, $resulJuicio["ID_CLIENTE"])
-                ->setCellValue("C".$pos, $resulJuicio["CECRTID"])
-                ->setCellValue("D".$pos, $resulJuicio["CEDOSSIERID"])
-                ->setCellValue("E".$pos, $resulComentario["CODIGO_ACCION"])
-                ->setCellValue("F".$pos, $resulComentario["ACCION"])
-                ->setCellValue("G".$pos, $resulComentario["CODIGO_RESPUESTA"])
-                ->setCellValue("H".$pos, $resulComentario["RESPUESTA"])
-                ->setCellValue("I".$pos, $resulComentario["COMENTARIO"])
-                ->setCellValue("J".$pos, $date);         
-        }
+while ($resul = $resultado->fetch_row()) {    
+    $fia = explode("-", $resul[2]);
+    $date = $fia[2]."-".$fia[1]."-".$fia[0];
+    if ($date == "--"){
+        $date = "";
     }
+    else{
+        $date = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($date);
+    }
+    $pos++;
+    $spreadsheet->getActiveSheet()->getStyle("J".$pos)->getNumberFormat()->setFormatCode("dd-mm-yyyy");    
+    $spreadsheet->setActiveSheetIndex(0)
+        ->setCellValue("A".$pos, $resul[10])
+        ->setCellValue("B".$pos, $resul[11])
+        ->setCellValue("C".$pos, $resul[12])
+        ->setCellValue("D".$pos, $resul[13])
+        ->setCellValue("E".$pos, $resul[3])
+        ->setCellValue("F".$pos, $resul[8])
+        ->setCellValue("G".$pos, $resul[5])
+        ->setCellValue("H".$pos, $resul[9])
+        ->setCellValue("I".$pos, $resul[4])
+        ->setCellValue("J".$pos, $date);         
 }
 
 $spreadsheet->getActiveSheet()->setTitle('Main');

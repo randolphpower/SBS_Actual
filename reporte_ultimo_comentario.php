@@ -1,10 +1,8 @@
 <?php 
 
 	require 'includes/header_start.php';
-
 	include("modelo/conectarBD.php");
 	include("modelo/consultaSQL.php");
-
 	$sql_admin = $var_select_asterisk_from."usuarios ".$var_where."US_USUARIO='".$_SESSION['username']."' AND rol='administrador'";
 	$datos_admin = call_select($sql_admin, "");
 	$reg_fil = $datos_admin['num_filas'];
@@ -21,11 +19,27 @@
 		$v = False;
 	}
 
-	$sql =  "SELECT DISTINCT(op_200_gestiones.ACACCT) AS ACACCT ";
-	$sql .= "FROM op_200_gestiones ";
-	$sql .= "INNER JOIN informe_datos ";
-	$sql .= "ON op_200_gestiones.id = informe_datos.ID_200_GESTION ";
-	$sql .= "WHERE True ";
+	//$sql =  "CALL sp_ulitmo_comentario; ";
+	$mysqli = new mysqli($host, $usuario, $password, $basedatos);
+	if (!$mysqli->query("CALL sp_ulitmo_comentario")) {
+		echo "Falló CALL: (" . $mysqli->errno . ") " . $mysqli->error;
+	}
+	
+	$sql = "SELECT num, ACACCT, DATE, CODIGO_ACCION, COMENTARIO, CODIGO_RESPUESTA, `temp_comentario`.ID_JUICIO, ";
+	$sql .= "informe_datos.FECHA_INSERT, ";
+	$sql .= "codigo_accion.DESCRIPCION AS ACCION, ";
+	$sql .= "codigo_result.DESCRIPCION AS RESPUESTA, "; 
+	$sql .= "NUM_JUICIO,ID_CLIENTE,CECRTID,CEDOSSIERID ";
+	$sql .= "FROM `temp_comentario`, ";
+	$sql .= "informe_datos, ";
+	$sql .= "codigo_accion, ";
+	$sql .= "codigo_result, ";
+	$sql .= "relacion_cliente_juicio ";
+	$sql .= "WHERE `temp_comentario`.num=1 ";
+	$sql .= "AND `temp_comentario`.id = informe_datos.ID_200_GESTION ";
+	$sql .= "AND `temp_comentario`.CODIGO_ACCION = codigo_accion.CODIGO ";
+	$sql .= "AND `temp_comentario`.CODIGO_RESPUESTA = codigo_result.CODIGO ";
+	$sql .= "AND informe_datos.ID_JUICIO = relacion_cliente_juicio.NUM_JUICIO ";
 	
 	if (trim($_GET['min']) != "") {
 
@@ -44,14 +58,20 @@
 		$sql .= "AND informe_datos.ID_JUICIO =".$_GET['nrojuicio']." ";
 	}
 
-	$sql_count =  "SELECT COUNT(op_200_gestiones.ACACCT) ";
-	$sql_count .= "FROM op_200_gestiones ";
-	$sql_count .= "INNER JOIN informe_datos ";
-	$sql_count .= "ON op_200_gestiones.id = informe_datos.ID_200_GESTION ";
-	$sql_count .= "WHERE True ";
+	$sql_count .= "SELECT COUNT(num) ";
+	$sql_count .= "FROM `temp_comentario`, ";
+	$sql_count .= "informe_datos, ";
+	$sql_count .= "codigo_accion, ";
+	$sql_count .= "codigo_result, ";
+	$sql_count .= "relacion_cliente_juicio ";
+	$sql_count .= "WHERE `temp_comentario`.num=1 ";	
+	$sql_count .= "AND `temp_comentario`.id = informe_datos.ID_200_GESTION ";
+	$sql_count .= "AND `temp_comentario`.CODIGO_ACCION = codigo_accion.CODIGO ";
+	$sql_count .= "AND `temp_comentario`.CODIGO_RESPUESTA = codigo_result.CODIGO ";
+	$sql_count .= "AND informe_datos.ID_JUICIO = relacion_cliente_juicio.NUM_JUICIO ";
 	
 	if ($reg_fil == 0) {
-		$sql .= "AND op_200_gestiones.USUSUARIO = '".$_SESSION['username']."' ";	
+		$sql_count .= "AND op_200_gestiones.USUSUARIO = '".$_SESSION['username']."' ";	
 	}
 
 	if (trim($_GET['min']) != "") {
@@ -67,10 +87,12 @@
 		$sql_count .= "AND informe_datos.FECHA_INSERT <= '{$max}' ";
 	}
 
-	if (trim($_GET['nrojuicio']) != "") {
-		$sql .= "AND informe_datos.ID_JUICIO =".$_GET['nrojuicio']." ";
-	}	
-	$datos = get_select($sql, $sql_count);
+	if (!($resultado = $mysqli->query($sql))) {
+		echo "Falló SELECT: (" . $mysqli->errno . ") " . $mysqli->error;
+	}
+	
+
+	
 
 ?>
 <link href="assets/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet">
@@ -119,11 +141,7 @@
 												<input autocomplete="off" class="form-control" name="min" id="min" type="text" value="<?php echo $_GET['min']; ?>">
 											</td>
 											<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-											<td>Nro. Juicio:</td>
-											<td>
-												<input class="form-control" name="txtjuicio" id="txtjuicio" type="text">
-											</td>
-											<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+													<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 											<td>
 												<button id="getExcel" class="btn btn-success" type="button">Descargar Excel</button>
 											</td>
@@ -139,88 +157,7 @@
 								</table>
 								<br>
                             </form>
-                            <div>
- 
-								<p><?php  	if ($p > 1) {
-												echo "<a href='?v={$vv}&min={$_GET['min']}&max={$_GET['max']}&p=".($p-1)."'>Anterior</a> - "; 
-											} ?>
-
-											Registros: <?php echo $datos['records'] ?> - 
-											Página <?php echo $datos['page'] ?> de <?php echo $datos['pages'] ?>
-
-											<?php  if ($p < $datos['pages']) {
-												echo " - <a href='?v={$vv}&min={$_GET['min']}&max={$_GET['max']}&p=".($p+1)."'>Siguiente</a> "; 
-											} ?></p>
-
-                            	<table id="datatable-buttons" class="table table-striped table-bordered" cellspacing="0" width="100%" style="font-size: 12px">
-                                <thead>
-									<tr>
-										<th bgcolor="#5B9BD5">Nro Juicio</th>
-										<th bgcolor="#5B9BD5">Rut</th>
-										<th bgcolor="#5B9BD5">Juzgado</th>
-										<th bgcolor="#5B9BD5">Rol</th>
-										<th bgcolor="#C6E0B4">Codigo Accion</th>
-										<th bgcolor="#C6E0B4">Accion</th>
-										<th bgcolor="#C6E0B4">Codigo Respuesta</th>
-										<th bgcolor="#C6E0B4">Respuesta</th>
-										<th bgcolor="#C6E0B4">Comentario</th>
-										<th bgcolor="#C6E0B4">Fecha</th>			
-									</tr>
-                                </thead>
-                                <tbody>
-                                 <?php
-                                   	while($resul=mysql_fetch_array($datos['registros'])){
-										$sql = "SELECT op_200_gestiones.ACACCODE AS CODIGO_ACCION,codigo_accion.DESCRIPCION AS ACCION, ";
-										$sql .= "op_200_gestiones.ACRCCODE AS CODIGO_RESPUESTA, ";
-										$sql .= "codigo_result.DESCRIPCION AS RESPUESTA, op_200_gestiones.ACCOMN AS COMENTARIO,op_200_gestiones.DATE ";
-										$sql .= "FROM op_200_gestiones ";
-										$sql .= "INNER JOIN codigo_accion ";
-										$sql .= "ON op_200_gestiones.ACACCODE = codigo_accion.CODIGO ";
-										$sql .= "INNER JOIN codigo_result ";
-										$sql .= "ON op_200_gestiones.ACRCCODE = codigo_result.CODIGO ";
-										$sql .= "WHERE ACACCT='".$resul["ACACCT"]."' ";
-										$sql .= "ORDER BY DATE DESC ";
-										$sql .= "LIMIT 1;";
-										$datoComentario = call_select($sql, "");
-										while($resulComentario=mysql_fetch_array($datoComentario['registros'])){
-											$sql = "SELECT NUM_JUICIO,ID_CLIENTE,CECRTID,CEDOSSIERID ";
-											$sql .= "FROM relacion_cliente_juicio  ";
-											$sql .= "WHERE NUM_JUICIO=".substr($resul["ACACCT"],1);
-											$datoJuicio = call_select($sql, "");
-											while($resulJuicio=mysql_fetch_array($datoJuicio['registros'])){
-								 ?>
-									<tr>
-										<td><?php echo substr($resul["ACACCT"],1) ?></td>
-										<td><?php echo $resulJuicio["ID_CLIENTE"] ?></td>
-										<td><?php echo $resulJuicio["CECRTID"] ?></td>
-										<td><?php echo $resulJuicio["CEDOSSIERID"] ?></td>										
-										<td><?php echo $resulComentario["CODIGO_ACCION"] ?></td>
-										<td><?php echo $resulComentario["ACCION"] ?></td>
-										<td><?php echo $resulComentario["CODIGO_RESPUESTA"] ?></td>
-										<td><?php echo $resulComentario["RESPUESTA"] ?></td>
-										<td><?php echo $resulComentario["COMENTARIO"] ?></td>
-										<td><?php echo $resulComentario["DATE"] ?></td>
-									</tr>
-                               	<?php
-											}
-										}
-									}
-								?>
-                                </tbody>
-                            </table>
-
-								<p><?php  	if ($p > 1) {
-												echo "<a href='?min={$_GET['min']}&max={$_GET['max']}&p=".($p-1)."'>Anterior</a> - "; 
-											} ?>
-
-											Registros: <?php echo $datos['records'] ?> - 
-											Página <?php echo $datos['page'] ?> de <?php echo $datos['pages'] ?>
-
-											<?php  if ($p < $datos['pages']) {
-												echo " - <a href='?min={$_GET['min']}&max={$_GET['max']}&p=".($p+1)."'>Siguiente</a> "; 
-											} ?></p>
-											
-                            </div>
+                            
                         </div>
                     </div>
                 </div>
@@ -268,20 +205,18 @@
 				e.preventDefault();  //stop the browser from following
 				var min = $("[name='min']").val();
 				var max = $("[name='max']").val();
-				var obj = document.getElementById('lastComment');
 				var v = 0;
 				window.location.href = 'get_excel_ultimo_comentario.php?v=' + v + '&min=' + encodeURIComponent(min) + '&max=' + encodeURIComponent(max);
 			});
 
-			$('#min, #max, #txtjuicio, #txtrut').change(function () {
+			/*$('#min, #max').change(function () {
 				var min = $("[name='min']").val();
 				var max = $("[name='max']").val();
-				var obj = document.getElementById('lastComment');
 				var v = 0;
 				var nrojuicio = $("[name='txtjuicio']").val();
 				var rut = $("[name='txtrut']").val();
-				window.location = '?v=' + v + '&min=' + encodeURIComponent(min) + '&max=' + encodeURIComponent(max) + '&nrojuicio=' + encodeURIComponent(nrojuicio);
-			 });
+				window.location = '?v=' + v + '&min=' + encodeURIComponent(min) + '&max=' + encodeURIComponent(max);
+			 });*/
 
 		});
 
