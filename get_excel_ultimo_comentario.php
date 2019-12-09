@@ -79,14 +79,10 @@ $spreadsheet->setActiveSheetIndex(0)
             ->setCellValue('B1', 'Rut')
             ->setCellValue('C1', 'Juzgado')
             ->setCellValue('D1', 'Rol')
-            ->setCellValue('E1', 'Codigo Accion')
-            ->setCellValue('F1', 'Accion')
-            ->setCellValue('G1', 'Codigo Respuesta')
-            ->setCellValue('H1', 'Respuesta')
-            ->setCellValue('I1', 'Comentario')
-            ->setCellValue('J1', 'Fecha Comentario');
+            ->setCellValue('E1', 'Comentario')
+            ->setCellValue('F1', 'Fecha Comentario');
             
-$spreadsheet->getActiveSheet()->getStyle("J1")->getNumberFormat()->setFormatCode("dd-mm-yyyy");
+$spreadsheet->getActiveSheet()->getStyle("F1")->getNumberFormat()->setFormatCode("dd-mm-yyyy");
             
 $pos = 1;
 while ($resul = $resultado->fetch_row()) {    
@@ -99,18 +95,14 @@ while ($resul = $resultado->fetch_row()) {
         $date = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($date);
     }
     $pos++;
-    $spreadsheet->getActiveSheet()->getStyle("J".$pos)->getNumberFormat()->setFormatCode("dd-mm-yyyy");    
+    $spreadsheet->getActiveSheet()->getStyle("F".$pos)->getNumberFormat()->setFormatCode("dd-mm-yyyy");    
     $spreadsheet->setActiveSheetIndex(0)
         ->setCellValue("A".$pos, $resul[10])
         ->setCellValue("B".$pos, $resul[11])
         ->setCellValue("C".$pos, $resul[12])
         ->setCellValue("D".$pos, $resul[13])
-        ->setCellValue("E".$pos, $resul[3])
-        ->setCellValue("F".$pos, $resul[8])
-        ->setCellValue("G".$pos, $resul[5])
-        ->setCellValue("H".$pos, $resul[9])
-        ->setCellValue("I".$pos, $resul[4])
-        ->setCellValue("J".$pos, $date);         
+        ->setCellValue("E".$pos, $resul[4])
+        ->setCellValue("F".$pos, $date);         
 }
 
 $spreadsheet->getActiveSheet()->setTitle('Main');
