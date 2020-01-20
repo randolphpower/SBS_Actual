@@ -108,8 +108,8 @@ EXP12;Busqueda de Bienes (vehículos);21111<br><br>
 		
 		$('#subir').click(function(e) {
 			if (archivo == "") {
-				alert("Debe seleccionar un archivo");
-				return false;
+				//alert("Debe seleccionar un archivo");
+				//return false;
 			};				
 		});
 

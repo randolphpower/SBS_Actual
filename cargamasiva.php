@@ -3,14 +3,14 @@
 session_start();
 
 include("modelo/conectarBD.php");
-require_once("/modelo/consultaSQL.php");
+
 $tipo = $_FILES['archivo']['type'];
 $tamanio = $_FILES['archivo']['size'];
 $archivotmp = $_FILES['archivo']['tmp_name'];
 $lineas = file($archivotmp);
 $i = 0;
 $tipo = $_POST["tipo"];
-$error_en_archivo = true;
+						 
 
 if ($tipo == "1") {
 	
@@ -49,107 +49,119 @@ if ($tipo == "1") {
 			
 			$farr = split("-", $fecha_demanda);
 			$fecha_demanda = "{$farr[2]}-{$farr[1]}-{$farr[0]}";
+			
+			$sql_searh = "SELECT * FROM relacion_cliente_juicio WHERE NUM_JUICIO = ".$numjuicio." and ID_CLIENTE = ".$rutcliente.";";
+			$num = call_select($sql_searh);
 
+			if ($num == 0) { // INSERT
 
-			$sql_searh = "SELECT * FROM juicios_dato_inicial WHERE id_juicio = ".$numjuicio;
+				//  relacion_info_juicio
+				$sql = "INSERT INTO relacion_cliente_juicio (NUM_JUICIO, ID_CLIENTE, CECRTID, CEDOSSIERID, CETYPE, nombre, TEMP_FECHA_INICIO, TEMP_FECHA_DEM) ";
+				$sql .= "VALUES (".$numjuicio.",".$rutcliente.",'".$tribunal."','".$rol."','".$tipojuicio."','".$nombre."', '{$fecha_inicio}', '{$fecha_demanda}');";
+		   		call_insert($sql, "");
 
-			if ($numjuicio != "") {
-				$registroJuicio = call_select($sql_searh, "");
+				// op_info_juicios en el caso que no exista en la BD
+				$sql = "INSERT INTO op_info_juicios (IDENTIFICADOR, CEDOSSIERID, CNCASENO, CESSNUM, CECRTID, CETYPE, USUSUARIO, CELASTRC, CELASTAC, CELWSTDT) VALUES ";
+				$sql .= "('902','".$rol."','".$numjuicio."','".$rutcliente."','".$tribunal."','".$tipojuicio."','".$_SESSION['username']."', 'MA', 'IJ', '{$fecha_demanda}')";
+				call_insert($sql, "");
 
-				if ($registroJuicio['num_filas'] == 0) { // No existe el registro
-					$arrnumjuicio[$i-1] = $numjuicio;
-					$arrrutcliente[$i-1] = $rutcliente;
-					$arrtipojuicio[$i-1] = $tipojuicio;
-					$arrmsj[$i-1] = "Juicio no existe en datos iniciales";
-					$arrcolorrow[$i-1] = "style=background-color:coral;font-weight:bold;color:black;";
-				} else { // existe el registro
-	
-					$tipo_juicio = mysql_fetch_array($registroJuicio['registros'])['tipo_juicio'];
-					if ($tipo_juicio != $tipojuicio) {
-						$arrmsj[$i-1] = "Tipo Juicio incorrecto (".$tipo_juicio.")";
-						$arrcolorrow[$i-1] = "style=background-color:coral;font-weight:bold;color:black;";
-						$error_en_archivo = true;
-					}
-					else {
-						$arrmsj[$i-1] = "Registro correcto";
-						$error_en_archivo = false;
-					}	
-					$arrnumjuicio[$i-1] =$numjuicio;
-					$arrrutcliente[$i-1] =$rutcliente;
-					$arrtipojuicio[$i-1] =$tipojuicio;
-				 }
-			}	
+				$sql = "INSERT INTO op_eta_proce (CSCASENO, CSTYPE, CSSTGID, CSSTDT	, CSENDDT, USUSUARIO) VALUES ";
+				$sql .= "('{$numjuicio}', '{$tipojuicio}', 1, '{$fecha_inicio}', '{$fecha_demanda}','{$_SESSION['username']}');";
+				call_insert($sql, "");
+																	 
+				$arrnumjuicio[$i-1] = $numjuicio;
+				$arrrutcliente[$i-1] = $rutcliente;
+				$arrtipojuicio[$i-1] = $tipojuicio;
+				$arrrol[$i-1] = $rol;
+				$arrnombre[$i-1] = $nombre;
+				$arrtribunal[$i-1] = $tribunal;   																  							
 
-			if ($error_en_archivo == false)
-			{
-				$sql_searh = "SELECT * FROM relacion_cliente_juicio WHERE NUM_JUICIO = ".$numjuicio." and ID_CLIENTE = ".$rutcliente.";";
-				$num = call_select2($sql_searh);
+			} else if ($num == 1) { // UPDATE
 
-				if ($num == 0) { // INSERT
+				$sql = "UPDATE relacion_cliente_juicio SET ";
+				$sql .= "CECRTID='".$tribunal."', ";
+				$sql .= "CETYPE='".$tipojuicio."', ";
+				$sql .= "nombre='".$nombre."', ";
+				$sql .= "CEDOSSIERID='".$rol."', ";
+				$sql .= "TEMP_FECHA_INICIO = '{$fecha_inicio}', ";
+				$sql .= "TEMP_FECHA_DEM = '{$fecha_demanda}' ";
+				$sql .= "WHERE (NUM_JUICIO='".$numjuicio."') AND (ID_CLIENTE='".$rutcliente."') ";
+				call_update($sql);
 
-					//  relacion_info_juicio
-					$sql = "INSERT INTO relacion_cliente_juicio (NUM_JUICIO, ID_CLIENTE, CECRTID, CEDOSSIERID, CETYPE, nombre, TEMP_FECHA_INICIO, TEMP_FECHA_DEM) ";
-					$sql .= "VALUES (".$numjuicio.",".$rutcliente.",'".$tribunal."','".$rol."','".$tipojuicio."','".$nombre."', '{$fecha_inicio}', '{$fecha_demanda}');";
-					call_insert2($sql, "");
+				// Insercion en op_info_juicios en el caso que exista en la tabla "relacion_info_juicio" se comprueba que exista en "op_info_juicios"
+				$sql = "SELECT * FROM op_info_juicios WHERE CNCASENO=".$numjuicio."  and CESSNUM=".$rutcliente.";";
+																																								   
+				$num = call_select($sql);
 
-					// op_info_juicios en el caso que no exista en la BD
-					$sql = "INSERT INTO op_info_juicios (IDENTIFICADOR, CEDOSSIERID, CNCASENO, CESSNUM, CECRTID, CETYPE, USUSUARIO, CELASTRC, CELASTAC, CELWSTDT) VALUES ";
-					$sql .= "('902','".$rol."','".$numjuicio."','".$rutcliente."','".$tribunal."','".$tipojuicio."','".$_SESSION['username']."', 'MA', 'IJ', '{$fecha_demanda}')";
-					call_insert2($sql, "");
+				if ($num == 0) {
+					$sql = "INSERT INTO op_info_juicios (IDENTIFICADOR, CEDOSSIERID, CNCASENO, CESSNUM, CECRTID, CETYPE, USUSUARIO, CELASTRC, CELASTAC, CECOMM) VALUES ('902','".$rol."','".$numjuicio."','".$rutcliente."','".$tribunal."','".$tipojuicio."','".$_SESSION['username']."','MA','IJ', '')";
+																													  
+					call_insert($sql,"");
 
-					$arrnumjuicio[$i-1] = $numjuicio;
-					$arrrutcliente[$i-1] = $rutcliente;
-					$arrtipojuicio[$i-1] = $tipojuicio;
-					$arrrol[$i-1] = $rol;
-					$arrnombre[$i-1] = $nombre;
-					$arrtribunal[$i-1] = $tribunal;
-
-				} else if ($num == 1) { // UPDATE
-
-					$sql = "UPDATE relacion_cliente_juicio SET ";
-					$sql .= "CECRTID='".$tribunal."', ";
-					$sql .= "CETYPE='".$tipojuicio."', ";
-					$sql .= "nombre='".$nombre."', ";
-					$sql .= "CEDOSSIERID='".$rol."', ";
-					$sql .= "TEMP_FECHA_INICIO = '{$fecha_inicio}', ";
-					$sql .= "TEMP_FECHA_DEM = '{$fecha_demanda}' ";
-					$sql .= "WHERE (NUM_JUICIO='".$numjuicio."') AND (ID_CLIENTE='".$rutcliente."') ";
-					call_update2($sql);
-
-					// Insercion en op_info_juicios en el caso que exista en la tabla "relacion_info_juicio" se comprueba que exista en "op_info_juicios"
-					$sql = "SELECT * FROM op_info_juicios WHERE CNCASENO=".$numjuicio."  and CESSNUM=".$rutcliente.";";
-					$num = call_select2($sql);
-
-					if ($num == 0) {
-						$sql = "INSERT INTO op_info_juicios (IDENTIFICADOR, CEDOSSIERID, CNCASENO, CESSNUM, CECRTID, CETYPE, USUSUARIO, CELASTRC, CELASTAC, CECOMM) VALUES ('902','".$rol."','".$numjuicio."','".$rutcliente."','".$tribunal."','".$tipojuicio."','".$_SESSION['username']."','MA','IJ', '')";
-						call_insert2($sql,"");
-					}
-					
-					$arrnumjuicio[$i-1] =$numjuicio;
-					$arrrutcliente[$i-1] =$rutcliente;
-					$arrtipojuicio[$i-1] =$tipojuicio;
-					$arrrol[$i-1] =$rol;
-					$arrnombre[$i-1] =$nombre;
-					$arrtribunal[$i-1] =$tribunal;
-
+					$sql = "INSERT INTO op_eta_proce (CSCASENO, CSTYPE, CSSTGID, CSSTDT	, CSENDDT, USUSUARIO) VALUES ";
+					$sql .= "('{$numjuicio}', '{$tipojuicio}', 1, '{$fecha_inicio}', '{$fecha_demanda}','{$_SESSION['username']}');";
+					call_insert($sql, "");
 				}
-			}
+				
+				$arrnumjuicio[$i-1] =$numjuicio;
+				$arrrutcliente[$i-1] =$rutcliente;
+				$arrtipojuicio[$i-1] =$tipojuicio;
+				$arrrol[$i-1] =$rol;
+				$arrnombre[$i-1] =$nombre;
+				$arrtribunal[$i-1] =$tribunal;
+
+		 	}
+
+												  
+										 
+										  
+									  
+										
+													   
+													
+																					   
+						
+
+																																		  
+																										
+							   
+
+					 
+																																																																							
+							
+
+																										 
+																													   
+							
+
+				
+	  
+	 
+									 
+									   
+									   
+						 
+							   
+								   
+
+	 
+	
 			// INSERT OR UPDATE
 			// Fecha Inicio, Fecha Fin ( = Fecha Demanda) -> PROCESO "Ingreso de la demanda..." 
 			
 			// $stg_id = 1; // Identificador de la etapa -> "Ingreso de la demanda"
 			// $sql = "SELECT * FROM op_eta_proce WHERE CSCASENO = '{$numjuicio}' AND CSSTGID = {$stg_id}";
-			// $num = call_select2($sql);
+			// $num = call_select($sql);
 
 			// if ($num == 0) {
 			// 	$sql = "INSERT INTO op_eta_proce (CSCASENO, CSTYPE, CSSTGID, CSSTDT	, CSENDDT, USUSUARIO) VALUES ";
 			// 	$sql .= "('{$numjuicio}', '{$tipojuicio}', {$stg_id}, '{$fecha_inicio}', '{$fecha_demanda}','{$_SESSION['username']}');";
-			// 	call_insert2($sql, "");
+			// 	call_insert($sql, "");
 			// } else {
 			// 	$sql = "UPDATE op_eta_proce ";
 			// 	$sql .= "SET CSSTDT = '{$fecha_inicio}', CSENDDT = '{$fecha_demanda}', USUSUARIO = '{$_SESSION['username']}' ";
 			// 	$sql .= "WHERE CSCASENO = '{$numjuicio}' AND CSSTGID = {$stg_id};";
-			// 	call_update2($sql, "");
+			// 	call_update($sql, "");
 			// }
 			
 	   }
@@ -171,12 +183,12 @@ if ($tipo == "1") {
 		   	$le_monto = trim($datos[2]);
 
 		   	$sql_searh = "SELECT * FROM gastos_judiciales WHERE (LE_CODE='".$le_code."');";
-		   	$num = call_select2($sql_searh);
+		   	$num = call_select($sql_searh);
 
 		  	if ($num == 0) {
 
 		   		$sql_insert = "INSERT INTO gastos_judiciales (LE_ID, LE_CODE, LE_DESCRIPTION, LE_MONTO) VALUES ('".$le_id_name."','".$le_code."','".$le_description."','".$le_monto."')";
-		   		call_insert2($sql_insert,"");
+		   		call_insert($sql_insert,"");
 
 		   		$ar_le_id[$i-1] = $le_id_name;
 		   		$ar_le_code[$i-1] = $le_code;
@@ -195,7 +207,7 @@ if ($tipo == "1") {
 
 // var_dump($le_description);
 
-function call_insert2($insert_sql, $parametro_condicional){
+function call_insert($insert_sql, $parametro_condicional){
 	include("modelo/conectarBD.php");
 	global $var_retorno_datos;
 	mysql_query($insert_sql,$conexion) or die(mysql_error());
@@ -214,7 +226,7 @@ function call_insert2($insert_sql, $parametro_condicional){
 
 }
 
-function call_select2($select_sql){
+function call_select($select_sql){
 	include("modelo/conectarBD.php");
 	$result=mysql_query($select_sql,$conexion) or die(mysql_error());
 	$numresult=mysql_num_rows($result);
@@ -223,7 +235,7 @@ function call_select2($select_sql){
 
 }
 
-function call_update2($update_sql){
+function call_update($update_sql){
 
 	include("modelo/conectarBD.php");
 	global $var_retorno_datos;
@@ -254,7 +266,7 @@ require 'includes/header_end.php';
 <!-- ============================================================== -->
 
 <div class="content-page">
-	
+ 
     <!-- Start content -->
     <div class="content">
         <div class="container">
@@ -277,8 +289,8 @@ require 'includes/header_end.php';
                                   <th class="col-md-1 text-center" style="vertical-align:middle">Nro.</th>
                                   <th class="col-md-1 text-center" style="vertical-align:middle">Identificador</th>
                                   <th class="col-md-1 text-center" style="vertical-align:middle">Rut Cliente</th>
-								  <th class="col-md-1 text-center" style="vertical-align:middle">Tipo Juicio</th>
-								  <th class="col-md-1 text-center" style="vertical-align:middle">Mensaje</th>
+                                  <th class="col-md-1 text-center" style="vertical-align:middle">Tipo Juicio</th>
+																					 
                               </tr>
 						</thead>
                         <tbody>
@@ -291,7 +303,7 @@ require 'includes/header_end.php';
 
                               ?>
 
-									<tr class="text-center text-muted" data-placement="top" <?php echo $arrcolorrow[$i]; ?>>
+                                  <tr class="text-center text-muted" data-placement="top">
 
                                   	  <td class="text-center" style="vertical-align:middle"><?php echo $j; ?></td>
 
@@ -301,7 +313,8 @@ require 'includes/header_end.php';
 
                                       <td class="text-center" style="vertical-align:middle"><?php echo $arrtipojuicio[$i]?></td>
 
-									  <td class="text-center" style="vertical-align:middle"><?php echo $arrmsj[$i]?></td>
+
+																							  
                                   </tr>
 
                               <?php

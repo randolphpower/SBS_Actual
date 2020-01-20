@@ -138,6 +138,7 @@ case "4":
 	$sql_consulta .= "FROM relacion_cliente_juicio a, cata_juzgados c ";
 	$sql_consulta .= "WHERE (a.`ID_CLIENTE` ".$var_like.$texto.") ".$var_and."(a.CECRTID = c.CTCRTID) ".$var_limit."10";
 
+	
 	// $stg_id = 1; // Identificador de la etapa -> "Ingreso de la demanda"
 	// $sql = "SELECT * FROM op_eta_proce WHERE CSCASENO = '{$numjuicio}' AND CSSTGID = {$stg_id}";
 
@@ -181,7 +182,7 @@ case "4":
 	}
 
 	//output the response
-	echo $hint;
+	echo $sql_consulta;
 	
 break;
 
