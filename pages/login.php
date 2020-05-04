@@ -1,7 +1,7 @@
 <?php 
+session_start();
 require "../includes/header_account.php"; 
 
-session_start();
 session_destroy();
 
 if(strtolower($_GET['men'])=="cerrar"){
