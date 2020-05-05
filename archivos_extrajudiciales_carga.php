@@ -9,11 +9,11 @@
 	require_once("controlador/script_general.php");
 	
 if ($_SERVER['REQUEST_METHOD'] == 'POST'){
-    //$conexion = mysqli_connect("localhost","root","12345678","factory");
+    //$conexion = mysqli_connect("localhost","root","12345678","servicobranza");
     //if(!$conexion){
     //    echo "error al conectarse a la base de datos";
     //}
-    //else {
+   // else {
         //echo "conexion exitosa";
     //}
     $tipo = $_FILES['file']['type'];
@@ -433,7 +433,9 @@ function  GenerarPlano200($transacciones, $conexion)
             $regs = $regs . "(\"".$plano->Valorconstante."\",\"".$plano->Grupo."\",\"".$plano->Cuenta."\",\"".$plano->Fecha."\",\"".$plano->Hora."\",\"".$plano->Secuencia."\",\"".$plano->CodigoAccion."\",\"".$plano->CodigoResultado."\",\"".$plano->CodigoCarta."\",\"".$plano->IdEmpex."\",\"".$plano->Comentario."\",\"".$plano->telefono."\",\"".$plano->IdGestor."\",\"".$plano->VCDIAL."\")";
             if ($i == 400){
                 $qwery = "INSERT INTO `plano200`( `VALORCONSTATE`, `GRUPO`, `CUENTA`, `FECHA`, `HORA`, `SECUENCIA`, `CODIGOACCION`, `RESULTADO`, `CODIGOCARTA`, `IDEMPEX`, `COMENTARIO`, `TELEFONO`, `IDGESTOR`, `VCDIAL`) VALUES" . $regs;
-                $Respuesta = mysqli_query($conexion ,$qwery);
+                //$Respuesta = mysqli_query($conexion ,$qwery);
+                $resultados = mysql_query($qwery, $conexion) or die(mysql_error());
+                //echo $Respuesta;
                 $first = true;
                 $i = 0; 
                 $qwery = "";
@@ -441,7 +443,9 @@ function  GenerarPlano200($transacciones, $conexion)
             }
         }
         $qwery = "INSERT INTO `plano200`( `VALORCONSTATE`, `GRUPO`, `CUENTA`, `FECHA`, `HORA`, `SECUENCIA`, `CODIGOACCION`, `RESULTADO`, `CODIGOCARTA`, `IDEMPEX`, `COMENTARIO`, `TELEFONO`, `IDGESTOR`, `VCDIAL`) VALUES" . $regs;
-        $Respuesta = mysqli_query($conexion ,$qwery);
+        //$Respuesta = mysqli_query($conexion ,$qwery);
+                $resultados = mysql_query($qwery, $conexion) or die(mysql_error());
+        //echo $Respuesta;
     }
     class Plano200
     {
@@ -472,18 +476,22 @@ function  GenerarPlano200($transacciones, $conexion)
             else{
                 $regs = $regs . ",";
             }
-            $regs = $regs . "(\"".$plano->Valorconstante."\",\"".$plano->Grupo."\",\"".$plano->Cuenta."\",\"".$plano->IdEmpex."\",\"".$plano->CodigoAccion."\",\"".$plano->Fecha."\",\"".$plano->Promno."\",\"".$plano->Promai."\",\"".$plano->FechaVencProm."\",\"".$plano->PromMonto."\",\"".$plano->VCDIAL."\",\"".$plano->CodigoResultado."\",\"".$plano->CodigoAccion."\")";
+            $regs = $regs . "(\"".$plano->Valorconstante."\",\"".$plano->Grupo."\",\"".$plano->Cuenta."\",\"".$plano->IdEmpex."\",\"".$plano->CodigoAccion."\",\"".$plano->Fecha."\",\"".$plano->Promno."\",\"".$plano->Promai."\",\"".$plano->FechaVencProm."\",\"".$plano->PromMonto."\",\"".$plano->VCDIAL."\",\"".$plano->CodigoResultado."\")";
             if ($i == 400){
-                $qwery = "INSERT INTO `plano600`(`VALORCONSTANTE`, `GRUPO`, `CUENTA`, `IDEMPEX`, `ACCION`, `FECHA`, `PROMNO`, `PROMAI`, `FECHAVENCPROM`, `PROMMONTO`, `VCDIAL`, `RESULTADO`, `CODIGOACCION`) VALUES ". $regs;
-                $Respuesta = mysqli_query($conexion ,$qwery);
+                $qwery = "INSERT INTO `plano600`(`VALORCONSTANTE`, `GRUPO`, `CUENTA`, `IDEMPEX`, `ACCION`, `FECHA`, `PROMNO`, `PROMAI`, `FECHAVENCPROM`, `PROMMONTO`, `VCDIAL`, `RESULTADO`) VALUES ". $regs;
+                //$Respuesta = mysqli_query($conexion ,$qwery);
+                $resultados = mysql_query($qwery, $conexion) or die(mysql_error());
+                //echo $Respuesta;
                 $first = true;
                 $i = 0; 
                 $qwery = "";
                 $regs = "";
             }
         }
-        $qwery = "INSERT INTO `plano600`(`VALORCONSTANTE`, `GRUPO`, `CUENTA`, `IDEMPEX`, `ACCION`, `FECHA`, `PROMNO`, `PROMAI`, `FECHAVENCPROM`, `PROMMONTO`, `VCDIAL`, `RESULTADO`, `CODIGOACCION`) VALUES ". $regs;
-        $Respuesta = mysqli_query($conexion ,$qwery);
+        $qwery = "INSERT INTO `plano600`(`VALORCONSTANTE`, `GRUPO`, `CUENTA`, `IDEMPEX`, `ACCION`, `FECHA`, `PROMNO`, `PROMAI`, `FECHAVENCPROM`, `PROMMONTO`, `VCDIAL`, `RESULTADO`) VALUES ". $regs;
+        //$Respuesta = mysqli_query($conexion ,$qwery);
+        $resultados = mysql_query($qwery, $conexion) or die(mysql_error());
+        //echo $Respuesta;
     }
     class Plano600
     {
@@ -518,7 +526,9 @@ function  GenerarPlano200($transacciones, $conexion)
             $regs = $regs . "(\"".$plano->Valorconstante."\",\"".$plano->Grupo."\",\"".$plano->Cuenta."\",\"".$plano->IdCliente."\",\"".$plano->TipoTelefono."\",\"".$plano->Areacode."\",\"".$plano->Telefono."\",\"".$plano->Fonoexten."\",\"".$plano->IdEmpex."\",\"".$plano->VCDIAL."\",\"".$plano->CodigoAccion."\",\"".$plano->CodigoResultado."\")";
             if ($i == 400){
                 $qwery = "INSERT INTO `plano700`(`VALORCONSTANTE`, `GRUPO`, `CUENTA`, `IDCLIENTE`, `TIPOTELEFONO`, `AREACODE`, `TELEFONO`, `FONOEXTEN`, `IDEMPEX`, `VCDIAL`, `CODIGOACCION`, `RESULTADO`) VALUES ". $regs;
-                $Respuesta = mysqli_query($conexion ,$qwery);
+                //$Respuesta = mysqli_query($conexion ,$qwery);
+                $resultados = mysql_query($qwery, $conexion) or die(mysql_error());
+                //echo $Respuesta;
                 $first = true;
                 $i = 0; 
                 $qwery = "";
@@ -526,7 +536,9 @@ function  GenerarPlano200($transacciones, $conexion)
             }
         }
         $qwery = "INSERT INTO `plano700`(`VALORCONSTANTE`, `GRUPO`, `CUENTA`, `IDCLIENTE`, `TIPOTELEFONO`, `AREACODE`, `TELEFONO`, `FONOEXTEN`, `IDEMPEX`, `VCDIAL`, `CODIGOACCION`, `RESULTADO`) VALUES ". $regs;
-        $Respuesta = mysqli_query($conexion ,$qwery);
+        //$Respuesta = mysqli_query($conexion ,$qwery);
+        $resultados = mysql_query($qwery, $conexion) or die(mysql_error());
+        //echo $Respuesta;
     }
     class Plano700
     {
@@ -558,7 +570,9 @@ function  GenerarPlano200($transacciones, $conexion)
             $regs = $regs . "(\"".$plano->Valorconstante."\",\"".$plano->Grupo."\",\"".$plano->Cuenta."\",\"".$plano->IdCliente."\",\"".$plano->TipoDirecc."\",\"".$plano->Domicilio."\",\"".$plano->Comuna."\",\"".$plano->region."\",\"".$plano->Ciudad."\",\"".$plano->DirEstado."\",\"".$plano->PostalCode."\",\"".$plano->IdEmpex."\",\"".$plano->Estado."\",\"".$plano->VCDIAL."\",\"".$plano->CodigoAccion."\",\"".$plano->CodigoResultado."\")";
             if ($i == 400){
                 $qwery = "INSERT INTO `plano800`( `VALORCONSTANTE`, `GRUPO`, `CUENTA`, `IDCLIENTE`, `TIPDIRECC`, `DOMICILIO`, `COMUNA`, `REGION`, `CIUDAD`, `DIRESTADO`, `POSTALCODE`, `IDEMPREX`, `ESTADO`, `VCDIAL`, `CODIGOACCION`, `RESULTADO`) VALUES" . $regs;
-                $Respuesta = mysqli_query($conexion ,$qwery);$regs ="";
+                //$Respuesta = mysqli_query($conexion ,$qwery);$regs ="";
+                $resultados = mysql_query($qwery, $conexion) or die(mysql_error());
+                //echo $Respuesta;
                 $first = true;
                 $i = 0; 
                 $qwery = "";
@@ -566,7 +580,9 @@ function  GenerarPlano200($transacciones, $conexion)
             }
         }
         $qwery = "INSERT INTO `plano800`( `VALORCONSTANTE`, `GRUPO`, `CUENTA`, `IDCLIENTE`, `TIPDIRECC`, `DOMICILIO`, `COMUNA`, `REGION`, `CIUDAD`, `DIRESTADO`, `POSTALCODE`, `IDEMPREX`, `ESTADO`, `VCDIAL`, `CODIGOACCION`, `RESULTADO`) VALUES" . $regs;
-        $Respuesta = mysqli_query($conexion ,$qwery);
+        //$Respuesta = mysqli_query($conexion ,$qwery);
+        $resultados = mysql_query($qwery, $conexion) or die(mysql_error());
+        //echo $Respuesta;
     }
     class Plano800
     {

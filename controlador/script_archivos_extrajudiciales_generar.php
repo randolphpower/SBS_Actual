@@ -1,10 +1,10 @@
 <?php 
 	
-    $conexion = mysqli_connect("localhost","root","12345678","factory");
-    if(!$conexion){
-        echo "error al conectarse a la base de datos";
-    }
-    else {
+    //$conexion = mysqli_connect("localhost","root","12345678","factory");
+    //if(!$conexion){
+    //    echo "error al conectarse a la base de datos";
+    //}
+    //else {
         echo "conexion exitosa";
         $a = GenerarPlano200($conexion);
         $b = GenerarPlano600($conexion);
@@ -15,17 +15,21 @@
         //llenaeFTP($a, $b, $c, $d);
         $now = strval(date("Y-m-d"));
         $qwery = "UPDATE `plano200` SET `CESENDDT`= ". $now . " WHERE `CESENDDT` = 0000-00-00;";
-        $Respuesta = mysqli_query($conexion ,$qwery);
+                        //$Respuesta = mysqli_query($conexion ,$qwery);
+                $Respuesta = mysql_query($qwery, $conexion) or die(mysql_error());
         $qwery = "UPDATE `plano600` SET `CESENDDT`= ". $now . " WHERE `CESENDDT` = 0000-00-00;";
-        $Respuesta = mysqli_query($conexion ,$qwery);
+                        //$Respuesta = mysqli_query($conexion ,$qwery);
+                $Respuesta = mysql_query($qwery, $conexion) or die(mysql_error());
         $qwery = "UPDATE `plano700` SET `CESENDDT`= ". $now . " WHERE `CESENDDT` = 0000-00-00;";
-        $Respuesta = mysqli_query($conexion ,$qwery);
+                        //$Respuesta = mysqli_query($conexion ,$qwery);
+                $Respuesta = mysql_query($qwery, $conexion) or die(mysql_error());
         $qwery = "UPDATE `plano800` SET `CESENDDT`= ". $now . " WHERE `CESENDDT` = 0000-00-00;";
-        $Respuesta = mysqli_query($conexion ,$qwery);
+                        //$Respuesta = mysqli_query($conexion ,$qwery);
+                $Respuesta = mysql_query($qwery, $conexion) or die(mysql_error());
         mysqli_close($conexion);
         echo "Archivos generados";
 
-    }
+    //}
 
 
 function  GenerarPlano200( $conexion)
@@ -33,7 +37,8 @@ function  GenerarPlano200( $conexion)
         try
         {
             $qwery = "SELECT * FROM `plano200` WHERE`CESENDDT`= 0";
-            $Respuesta = mysqli_query($conexion ,$qwery);
+                            //$Respuesta = mysqli_query($conexion ,$qwery);
+                $Respuesta = mysql_query($qwery, $conexion) or die(mysql_error());
             $transacciones = $Respuesta;
             $nombre = "docs/traSERVICOB_".strval(date("Ymd")).".txt";
             $ar =fopen($nombre,"a") or die ("error al crear");
@@ -75,7 +80,8 @@ function  GenerarPlano200( $conexion)
         try
         {
             $qwery = "SELECT * FROM `plano600` WHERE`CESENDDT`= 0";
-            $Respuesta = mysqli_query($conexion ,$qwery);
+                            //$Respuesta = mysqli_query($conexion ,$qwery);
+                $Respuesta = mysql_query($qwery, $conexion) or die(mysql_error());
             $transacciones = $Respuesta;
             $nombre = "docs/600SERVICOB_".strval(date("Ymd")).".txt";
             $ar =fopen($nombre,"a") or die ("error al crear");
@@ -113,7 +119,8 @@ function  GenerarPlano200( $conexion)
         try
         {
             $qwery = "SELECT * FROM `plano700` WHERE`CESENDDT`= 0";
-            $Respuesta = mysqli_query($conexion ,$qwery);
+                            //$Respuesta = mysqli_query($conexion ,$qwery);
+                $Respuesta = mysql_query($qwery, $conexion) or die(mysql_error());
             $transacciones = $Respuesta;
             $listaLineas = array();
             $nombre = "docs/telSERVICOB_".strval(date("Ymd")).".txt";
@@ -149,7 +156,8 @@ function  GenerarPlano200( $conexion)
         try
         {
             $qwery = "SELECT * FROM `plano800` WHERE`CESENDDT`= 0";
-            $Respuesta = mysqli_query($conexion ,$qwery);
+                            //$Respuesta = mysqli_query($conexion ,$qwery);
+                $Respuesta = mysql_query($qwery, $conexion) or die(mysql_error());
             $transacciones = $Respuesta;
             $listaLineas = array();
             $nombre = "docs/dirSERVICOB_".strval(date("Ymd")).".txt";
