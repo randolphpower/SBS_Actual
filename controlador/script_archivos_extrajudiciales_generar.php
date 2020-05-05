@@ -1,10 +1,10 @@
 <?php 
 	
-    //$conexion = mysqli_connect("localhost","root","12345678","factory");
-    //if(!$conexion){
-    //    echo "error al conectarse a la base de datos";
-    //}
-    //else {
+    $conexion = mysqli_connect("localhost","root","12345678","servicobranza");
+    if(!$conexion){
+        echo "error al conectarse a la base de datos";
+    }
+    else {
         echo "conexion exitosa";
         $a = GenerarPlano200($conexion);
         $b = GenerarPlano600($conexion);
@@ -14,33 +14,28 @@
         //marcar todo como generado en base de datos
         //llenaeFTP($a, $b, $c, $d);
         $now = strval(date("Y-m-d"));
-        $qwery = "UPDATE `plano200` SET `CESENDDT`= ". $now . " WHERE `CESENDDT` = 0000-00-00;";
-                        //$Respuesta = mysqli_query($conexion ,$qwery);
-                $Respuesta = mysql_query($qwery, $conexion) or die(mysql_error());
-        $qwery = "UPDATE `plano600` SET `CESENDDT`= ". $now . " WHERE `CESENDDT` = 0000-00-00;";
-                        //$Respuesta = mysqli_query($conexion ,$qwery);
-                $Respuesta = mysql_query($qwery, $conexion) or die(mysql_error());
-        $qwery = "UPDATE `plano700` SET `CESENDDT`= ". $now . " WHERE `CESENDDT` = 0000-00-00;";
-                        //$Respuesta = mysqli_query($conexion ,$qwery);
-                $Respuesta = mysql_query($qwery, $conexion) or die(mysql_error());
-        $qwery = "UPDATE `plano800` SET `CESENDDT`= ". $now . " WHERE `CESENDDT` = 0000-00-00;";
-                        //$Respuesta = mysqli_query($conexion ,$qwery);
-                $Respuesta = mysql_query($qwery, $conexion) or die(mysql_error());
+        $qwery = "UPDATE `plano200` SET `CESENDDT`= '". $now . "' WHERE `CESENDDT` = '0000-00-00';";
+        $Respuesta = mysqli_query($conexion ,$qwery);
+        $qwery = "UPDATE `plano600` SET `CESENDDT`= '". $now . "' WHERE `CESENDDT` = '0000-00-00';";
+        $Respuesta = mysqli_query($conexion ,$qwery);
+        $qwery = "UPDATE `plano700` SET `CESENDDT`= '". $now . "' WHERE `CESENDDT` = '0000-00-00';";
+        $Respuesta = mysqli_query($conexion ,$qwery);
+        $qwery = "UPDATE `plano800` SET `CESENDDT`= '". $now . "' WHERE `CESENDDT` = '0000-00-00';";
+        $Respuesta = mysqli_query($conexion ,$qwery);
         mysqli_close($conexion);
         echo "Archivos generados";
 
-    //}
+    }
 
 
 function  GenerarPlano200( $conexion)
     {
         try
         {
-            $qwery = "SELECT * FROM `plano200` WHERE`CESENDDT`= 0";
-                            //$Respuesta = mysqli_query($conexion ,$qwery);
-                $Respuesta = mysql_query($qwery, $conexion) or die(mysql_error());
+            $qwery = "SELECT * FROM `plano200` WHERE`CESENDDT`= '0000-00-00'";
+            $Respuesta = mysqli_query($conexion ,$qwery);
             $transacciones = $Respuesta;
-            $nombre = "docs/traSERVICOB_".strval(date("Ymd")).".txt";
+            $nombre = "../docs/traSERVICOB_".strval(date("Ymd")).".txt";
             $ar =fopen($nombre,"a") or die ("error al crear");
             $i = 2;
             foreach ( $transacciones AS $item )
@@ -79,11 +74,10 @@ function  GenerarPlano200( $conexion)
     {
         try
         {
-            $qwery = "SELECT * FROM `plano600` WHERE`CESENDDT`= 0";
-                            //$Respuesta = mysqli_query($conexion ,$qwery);
-                $Respuesta = mysql_query($qwery, $conexion) or die(mysql_error());
+            $qwery = "SELECT * FROM `plano600` WHERE`CESENDDT`= '0000-00-00'";
+            $Respuesta = mysqli_query($conexion ,$qwery);
             $transacciones = $Respuesta;
-            $nombre = "docs/600SERVICOB_".strval(date("Ymd")).".txt";
+            $nombre = "../docs/600SERVICOB_".strval(date("Ymd")).".txt";
             $ar =fopen($nombre,"a") or die ("error al crear");
 
             foreach ( $transacciones AS $item )
@@ -118,12 +112,11 @@ function  GenerarPlano200( $conexion)
     {
         try
         {
-            $qwery = "SELECT * FROM `plano700` WHERE`CESENDDT`= 0";
-                            //$Respuesta = mysqli_query($conexion ,$qwery);
-                $Respuesta = mysql_query($qwery, $conexion) or die(mysql_error());
+            $qwery = "SELECT * FROM `plano700` WHERE`CESENDDT`= '0000-00-00'";
+            $Respuesta = mysqli_query($conexion ,$qwery);
             $transacciones = $Respuesta;
             $listaLineas = array();
-            $nombre = "docs/telSERVICOB_".strval(date("Ymd")).".txt";
+            $nombre = "../docs/telSERVICOB_".strval(date("Ymd")).".txt";
             $ar =fopen($nombre,"a") or die ("error al crear");
 
             foreach ( $transacciones AS $item )
@@ -155,12 +148,11 @@ function  GenerarPlano200( $conexion)
     {
         try
         {
-            $qwery = "SELECT * FROM `plano800` WHERE`CESENDDT`= 0";
-                            //$Respuesta = mysqli_query($conexion ,$qwery);
-                $Respuesta = mysql_query($qwery, $conexion) or die(mysql_error());
+            $qwery = "SELECT * FROM `plano800` WHERE`CESENDDT`= '0000-00-00'";
+            $Respuesta = mysqli_query($conexion ,$qwery);
             $transacciones = $Respuesta;
             $listaLineas = array();
-            $nombre = "docs/dirSERVICOB_".strval(date("Ymd")).".txt";
+            $nombre = "../docs/dirSERVICOB_".strval(date("Ymd")).".txt";
             $ar =fopen($nombre,"a") or die ("error al crear");
             foreach ( $transacciones AS $item )
             {
@@ -223,10 +215,10 @@ function  GenerarPlano200( $conexion)
         $zipb->open(substr($b,0, -4) . ".zip", ZipArchive::CREATE);
         $zipc->open(substr($c,0, -4) . ".zip", ZipArchive::CREATE);
         $zipd->open(substr($d,0, -4) . ".zip", ZipArchive::CREATE);
-        $zipa->addFile($a,$a);
-        $zipb->addFile($b,$b);
-        $zipc->addFile($c,$c);
-        $zipd->addFile($d,$d);
+        $zipa->addFile($a,substr($a,8,24));
+        $zipb->addFile($b,substr($b,8,24));
+        $zipc->addFile($c,substr($c,8,24));
+        $zipd->addFile($d,substr($d,8,24));
         $zipa->close();
         $zipb->close();
         $zipc->close();
