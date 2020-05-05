@@ -1,14 +1,5 @@
 <?php 
-	session_start();
-	require 'includes/header_start.php'; 
-	require 'includes/header_end.php'; 
-	require 'mail.php'; 
-	require_once("/modelo/consultaSQL.php");
-	require_once("/modelo/conectarBD.php");
-	require_once("/PHPExcel.php");
-	require_once("controlador/script_general.php");
 	
-if ($_SERVER['REQUEST_METHOD'] == 'POST'){
     $conexion = mysqli_connect("localhost","root","12345678","factory");
     if(!$conexion){
         echo "error al conectarse a la base de datos";
@@ -22,19 +13,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
         zipear($a, $b, $c, $d);
         //marcar todo como generado en base de datos
         //llenaeFTP($a, $b, $c, $d);
-        $qwery = "UPDATE `plano200` SET `CESENDDT`= 1 WHERE `CESENDDT` = 0;";
+        $now = strval(date("Y-m-d"));
+        $qwery = "UPDATE `plano200` SET `CESENDDT`= ". $now . " WHERE `CESENDDT` = 0000-00-00;";
         $Respuesta = mysqli_query($conexion ,$qwery);
-        $qwery = "UPDATE `plano600` SET `CESENDDT`= 1 WHERE `CESENDDT` = 0;";
+        $qwery = "UPDATE `plano600` SET `CESENDDT`= ". $now . " WHERE `CESENDDT` = 0000-00-00;";
         $Respuesta = mysqli_query($conexion ,$qwery);
-        $qwery = "UPDATE `plano700` SET `CESENDDT`= 1 WHERE `CESENDDT` = 0;";
+        $qwery = "UPDATE `plano700` SET `CESENDDT`= ". $now . " WHERE `CESENDDT` = 0000-00-00;";
         $Respuesta = mysqli_query($conexion ,$qwery);
-        $qwery = "UPDATE `plano800` SET `CESENDDT`= 1 WHERE `CESENDDT` = 0;";
+        $qwery = "UPDATE `plano800` SET `CESENDDT`= ". $now . " WHERE `CESENDDT` = 0000-00-00;";
         $Respuesta = mysqli_query($conexion ,$qwery);
         mysqli_close($conexion);
         echo "Archivos generados";
 
     }
-}
 
 
 function  GenerarPlano200( $conexion)
@@ -234,60 +225,3 @@ function  GenerarPlano200( $conexion)
         $zipd->close();
     }
 	
-?>
-
-
-<!-- ============================================================== -->
-<!-- Start right Content here -->
-<!-- ============================================================== -->
-
-<form action="?" method="post" enctype="multipart/form-data">
-<div class="content-page">
-    <!-- Start content -->
-    <div class="content">
-        <div class="container">
-
-            <div class="row">
-                <div class="col-xs-12">
-                    <div class="page-title-box">
-                        <h3 class="page-title">Generar Zips de planos</h3>
-                        <div class="clearfix"></div>
-                    </div>
-                </div>
-            </div>
-            <!-- end row -->
-
-        	<div class="row">
-            	<div class="col-sm-12">
-					<div class="card">
-						<div class="card-header">Generar Archivos Zip</div>						
-							<div class="card-block">
-								<div class="row">
-									<div class="form-group col-sm-6">
-											<button type="submit" class="btn btn-rounded btn-primary">Generar</button>
-											<button type="button" class="btn btn-rounded btn-danger" onClick="location='principal.php'">Volver</button>
-									</div>
-								</div>
-							</div>
-						</div>
-        			</div>
-				</div>	
-			</div>
-			<!-- end row -->
-        </div> <!-- container -->
-    </div> <!-- content -->
-</div>
-<!-- End content-page -->
-</form>
-
-<!-- ============================================================== -->
-<!-- End Right content here -->
-<!-- ============================================================== -->
-
-<?php require 'includes/footer_start.php' ?>
-<!-- extra js -->
-<?php require 'includes/footer_end.php' ?>
-
-<script type="text/javascript">
-
-</script>
