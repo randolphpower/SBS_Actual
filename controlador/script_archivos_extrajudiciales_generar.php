@@ -187,23 +187,20 @@ function  GenerarPlano200( $conexion)
 
     function llenaeFTP($a, $b, $c, $d) {
 
-        $ftp_server="";
-        $ftp_user_name="";
-        $ftp_user_pass="";
-        
-        // set up basic connection
-        $conn_id = ftp_connect($ftp_server,"21");
-        
-        // login with username and password
-        $login_result = ftp_login($conn_id, $ftp_user_name, $ftp_user_pass); 
-        
-        // upload a file
-        ftp_put($conn_id, $a, $a, FTP_ASCII);
-        ftp_put($conn_id, $b, $b, FTP_ASCII);
-        ftp_put($conn_id, $c, $c, FTP_ASCII);
-        ftp_put($conn_id, $d, $d, FTP_ASCII);
-        // close the connection
-        ftp_close($conn_id);
+
+
+        include 'Net/SFTP.php';
+
+        $sftp = new Net_SFTP('');
+        if (!$sftp->login('', '')) {
+           echo "error de login";
+        }else {
+
+            $sftp->put($a, $a, NET_SFTP_LOCAL_FILE);
+            $sftp->put($b, $b, NET_SFTP_LOCAL_FILE);
+            $sftp->put($c, $c, NET_SFTP_LOCAL_FILE);
+            $sftp->put($d, $d, NET_SFTP_LOCAL_FILE);
+        }
     }
     function zipear($a, $b, $c, $d)
     { 

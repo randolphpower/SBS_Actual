@@ -428,7 +428,7 @@ function  GenerarPlano200($transacciones, $conexion)
                 $first = false;
             }
             else{
-                $regs = $regs . ",";
+                $regs = $regs . ",CHAR(13) + CHAR(10)+";
             }
             $regs = $regs . "(\"".$plano->Valorconstante."\",\"".$plano->Grupo."\",\"".$plano->Cuenta."\",\"".$plano->Fecha."\",\"".$plano->Hora."\",\"".$plano->Secuencia."\",\"".$plano->CodigoAccion."\",\"".$plano->CodigoResultado."\",\"".$plano->CodigoCarta."\",\"".$plano->IdEmpex."\",\"".$plano->Comentario."\",\"".$plano->telefono."\",\"".$plano->IdGestor."\",\"".$plano->VCDIAL."\")";
             if ($i == 400){
@@ -474,7 +474,7 @@ function  GenerarPlano200($transacciones, $conexion)
                 $first = false;
             }
             else{
-                $regs = $regs . ",";
+                $regs = $regs . ",CHAR(13) + CHAR(10)+";
             }
             $regs = $regs . "(\"".$plano->Valorconstante."\",\"".$plano->Grupo."\",\"".$plano->Cuenta."\",\"".$plano->IdEmpex."\",\"".$plano->CodigoAccion."\",\"".$plano->Fecha."\",\"".$plano->Promno."\",\"".$plano->Promai."\",\"".$plano->FechaVencProm."\",\"".$plano->PromMonto."\",\"".$plano->VCDIAL."\",\"".$plano->CodigoResultado."\")";
             if ($i == 400){
@@ -521,7 +521,7 @@ function  GenerarPlano200($transacciones, $conexion)
                 $first = false;
             }
             else{
-                $regs = $regs . ",";
+                $regs = $regs . ",CHAR(13) + CHAR(10)+";
             }
             $regs = $regs . "(\"".$plano->Valorconstante."\",\"".$plano->Grupo."\",\"".$plano->Cuenta."\",\"".$plano->IdCliente."\",\"".$plano->TipoTelefono."\",\"".$plano->Areacode."\",\"".$plano->Telefono."\",\"".$plano->Fonoexten."\",\"".$plano->IdEmpex."\",\"".$plano->VCDIAL."\",\"".$plano->CodigoAccion."\",\"".$plano->CodigoResultado."\")";
             if ($i == 400){
@@ -565,7 +565,7 @@ function  GenerarPlano200($transacciones, $conexion)
                 $first = false;
             }
             else{
-                $regs = $regs . ",";
+                $regs = $regs . ",CHAR(13) + CHAR(10)+";
             }
             $regs = $regs . "(\"".$plano->Valorconstante."\",\"".$plano->Grupo."\",\"".$plano->Cuenta."\",\"".$plano->IdCliente."\",\"".$plano->TipoDirecc."\",\"".$plano->Domicilio."\",\"".$plano->Comuna."\",\"".$plano->region."\",\"".$plano->Ciudad."\",\"".$plano->DirEstado."\",\"".$plano->PostalCode."\",\"".$plano->IdEmpex."\",\"".$plano->Estado."\",\"".$plano->VCDIAL."\",\"".$plano->CodigoAccion."\",\"".$plano->CodigoResultado."\")";
             if ($i == 400){
