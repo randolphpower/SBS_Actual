@@ -1,7 +1,7 @@
 <?php 
 	session_start();
-	require 'includes/header_start.php'; 
-	require 'includes/header_end.php'; 
+	//require 'includes/header_start.php'; 
+	//require 'includes/header_end.php'; 
 	require 'mail.php'; 
 	require_once("/modelo/consultaSQL.php");
 	require_once("/modelo/conectarBD.php");
