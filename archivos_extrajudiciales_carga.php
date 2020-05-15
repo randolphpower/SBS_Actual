@@ -1,27 +1,39 @@
 <?php 
 	session_start();
-	require 'includes/header_start.php'; 
-	require 'includes/header_end.php'; 
+	//require 'includes/header_start.php'; 
+	//require 'includes/header_end.php'; 
 	require 'mail.php'; 
 	require_once("/modelo/consultaSQL.php");
 	require_once("/modelo/conectarBD.php");
 	require_once("/PHPExcel.php");
-	require_once("controlador/script_general.php");
+    require_once("controlador/script_general.php");
+   $DIALSBDD = array();
 	
 if ($_SERVER['REQUEST_METHOD'] == 'POST'){
-    //$conexion = mysqli_connect("localhost","root","12345678","servicobranza");
-    //if(!$conexion){
-    //    echo "error al conectarse a la base de datos";
-    //}
-   // else {
-        //echo "conexion exitosa";
-    //}
+        
+    $qwery = "SELECT * FROM `vcdials`";
+    $Respuesta = mysql_query($qwery, $conexion) or die(mysql_error());
+    $cont = 0;
+    while ($item = mysql_fetch_assoc($Respuesta))
+    {
+        $c = array(
+            ('VCDIAL') => $item["NOMBRE"],
+            ('CodigoAccion') => $item["CODIGOACCION"],
+            ('CodGestion') => $item["CODIGORESULTADO"],
+            ('Descrip') => $item["DESCRIP"]
+        );
+        $GLOBALS["DIALSBDD"][$cont] = $c;
+        $cont ++;
+
+    }
+
     $tipo = $_FILES['file']['type'];
     $error = $_FILES['file']['error'];
     $name       = $_FILES['file']['name'];  
     $temp_name  = $_FILES['file']['tmp_name'];  
     //echo $tipo;
     //echo $temp_name;
+    if (empty($temp_name)) { return; }
     $lineas = array();
     $fp = fopen($temp_name, "rb");
     while (!feof($fp)){
@@ -91,11 +103,11 @@ function  GenerarPlano200($transacciones, $conexion)
                 $plano->CodigoCarta = "VQ";
                 } 
                 $plano->IdEmpex= "SERVICOB";
-                if (strlen($item->Observaciones) == ""){}
+                if (strlen($item->Observaciones) != ""){}
                 $plano->Comentario= str_pad($item->Descripcion,56," ", STR_PAD_RIGHT);
-                if (strlen($item->Telefono) == ""){}
-                $plano->telefono= substr($item->Telefono,8);
-                if (strlen($item->Gestor) == ""){}
+                if (strlen($item->Telefono) != ""){}
+                $plano->telefono= substr($item->Telefono,0,8);
+                if (strlen($item->Gestor) != ""){}
                 $plano->IdGestor= strtoupper(str_pad($item->Gestor, 8, " ", STR_PAD_RIGHT));
 
                 $plano->VCDIAL = $item->Status;   
@@ -261,7 +273,11 @@ function  GenerarPlano200($transacciones, $conexion)
         $t->Domicilio = "";
         $t->Comuna = "";
         $t->Gestor = $reg[4];
-        $t->Cuenta = $reg[17];
+        if (substr(trim($reg[17]), -1, 1) == "A" ){
+            $t->Cuenta = substr(trim($reg[17]), 0, -1);
+        } else{
+            $t->Cuenta = $reg[17];
+        }
         $t->CodigoAccion = $P->CodigoAccion;// CodigoAccion($reg[5]);
         $t->Acciones = "";
         $t->CodigoResultado = $P->CodGestion;// codgestion($reg[5]);
@@ -275,116 +291,16 @@ function  GenerarPlano200($transacciones, $conexion)
     }
     function codigos($reg){
         $c = new codes;
-        switch ($reg){
-        case "A": 
-            $c->CodigoAccion = "LN" ;
-            $c->CodGestion ="TP";
-            $c->Descrip ="TELEFONO OCUPADO";
-        break;
-        case "ADC":
-            $c->CodigoAccion =  "LN" ;
-            $c->CodGestion ="TN";
-            $c->Descrip ="TELEFONO NO CONTESTA";
-        break;
-        case "B": 
-            $c->CodigoAccion =  "LT" ;
-            $c->CodGestion ="IT";
-            $c->Descrip ="INDICA QUE REALIZO REPACTACION";
-        break;
-        case "CALLBK": 
-            $c->CodigoAccion =  "L3" ;
-            $c->CodGestion ="LT";
-            $c->Descrip ="LLAMAR MAS TARDE";
-        break;
-        case "CBHOLD": 
-            $c->CodigoAccion =  "L3" ;
-            $c->CodGestion ="LT";
-            $c->Descrip ="LLAMAR MAS TARDE";
-        break;
-        case "DC": 
-            $c->CodigoAccion =  "L3" ;
-            $c->CodGestion ="TC";
-            $c->Descrip ="TELEFONO NO CORRESPONDE";
-        break;
-        case "DEC": 
-            $c->CodigoAccion =  "L3" ;
-            $c->CodGestion ="IR";
-            $c->Descrip ="INDICA QUE REALIZO REPACTACION";
-        break;
-        case "DNC": 
-            $c->CodigoAccion =  "LN" ;
-            $c->CodGestion ="TV";
-            $c->Descrip ="TELEFONO VACANTE";
-        break;
-        case "DROP": 
-            $c->CodigoAccion =  "LF" ;
-            $c->CodGestion ="LT";
-            $c->Descrip ="LLAMAR MAS TARDE";
-        break;
-        case "ERI": 
-            $c->CodigoAccion =  "LF" ;
-            $c->CodGestion ="DR";
-            $c->Descrip ="SE DEJA RECADO";
-        break;
-        case "INCALL": 
-            $c->CodigoAccion =  "LN" ;
-            $c->CodGestion ="TN";
-            $c->Descrip ="TELEFONO NO CONTESTA";
-        break;
-        case "LSMERG": 
-            $c->CodigoAccion =  "LT" ;
-            $c->CodGestion ="CL";
-            $c->Descrip ="CLIENTE CONCURRIRA A OFICINA CLA";
-        break;
-        case "N": 
-            $c->CodigoAccion =  "LT" ;
-            $c->CodGestion ="IA";
-            $c->Descrip ="INDICA QUE ABONO";
-        break;
-        case "NA": 
-            $c->CodigoAccion =  "LN" ;
-            $c->CodGestion ="NT";
-            $c->Descrip ="TELEFONO NO CONTESTA";
-        break;
-        case "NEW": 
-            $c->CodigoAccion =  "LN" ;
-            $c->CodGestion ="NT";
-            $c->Descrip ="TELEFONO NO CONTESTA";
-        break;
-        case "IN": 
-            $c->CodigoAccion =  "LT" ;
-            $c->CodGestion ="NP";
-            $c->Descrip ="NO QUIERE O NO PUEDE PAGAR";
-        break;
-        case "NP": 
-            $c->CodigoAccion =  "LN" ;
-            $c->CodGestion ="NT";
-            $c->Descrip ="TELEFONO NO CONTESTA";
-        break;
-        case "PM": 
-            $c->CodigoAccion =  "CL" ;
-            $c->CodGestion ="LT";
-            $c->Descrip ="CLIENTE CONCURRIRA A OFICINA CLA";
-        break;
-        case "SALE": 
-            $c->CodigoAccion =  "LT" ;
-            $c->CodGestion ="PP";
-            $c->Descrip ="COMPROMISO DE PAGO";
-        break;
-        case "XFER": 
-            $c->CodigoAccion =  "LT" ;
-            $c->CodGestion ="RN";
-            $c->Descrip ="RECLAMO POR NORMALIZAR";
-        break;
-        case "YP": 
-            $c->CodigoAccion =  "LT" ;
-            $c->CodGestion ="IA";
-            $c->Descrip ="INDICA QUE ABONO";
-        break;
+        $key = array_keys(array_column($GLOBALS["DIALSBDD"], 'VCDIAL'),$reg);
+        foreach( $key AS $item ){
+            $c->CodigoAccion = $GLOBALS["DIALSBDD"][$item]['CodigoAccion'] ;
+            $c->CodGestion = $GLOBALS["DIALSBDD"][$item]['CodGestion'];
+            $c->Descrip = $GLOBALS["DIALSBDD"][$item]['Descrip'];
         }
         return $c;
     }
     class codes{
+        public $VCDIAL;
         public $CodigoAccion;
         public $CodGestion;
         public $Descrip;
@@ -422,6 +338,7 @@ function  GenerarPlano200($transacciones, $conexion)
         $regs ="";
         $first = true;
         $i = 0; 
+        if (empty($listaplano)) { return; }
         foreach ( $listaplano AS $plano  ){
             $i++;
             if ($first == true){
@@ -433,9 +350,8 @@ function  GenerarPlano200($transacciones, $conexion)
             $regs = $regs . "(\"".$plano->Valorconstante."\",\"".$plano->Grupo."\",\"".$plano->Cuenta."\",\"".$plano->Fecha."\",\"".$plano->Hora."\",\"".$plano->Secuencia."\",\"".$plano->CodigoAccion."\",\"".$plano->CodigoResultado."\",\"".$plano->CodigoCarta."\",\"".$plano->IdEmpex."\",\"".$plano->Comentario."\",\"".$plano->telefono."\",\"".$plano->IdGestor."\",\"".$plano->VCDIAL."\")";
             if ($i == 400){
                 $qwery = "INSERT INTO `plano200`( `VALORCONSTATE`, `GRUPO`, `CUENTA`, `FECHA`, `HORA`, `SECUENCIA`, `CODIGOACCION`, `RESULTADO`, `CODIGOCARTA`, `IDEMPEX`, `COMENTARIO`, `TELEFONO`, `IDGESTOR`, `VCDIAL`) VALUES" . $regs .";";
-                //$Respuesta = mysqli_query($conexion ,$qwery);
                 $resultados = mysql_query($qwery, $conexion) or die(mysql_error());
-                //echo $Respuesta;
+                echo $qwery;
                 $first = true;
                 $i = 0; 
                 $qwery = "";
@@ -445,7 +361,7 @@ function  GenerarPlano200($transacciones, $conexion)
         $qwery = "INSERT INTO `plano200`( `VALORCONSTATE`, `GRUPO`, `CUENTA`, `FECHA`, `HORA`, `SECUENCIA`, `CODIGOACCION`, `RESULTADO`, `CODIGOCARTA`, `IDEMPEX`, `COMENTARIO`, `TELEFONO`, `IDGESTOR`, `VCDIAL`) VALUES" . $regs .";";
         //$Respuesta = mysqli_query($conexion ,$qwery);
                 $resultados = mysql_query($qwery, $conexion) or die(mysql_error());
-        //echo $Respuesta;
+        echo $qwery;
     }
     class Plano200
     {
@@ -468,6 +384,7 @@ function  GenerarPlano200($transacciones, $conexion)
         $regs ="";
         $first = true;
         $i = 0; 
+        if (empty($listaplano)) { return; }
         foreach ( $listaplano AS $plano  ){
             $i++;
             if ($first == true){
@@ -481,6 +398,7 @@ function  GenerarPlano200($transacciones, $conexion)
                 $qwery = "INSERT INTO `plano600`(`VALORCONSTANTE`, `GRUPO`, `CUENTA`, `IDEMPEX`, `ACCION`, `FECHA`, `PROMNO`, `PROMAI`, `FECHAVENCPROM`, `PROMMONTO`, `VCDIAL`, `RESULTADO`) VALUES ". $regs .";";
                 //$Respuesta = mysqli_query($conexion ,$qwery);
                 $resultados = mysql_query($qwery, $conexion) or die(mysql_error());
+                echo $qwery;
                 //echo $Respuesta;
                 $first = true;
                 $i = 0; 
@@ -491,6 +409,7 @@ function  GenerarPlano200($transacciones, $conexion)
         $qwery = "INSERT INTO `plano600`(`VALORCONSTANTE`, `GRUPO`, `CUENTA`, `IDEMPEX`, `ACCION`, `FECHA`, `PROMNO`, `PROMAI`, `FECHAVENCPROM`, `PROMMONTO`, `VCDIAL`, `RESULTADO`) VALUES ". $regs .";";
         //$Respuesta = mysqli_query($conexion ,$qwery);
         $resultados = mysql_query($qwery, $conexion) or die(mysql_error());
+        echo $qwery;
         //echo $Respuesta;
     }
     class Plano600
@@ -515,6 +434,7 @@ function  GenerarPlano200($transacciones, $conexion)
         $regs ="";
         $first = true;
         $i = 0; 
+        if (empty($listaplano)) { return; }
         foreach ( $listaplano AS $plano  ){
             $i++;
             if ($first == true){
@@ -528,6 +448,7 @@ function  GenerarPlano200($transacciones, $conexion)
                 $qwery = "INSERT INTO `plano700`(`VALORCONSTANTE`, `GRUPO`, `CUENTA`, `IDCLIENTE`, `TIPOTELEFONO`, `AREACODE`, `TELEFONO`, `FONOEXTEN`, `IDEMPEX`, `VCDIAL`, `CODIGOACCION`, `RESULTADO`) VALUES ". $regs .";";
                 //$Respuesta = mysqli_query($conexion ,$qwery);
                 $resultados = mysql_query($qwery, $conexion) or die(mysql_error());
+                echo $qwery;
                 //echo $Respuesta;
                 $first = true;
                 $i = 0; 
@@ -538,6 +459,7 @@ function  GenerarPlano200($transacciones, $conexion)
         $qwery = "INSERT INTO `plano700`(`VALORCONSTANTE`, `GRUPO`, `CUENTA`, `IDCLIENTE`, `TIPOTELEFONO`, `AREACODE`, `TELEFONO`, `FONOEXTEN`, `IDEMPEX`, `VCDIAL`, `CODIGOACCION`, `RESULTADO`) VALUES ". $regs .";";
         //$Respuesta = mysqli_query($conexion ,$qwery);
         $resultados = mysql_query($qwery, $conexion) or die(mysql_error());
+        echo $qwery;
         //echo $Respuesta;
     }
     class Plano700
@@ -559,6 +481,7 @@ function  GenerarPlano200($transacciones, $conexion)
         $regs ="";
         $first = true;
         $i = 0; 
+        if (empty($listaplano)) { return; }
         foreach ( $listaplano AS $plano  ){
             $i++;
             if ($first == true){
@@ -572,6 +495,7 @@ function  GenerarPlano200($transacciones, $conexion)
                 $qwery = "INSERT INTO `plano800`( `VALORCONSTANTE`, `GRUPO`, `CUENTA`, `IDCLIENTE`, `TIPDIRECC`, `DOMICILIO`, `COMUNA`, `REGION`, `CIUDAD`, `DIRESTADO`, `POSTALCODE`, `IDEMPREX`, `ESTADO`, `VCDIAL`, `CODIGOACCION`, `RESULTADO`) VALUES" . $regs .";";
                 //$Respuesta = mysqli_query($conexion ,$qwery);$regs ="";
                 $resultados = mysql_query($qwery, $conexion) or die(mysql_error());
+                echo $qwery;
                 //echo $Respuesta;
                 $first = true;
                 $i = 0; 
@@ -582,6 +506,7 @@ function  GenerarPlano200($transacciones, $conexion)
         $qwery = "INSERT INTO `plano800`( `VALORCONSTANTE`, `GRUPO`, `CUENTA`, `IDCLIENTE`, `TIPDIRECC`, `DOMICILIO`, `COMUNA`, `REGION`, `CIUDAD`, `DIRESTADO`, `POSTALCODE`, `IDEMPREX`, `ESTADO`, `VCDIAL`, `CODIGOACCION`, `RESULTADO`) VALUES" . $regs .";";
         //$Respuesta = mysqli_query($conexion ,$qwery);
         $resultados = mysql_query($qwery, $conexion) or die(mysql_error());
+        echo $qwery;
         //echo $Respuesta;
     }
     class Plano800

@@ -1,5 +1,8 @@
 <?php 
 	
+switch ($_GET["opcion"]) {
+
+    case "1":
     $conexion = mysqli_connect("localhost","root","12345678","servicobranza");
     if(!$conexion){
         echo "error al conectarse a la base de datos";
@@ -26,8 +29,8 @@
         echo "Archivos generados";
 
     }
-
-
+    break;
+}
 function  GenerarPlano200( $conexion)
     {
         try
@@ -45,15 +48,15 @@ function  GenerarPlano200( $conexion)
                 $linea = $linea . str_pad($item["VALORCONSTATE"], 3, " ", STR_PAD_RIGHT); 
                 $linea = $linea . str_pad($item["GRUPO"], 1, " ", STR_PAD_RIGHT); 
                 $linea = $linea . str_pad($item["CUENTA"], 25, " ", STR_PAD_RIGHT);  
-                $linea = $linea . str_pad($item["FECHA"], 8, " ", STR_PAD_RIGHT); //Fecha
-                $linea = $linea . str_pad($item["HORA"], 12, " ", STR_PAD_RIGHT); //Hora
+                $linea = $linea . str_pad($item["FECHA"], 9, " ", STR_PAD_RIGHT); //Fecha
+                $linea = $linea . str_pad($item["HORA"], 8, " ", STR_PAD_RIGHT); //Hora
                 $linea = $linea . str_pad($item["SECUENCIA"], 3, " ", STR_PAD_RIGHT); //Secuencia
                 $linea = $linea . str_pad($item["CODIGOACCION"], 2, " ", STR_PAD_RIGHT); //Código de Acción
                 $linea = $linea . str_pad($item["RESULTADO"], 2, " ", STR_PAD_RIGHT); //Código de Resultado
                 $linea = $linea . str_pad($item["CODIGOCARTA"], 2, " ", STR_PAD_RIGHT); //Código de Carta
                 $linea = $linea . str_pad($item["IDEMPEX"], 8, " ", STR_PAD_RIGHT); //Id 
                 $linea = $linea . str_pad($item["COMENTARIO"], 56, " ", STR_PAD_RIGHT); //Comentario
-                $linea = $linea . str_pad($item["TELEFONO"], 13, " ", STR_PAD_RIGHT); //TELEFONO
+                $linea = $linea . "2" . str_pad($item["TELEFONO"], 12, " ", STR_PAD_RIGHT); //TELEFONO
                 $linea = $linea . str_pad($item["IDGESTOR"], 8, " ", STR_PAD_RIGHT); //IDGESTOR
                 fwrite($ar, $linea);
                 fwrite($ar, "\n");
