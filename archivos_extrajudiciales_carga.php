@@ -17,10 +17,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
     while ($item = mysql_fetch_assoc($Respuesta))
     {
         $c = array(
-            ('VCDIAL') => $item["NOMBRE"],
-            ('CodigoAccion') => $item["CODIGOACCION"],
-            ('CodGestion') => $item["CODIGORESULTADO"],
-            ('Descrip') => $item["DESCRIP"]
+            ('VCDIAL') => $item["cod_vcdial"],
+            ('CodigoAccion') => $item["cod_accion"],
+            ('CodGestion') => $item["cod_respuesta"],
+            ('Descrip') => $item["nom_respuesta"]
         );
         $GLOBALS["DIALSBDD"][$cont] = $c;
         $cont ++;
@@ -49,13 +49,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
         //echo $lineaarray . "<br>";
     }
     GenerarPlano200($matriz, $conexion);
-    GenerarPlano600($matriz, $conexion);
-    GenerarPlano700($matriz, $conexion);
-    GenerarPlano800($matriz, $conexion);
+    //GenerarPlano600($matriz, $conexion);
+    //GenerarPlano700($matriz, $conexion);
+    //GenerarPlano800($matriz, $conexion);
     //mysqli_close($conexion);
 }
 
-function  GenerarPlano200($transacciones, $conexion)
+    function  GenerarPlano200($transacciones, $conexion)
     {
         try
         {
@@ -448,7 +448,7 @@ function  GenerarPlano200($transacciones, $conexion)
                 $qwery = "INSERT INTO `plano700`(`VALORCONSTANTE`, `GRUPO`, `CUENTA`, `IDCLIENTE`, `TIPOTELEFONO`, `AREACODE`, `TELEFONO`, `FONOEXTEN`, `IDEMPEX`, `VCDIAL`, `CODIGOACCION`, `RESULTADO`) VALUES ". $regs .";";
                 //$Respuesta = mysqli_query($conexion ,$qwery);
                 $resultados = mysql_query($qwery, $conexion) or die(mysql_error());
-                echo $qwery;
+                //echo $qwery;
                 //echo $Respuesta;
                 $first = true;
                 $i = 0; 

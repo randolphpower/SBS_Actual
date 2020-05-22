@@ -4,6 +4,7 @@
 	require 'includes/header_end.php'; 
 	require_once("/modelo/consultaSQL.php");
 	require_once("/modelo/conectarBD.php");
+	require_once("/controlador/script_general.php");
 	require_once("/PHPExcel.php");
 	$tipo = $_FILES['archivo']['type'];
 	$tamanio = $_FILES['archivo']['size'];
@@ -25,58 +26,63 @@
 			$tituloJuicio = $worksheet->getCell('A1')->getValue();
 			$tituloRut = $worksheet->getCell('C1')->getValue();
 			$tituloTipoJuicio = $worksheet->getCell('AA1')->getValue();
-			if ($tituloJuicio != "ID JUICIO"){
-				$error = "La columna ID JUICIO no esta en la posición correcta";
-				break;
-			} else if ($tituloRut != "Rut_Deudor"){
-				$error = "La columna Rut_Deudor no esta en la posición correcta";
-				break;
-			} else if ($tituloTipoJuicio != "TIPO JUICIO"){
-				$error = "La columna TIPO JUICIO no esta en la posición correcta";
-				break;
-			}
-			else {
-				echo "itera</br>";
-				for ($row = 2; $row <= $lastRow; $row++) {
+
+			//echo "itera</br>";
+			for ($row = 2; $row <= $lastRow; $row++) {
+			
+				$id_juicio = $worksheet->getCell('A'.$row)->getValue();
+				$rut = substr($worksheet->getCell('B'.$row)->getValue(),0,strpos($worksheet->getCell('B'.$row)->getValue(), '-'));
+				$nombre = $worksheet->getCell('C'.$row)->getValue();
+				$cuenta = $worksheet->getCell('D'.$row)->getValue();
+				$tipo_juicio = $worksheet->getCell('E'.$row)->getValue();
+				$fecha = $worksheet->getCell('F'.$row)->getValue();
+				$fecha = date('Y-m-d', PHPExcel_Shared_Date::ExcelToPHP($worksheet->getCell('F'.$row)->getValue()));
+				$fecha = date('Y-m-d', strtotime($fecha. ' + 1 days'));
+				$monto = $worksheet->getCell('G'.$row)->getValue();
 				
-					$id_juicio = $worksheet->getCell('A'.$row)->getValue();
-					$tipo_juicio = $worksheet->getCell('AA'.$row)->getValue();
-					$rut = substr($worksheet->getCell('C'.$row)->getValue(),0,strpos($worksheet->getCell('C'.$row)->getValue(), '-'));
-					
-					if ($tipo_juicio != "") {
-						$sql_search = "SELECT id FROM juicios_dato_inicial WHERE id_juicio = ".$id_juicio." and tipo_juicio = '".$tipo_juicio."';";				
-						$datos = call_select($sql_search, "");			
-						$id_tabla = mysql_fetch_array($datos['registros'])['id'];
-						//echo $id_tabla."</br>";
-						if ($datos['num_filas'] == 0) { // INSERT
-							$sql = "INSERT INTO juicios_dato_inicial (id_juicio, tipo_juicio, rut, fecha_asignacion)  ";
-							$sql .= "VALUES (".$id_juicio.",'".$tipo_juicio."','".$rut."','".$fechaAsignacion."');";
-							call_insert($sql, "");
-		
-							$arrnumjuicio[$i-1] = $id_juicio;
-							$arrrutcliente[$i-1] = $rut;
-							$arrtipojuicio[$i-1] = $tipo_juicio;
-							$arraccion[$i-1] = "INSERT";	
-							$instertados++;
-						} else { // UPDATE
-							$sql = "UPDATE juicios_dato_inicial SET ";
-							$sql .= "tipo_juicio='".$tipo_juicio."', ";				
-							$sql .= "rut='".$rut."', ";				
-							$sql .= "fecha_asignacion='".$fechaAsignacion."' ";						
-							$sql .= "WHERE (id='".$id_tabla."') ";
-							call_update($sql);
-		
-							$arrnumjuicio[$i-1] = $id_juicio;
-							$arrrutcliente[$i-1] = $rut;
-							$arrtipojuicio[$i-1] = $tipo_juicio;
-							$arraccion[$i-1] = "UPDATE";	
-							$actualizados++;
-						 }
-					}	
-					$i++;		
-				}		
-			}
-				
+				if ($tipo_juicio != "") {
+					$sql_search = "SELECT id FROM juicios_dato_inicial WHERE id_juicio = ".$id_juicio." and tipo_juicio = '".$tipo_juicio."';";				
+					$datos = call_select($sql_search, "");			
+					$id_tabla = mysql_fetch_array($datos['registros'])['id'];
+					//echo $id_tabla."</br>";
+					if ($datos['num_filas'] == 0) { // INSERT
+						$sql = "INSERT INTO juicios_dato_inicial (id_juicio, tipo_juicio, rut, fecha_asignacion, cuenta, monto, nombre)  ";
+						$sql .= "VALUES (".$id_juicio.",'".$tipo_juicio."','".$rut."','".$fecha."','".$cuenta."','".$monto."','".$nombre."');";
+						call_insert($sql, "");
+	
+						$arrnumjuicio[$i-1] = $id_juicio;
+						$arrrutcliente[$i-1] = $rut;
+						$arrcliente[$i-1] = $nombre;
+						$arrtipojuicio[$i-1] = $tipo_juicio;
+						$arrcuenta[$i-1] = $cuenta;
+						$arrmonto[$i-1] = $monto;
+						$arraccion[$i-1] = "INSERT";	
+						$arrfecha[$i-1] = $fecha;	
+						$instertados++;
+					} else { // UPDATE
+						$sql = "UPDATE juicios_dato_inicial SET ";
+						$sql .= "tipo_juicio='".$tipo_juicio."', ";				
+						$sql .= "rut='".$rut."', ";				
+						$sql .= "fecha_asignacion='".$fecha."', ";	
+						$sql .= "cuenta='".$cuenta."', ";				
+						$sql .= "monto='".$monto."', ";				
+						$sql .= "nombre='".$nombre."' ";									
+						$sql .= "WHERE (id='".$id_tabla."') ";
+						call_update($sql);
+	
+						$arrnumjuicio[$i-1] = $id_juicio;
+						$arrrutcliente[$i-1] = $rut;
+						$arrcliente[$i-1] = $nombre;
+						$arrtipojuicio[$i-1] = $tipo_juicio;
+						$arrcuenta[$i-1] = $cuenta;
+						$arrmonto[$i-1] = $monto;
+						$arraccion[$i-1] = "UPDATE";		
+						$arrfecha[$i-1] = $fecha;	
+						$actualizados++;
+						}
+				}	
+				$i++;		
+			}						
 		}	
 	
 		$print = "<table class='table table-striped table-bordered table-hover'>";
@@ -85,14 +91,18 @@
 		$print .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Nro.</th>";
 		$print .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Identificador</th>";
 		$print .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Rut Cliente</th>";
+		$print .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Cliente</th>";
+		$print .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Cuenta</th>";
 		$print .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Tipo Juicio</th>";
+		$print .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Fecha</th>";
+		$print .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Monto</th>";
 		$print .= "</tr>";
 		$print .= "</thead>";
 		$print .= "<tbody>";
 	
 		$j=1;
 		$count = count($arrnumjuicio);
-		echo $count;
+		//echo $count;
 		for ($i = 0; $i < $count; $i++) {
 			if ($arraccion[$i-1] == "INSERT"){
 				$color = "#C4FBB5";
@@ -104,7 +114,11 @@
 			$print .= "<td class='text-center' style='vertical-align:middle'>".$j."</td>";
 			$print .= "<td class='text-center' style='vertical-align:middle'>".$arrnumjuicio[$i-1]."</td>";
 			$print .= "<td class='text-center' style='vertical-align:middle'>".$arrrutcliente[$i-1]."</td>";
+			$print .= "<td class='text-center' style='vertical-align:middle'>".$arrcliente[$i-1]."</td>";
+			$print .= "<td class='text-center' style='vertical-align:middle'>".$arrcuenta[$i-1]."</td>";
 			$print .= "<td class='text-center' style='vertical-align:middle'>".$arrtipojuicio[$i-1]."</td>";
+			$print .= "<td class='text-center' style='vertical-align:middle'>".$arrfecha[$i-1]."</td>";
+			$print .= "<td class='text-center' style='vertical-align:middle'>".$arrmonto[$i-1]."</td>";
 			$print .= "</tr>";
 			$j=$j+1;
 		}   
@@ -127,7 +141,7 @@
             <div class="row">
                 <div class="col-xs-12">
                     <div class="page-title-box">
-                        <h3 class="page-title">Carga Asignaciones</h3>
+                        <h3 class="page-title">Asignaciones</h3>
                         <div class="clearfix"></div>
                     </div>
                 </div>
@@ -137,27 +151,24 @@
         	<div class="row">
             	<div class="col-sm-12">
 					<div class="card">
-						<div class="card-header">Informacion de Archivo</div>
+						<div class="card-header">Carga de Archivo</div>
 							<div class="card-block">
+								<div class="row">
+									<div class="form-group col-sm-6">
+									<label>Ejemplo de Archivo de Juicios</label>
+										<a href="ejemplo_archivo_asignaciones.xlsx">DESCARGAR</a>
+									</div>
+								</div>
 								<div class="row">
 									<div class="form-group col-sm-6">
 											<label>Archivo</label><br>
 											<input type="file" id="archivo" name="archivo" accept=".xlsx">
 									</div>
-								</div>
-								<div class="row">
-									<div class="form-group col-sm-2" col>
-											<label>Fecha</label>
-											<div class="input-group">
-												<input type="text" class="form-control" name="fechaAsignacion" id="fechaAsignacion" placeholder="dd/mm/aaaa"><span class="input-group-addon bg-custom b-0"><i class="icon-calender"></i></span>
-											</div>
-									</div>
-								</div>						
+								</div>					
 								<div class="row">
 									<div class="form-group col-sm-6">
 											<button type="submit" class="btn btn-rounded btn-primary" id="subir">Subir</button>
 											<button type="button" class="btn btn-rounded btn-danger" onClick="location='principal.php'">Volver</button>
-											<button type="button" class="btn btn-rounded btn-primary" id="descargarDatosIniciales">Descargar Datos Iniciales</button>
 									</div>
 								</div>
 								<div id="guardardo_info"></div>
@@ -191,6 +202,37 @@
 			</div>
 			<!-- end row -->
 
+            	<div class="col-sm-12">
+					<div class="card">
+						<div class="card-header">Descarga de Asignaciones</div>					
+						<div class="card-block">
+							<div class="row">
+								<div class="form-group col-sm-2" col>
+										<label>Fecha</label>
+										<select class="form-control" id="selector" name="selector">
+										<option value="0">----Seleccione----</option>
+										<?php 
+										$sql_consulta="SELECT DISTINCT fecha_asignacion FROM juicios_dato_inicial ORDER BY fecha_asignacion DESC";
+										$datosFechas = array();
+										$datosFechas = call_select($sql_consulta,"");
+										while($resultFechas=mysql_fetch_array($datosFechas['registros'])){ 
+											echo "<option value='".date("d/m/Y", strtotime($resultFechas['fecha_asignacion']))."' >".date("d/m/Y", strtotime($resultFechas['fecha_asignacion']))."</option>";
+										} 
+										?>
+		</select>
+										</select>
+								</div>
+							</div>						
+							<div class="row">
+								<div class="form-group col-sm-6">
+										<button type="button" class="btn btn-rounded btn-primary" id="descargarDatosIniciales">Descargar</button>
+								</div>
+							</div>
+							<div id="guardardo_info"></div>
+						</div>
+					</div>
+				</div>
+
 
         </div> <!-- container -->
 
@@ -214,20 +256,19 @@
 <script type="text/javascript">
 	
 	$(document).ready(function () {
-		$("#fechaAsignacion").datepicker({ weekStart: 1, changeMonth: true, changeYear: true, dateFormat: 'dd/mm/yy', autoclose: true, language:'es' });
 		$('#subir').click(function(e) {
 			if (document.form.archivo.value == "") {
 				alert('Debe seleccionar un archivo');
 				return false;
 			}
-			if (document.form.fechaAsignacion.value == "") {
+		});
+		$('#descargarDatosIniciales').click(function(e) {
+			if (document.form.selector.value == "0") {
 				alert('Debe seleccionar una fecha de asignacion');
 				return false;
 			}
-		});
-		$('#descargarDatosIniciales').click(function(e) {
 			e.preventDefault();  //stop the browser from following			
-			window.location.href = './descargar_datos_iniciales.php';
+			window.location.href = './descargar_datos_iniciales.php?fecha='+document.form.selector.value;
 		});
 	});
 

@@ -10,10 +10,10 @@ switch ($_GET["opcion"]) {
     else {
         echo "conexion exitosa";
         $a = GenerarPlano200($conexion);
-        $b = GenerarPlano600($conexion);
-        $c = GenerarPlano700($conexion);
-        $d = GenerarPlano800($conexion);
-        zipear($a, $b, $c, $d);
+        //$b = GenerarPlano600($conexion);
+        //$c = GenerarPlano700($conexion);
+        //$d = GenerarPlano800($conexion);
+        //zipear($a, $b, $c, $d);
         //marcar todo como generado en base de datos
         //llenaeFTP($a, $b, $c, $d);
         $now = strval(date("Y-m-d"));
@@ -48,15 +48,21 @@ function  GenerarPlano200( $conexion)
                 $linea = $linea . str_pad($item["VALORCONSTATE"], 3, " ", STR_PAD_RIGHT); 
                 $linea = $linea . str_pad($item["GRUPO"], 1, " ", STR_PAD_RIGHT); 
                 $linea = $linea . str_pad($item["CUENTA"], 25, " ", STR_PAD_RIGHT);  
-                $linea = $linea . str_pad($item["FECHA"], 9, " ", STR_PAD_RIGHT); //Fecha
-                $linea = $linea . str_pad($item["HORA"], 8, " ", STR_PAD_RIGHT); //Hora
+                $linea = $linea . str_pad($item["FECHA"], 8, " ", STR_PAD_RIGHT); //Fecha
+                $linea = $linea . str_pad($item["HORA"], 9, " ", STR_PAD_LEFT); //Hora
                 $linea = $linea . str_pad($item["SECUENCIA"], 3, " ", STR_PAD_RIGHT); //Secuencia
                 $linea = $linea . str_pad($item["CODIGOACCION"], 2, " ", STR_PAD_RIGHT); //Código de Acción
                 $linea = $linea . str_pad($item["RESULTADO"], 2, " ", STR_PAD_RIGHT); //Código de Resultado
                 $linea = $linea . str_pad($item["CODIGOCARTA"], 2, " ", STR_PAD_RIGHT); //Código de Carta
                 $linea = $linea . str_pad($item["IDEMPEX"], 8, " ", STR_PAD_RIGHT); //Id 
                 $linea = $linea . str_pad($item["COMENTARIO"], 56, " ", STR_PAD_RIGHT); //Comentario
-                $linea = $linea . "2" . str_pad($item["TELEFONO"], 12, " ", STR_PAD_RIGHT); //TELEFONO
+                if (strlen($item["TELEFONO"]) == 8){
+                    $linea = $linea . "2" . str_pad($item["TELEFONO"], 12, " ", STR_PAD_RIGHT); //TELEFONO
+                }
+                else {
+                    $linea = $linea . str_pad($item["TELEFONO"], 12, " ", STR_PAD_RIGHT); //TELEFONO
+                }
+                
                 $linea = $linea . str_pad($item["IDGESTOR"], 8, " ", STR_PAD_RIGHT); //IDGESTOR
                 fwrite($ar, $linea);
                 fwrite($ar, "\n");
