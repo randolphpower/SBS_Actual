@@ -71,16 +71,14 @@
 			$duplicados = 0;
 			$noEncontrados = 0;
 			
-			$worksheet = $excelObj->getSheet(3);
+			$worksheet = $excelObj->getSheet(0);
 			$lastRow = $worksheet->getHighestRow();
 			$rut_demandado = "";
 			$nombre_demandado = "";
 	
-			for ($row = 5; $row <= $lastRow; $row++) {
-	
-				if (strpos($worksheet->getCell('C'.$row)->getValue(), 'ANDES') !== false) {
-						
-					$tipo_ligitante = $worksheet->getCell('I'.$row)->getValue();
+			for ($row = 2; $row <= $lastRow; $row++) {
+		
+					/*$tipo_ligitante = $worksheet->getCell('I'.$row)->getValue();
 					if ($tipo_ligitante == "Demandado") {
 						$rut_demandado = $worksheet->getCell('J'.$row)->getValue();
 						$nombre_demandado = $worksheet->getCell('K'.$row)->getValue();
@@ -105,58 +103,47 @@
 								}
 							}
 						}
-					}
+					}*/
+					$rut_demandado = $worksheet->getCell('B'.$row)->getValue();
+					$cuenta = $worksheet->getCell('A'.$row)->getValue();
+					$nombre_demandado = "";
+					//$rut_demandado = substr($rut_demandado,0,strpos($rut_demandado, '-'));
 	
-					$rut_demandado = substr($rut_demandado,0,strpos($rut_demandado, '-'));
-	
-					$sql_search = "SELECT * FROM juicios_dato_inicial WHERE rut = '".$rut_demandado."';";
+					$sql_search = "SELECT * FROM juicios_dato_inicial WHERE rut = '".$rut_demandado."' 
+								   AND cuenta = '".$cuenta."';";
 					$datos = call_select($sql_search, "");	
-	
-					$tribunal = $worksheet->getCell('A'.$row)->getValue();
+					//echo $sql_search;
+					$tribunal = $worksheet->getCell('C'.$row)->getValue();
 					$sql_search = "SELECT * FROM tribunales WHERE descripcion LIKE '%".$tribunal."%';";
 					$datosTribunal = call_select($sql_search, "");
 					$resultTribunal = mysql_fetch_array($datosTribunal['registros']);
-					$fechaDemanda = $worksheet->getCell('E'.$row)->getValue();
-					$procurador = $worksheet->getCell('U'.$row)->getValue();
-					if ($datos['num_filas'] > 1) { 
-						while($result=mysql_fetch_array($datos['registros'])){
-							$rol =  $worksheet->getCell('B'.$row)->getValue();
-							$rolPos1 = substr($rol, 0, 1);
-							$rolPos3 = substr($rol, -4);
-							$rol = str_replace($rolPos1,$rolPos1."-",$rol);
-							$rol = str_replace($rolPos3,"-".$rolPos3,$rol);
-							$time = strtotime($result['fecha_asignacion']);
-							$myFormatForView = date("d/m/Y", $time);
-							$arrayDuplicados[$duplicados-1] = 
-								array($result['id_juicio'], 
-									  $rut_demandado, 
-									  $nombre_demandado, 
-									  $result['tipo_juicio'], 
-									  $resultTribunal['codigo'],
-									  $rol,
-									  $myFormatForView,
-									  $fechaDemanda,
-									  $procurador);
-							$duplicados++;		
-						}					
-					}	
-					else if ($datos['num_filas'] ==1) { 
+					$fechaDemanda = date('Y-m-d', PHPExcel_Shared_Date::ExcelToPHP($worksheet->getCell('F'.$row)->getValue()));
+					$fechaDemanda = date('Y-m-d', strtotime($fechaDemanda. ' + 1 days'));
+					$fechaDemanda = split("-", $fechaDemanda);
+					$fechaDemanda = "{$fechaDemanda[2]}/{$fechaDemanda[1]}/{$fechaDemanda[0]}";
+					$procurador = $worksheet->getCell('E'.$row)->getValue();
+					$sql_search = "SELECT * FROM usuarios WHERE codigo_servicobranza = '".$procurador."';";
+					$datosProc = call_select($sql_search, "");
+					$resultProc=mysql_fetch_array($datosProc['registros']);
+					$procurador = $resultProc['US_USUARIO'];
+					if ($datos['num_filas'] ==1) { 
 						$result=mysql_fetch_array($datos['registros']);
-						$rol =  $worksheet->getCell('B'.$row)->getValue();
-						$rolPos1 = substr($rol, 0, 1);
+						$rol =  $worksheet->getCell('D'.$row)->getValue();
+						/*$rolPos1 = substr($rol, 0, 1);
 						$rolPos3 = substr($rol, -4);
 						$rol = str_replace($rolPos1,$rolPos1."-",$rol);
-						$rol = str_replace($rolPos3,"-".$rolPos3,$rol);
-						$time = strtotime($result['fecha_asignacion']);
-						$myFormatForView = date("d/m/Y", $time);
+						$rol = str_replace($rolPos3,"-".$rolPos3,$rol);*/
+						$fechaAsignacion = strtotime($result['fecha_asignacion']);
+						$fechaAsignacion = date("d/m/Y", $fechaAsignacion);
+						//$fechaDemanda = date("d/m/Y", $fechaDemanda);
 						$arrayInsertados[$insertados-1] = 
 							array($result['id_juicio'], 
 								  $rut_demandado, 
-								  $nombre_demandado,
+								  $result['nombre'],
 								  $result['tipo_juicio'], 
 								  $resultTribunal['codigo'],
 								  $rol,
-								  $myFormatForView,
+								  $fechaAsignacion,
 								  $fechaDemanda,
 								  $procurador);
 						$insertados++;
@@ -168,8 +155,8 @@
 						$rolPos3 = substr($rol, -4);
 						$rol = str_replace($rolPos1,$rolPos1."-",$rol);
 						$rol = str_replace($rolPos3,"-".$rolPos3,$rol);
-						$time = strtotime($result['fecha_asignacion']);
-						$myFormatForView = date("d/m/Y", $time);
+						$fechaAsignacion = strtotime($result['fecha_asignacion']);
+						$fechaAsignacion = date("d/m/Y", $fechaAsignacion);
 						$arrayNoEncontrados[$noEncontrados-1] = 
 							array($result['id_juicio'], 
 								  $rut_demandado, 
@@ -177,12 +164,11 @@
 								  $result['tipo_juicio'], 
 								  $resultTribunal['codigo'],
 								  $rol,
-								  $myFormatForView,
+								  $fechaAsignacion,
 								  $fechaDemanda,
 								  $procurador);
 						$noEncontrados++;					
-					}			
-				}						
+					}							
 				$i++;
 			}			
 		
@@ -196,7 +182,7 @@
 			$tableInsertados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Tipo Juicio</th>";
 			$tableInsertados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Tribunal</th>";
 			$tableInsertados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Rol</th>";
-			$tableInsertados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Fecha Inicio</th>";
+			$tableInsertados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Fecha Asignacion</th>";
 			$tableInsertados .= "<th class='col-md-1 text-center' style='vertical-align:middle'>Fecha Demanda</th>";
 			$tableInsertados .= "</tr>";
 			$tableInsertados .= "</thead>";
@@ -325,7 +311,7 @@
 
 			// op_info_juicios en el caso que no exista en la BD
 			$sql = "INSERT INTO op_info_juicios (IDENTIFICADOR, CEDOSSIERID, CNCASENO, CESSNUM, CECRTID, CETYPE, USUSUARIO, CELASTRC, CELASTAC, CELWSTDT) VALUES ";
-			$sql .= "('902','".$rol."','".$numjuicio."','".$rutcliente."','".$tribunal."','".$tipojuicio."','".$_SESSION['username']."', 'MA', 'IJ', '{$fecha_demanda}')";
+			$sql .= "('902','".$rol."','".$numjuicio."','".$rutcliente."','".$tribunal."','".$tipojuicio."','".$procurador."', 'MA', 'IJ', '{$fecha_demanda}')";
 			call_insert2($sql, "");
 
 		} else if ($num == 1) { // UPDATE
@@ -348,7 +334,8 @@
 				$sql .= "CECRTID='".$tribunal."', ";
 				$sql .= "CETYPE='".$tipojuicio."', ";				
 				$sql .= "CEDOSSIERID='".$rol."', ";
-				$sql .= "CELWSTDT = '{$fecha_demanda}' ";
+				$sql .= "CELWSTDT = '{$fecha_demanda}', ";
+				$sql .= "USUSUARIO = '{$procurador}' ";
 				$sql .= "WHERE (CNCASENO='".$numjuicio."' AND CESSNUM='".$rutcliente."') ";
 				call_update2($sql);
 			}	
@@ -400,7 +387,21 @@
 	
 	}//Fin funcion update
 ?>
-
+<style>
+   #page-loader {
+   position: absolute;
+   top: 0;
+   bottom: 0%;
+   left: 0;
+   right: 0%;
+   background-color: white;
+   z-index: 99;
+   display: none;
+   text-align: center;
+   width: 100%;
+   padding-top: 25px;
+   }
+</style>
 
 <!-- ============================================================== -->
 <!-- Start right Content here -->
@@ -427,6 +428,17 @@
 					<div class="card">
 						<div class="card-header">Informacion de Archivo</div>						
 							<div class="card-block">
+							<div id="page-loader">
+								<h3>Cargando Demandas...</h3>
+								<img src="./images/gif-load.gif" alt="loader">
+								<h3>...por favor espere</h3>
+							</div>
+								<div class="row">
+									<div class="form-group col-sm-6">
+									<label>Ejemplo de Archivo de Demandas</label>
+										<a href="ejemplo_archivo_demandas.xlsx">DESCARGAR</a>
+									</div>
+								</div>
 								<div class="row">
 									<div class="form-group col-sm-6">
 											<label>Archivo</label><br>
@@ -436,7 +448,7 @@
 								</div>
 								<div class="row">
 									<div class="form-group col-sm-6">
-											<button type="submit" class="btn btn-rounded btn-primary">Subir</button>
+											<button type="submit" class="btn btn-rounded btn-primary" id="subir">Subir</button>
 											<button type="button" class="btn btn-rounded btn-danger" onClick="location='principal.php'">Volver</button>
 									</div>
 								</div>
@@ -527,6 +539,13 @@
 			e.preventDefault();  
 			window.location.href = './descargar_datos_iniciales.php';
 		});
+		$('#subir').click(function(e) {
+   			if (document.form.archivo.value == "") {
+   			alert('Debe seleccionar un archivo');
+   			return false;
+   		}
+   		document.getElementById('page-loader').style.display='block';
+   	});
 	});
 	function GetSelected() {
         var grid = document.getElementById("tableDuplicados");

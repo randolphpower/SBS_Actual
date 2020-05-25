@@ -182,7 +182,7 @@ case "4":
 	}
 
 	//output the response
-	echo $sql_consulta;
+	//echo $sql_consulta;
 	
 break;
 
