@@ -92,7 +92,11 @@
 				</li>
                 <?php } ?>
 
- 		
+                <li class="has_sub">
+                    <a href="archivos_extrajudiciales_carga.php" class="waves-effect"><i class="zmdi zmdi-upload"></i>
+                        <span> Carga de Extra Judicial </span>
+                    </a>
+				</li>
 		           	
             	<li class="has_sub">
                     <a href="javascript:void(0);" class="waves-effect"><i class="zmdi zmdi-upload"></i>

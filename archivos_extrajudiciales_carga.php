@@ -1,8 +1,7 @@
 <?php 
 	session_start();
-	//require 'includes/header_start.php'; 
-	//require 'includes/header_end.php'; 
-	require 'mail.php'; 
+	require 'includes/header_start.php'; 
+	require 'includes/header_end.php'; 
 	require_once("/modelo/consultaSQL.php");
 	require_once("/modelo/conectarBD.php");
 	require_once("/PHPExcel.php");
@@ -10,7 +9,8 @@
    $DIALSBDD = array();
 	
 if ($_SERVER['REQUEST_METHOD'] == 'POST'){
-        
+    
+    $finalizo = false;
     $qwery = "SELECT * FROM `vcdials`";
     $Respuesta = mysql_query($qwery, $conexion) or die(mysql_error());
     $cont = 0;
@@ -49,10 +49,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
         //echo $lineaarray . "<br>";
     }
     GenerarPlano200($matriz, $conexion);
-    //GenerarPlano600($matriz, $conexion);
-    //GenerarPlano700($matriz, $conexion);
-    //GenerarPlano800($matriz, $conexion);
-    //mysqli_close($conexion);
+    GenerarPlano600($matriz, $conexion);
+    GenerarPlano700($matriz, $conexion);
+    GenerarPlano800($matriz, $conexion);
+    $finalizo = true;
 }
 
     function  GenerarPlano200($transacciones, $conexion)
@@ -114,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                 array_push($listaplanos, $plano);
 
             }
-            Guardar200($listaplanos, $conexion);
+            Guardar200($listaplanos, $conexion, $f2);
         }
         catch (Exception $ex)
         {
@@ -135,7 +135,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                     return false;
                 }
             },null);
-
+            $f=strval(date('Y-m-d H:i:s'));
+            $f2 = substr($f,5,2) . substr($f,8,2) . substr($f,0,4);
             foreach ( $transacciones AS $item )
             {
                 $plano = new Plano600;
@@ -165,7 +166,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                 else{
                     continue;
                 }
-                $plano->Fecha= $item->Fecha;
+                $plano->Fecha= $f2;
                 $plano->Promno = "000";
                 $plano->Promai = "000";
                 $plano->FechaVencProm = $item->FechaCompromiso;
@@ -175,7 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                 $plano->CodigoResultado= $item->CodigoResultado;
                 array_push($listaplanos, $plano);
             }
-                Guardar600($listaplanos, $conexion);
+                Guardar600($listaplanos, $conexion, $f2);
         }
         catch (Exception $ex)
         {
@@ -190,6 +191,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
         {
             $listaplanos = array();
             $i = 2;
+            $f=strval(date('Y-m-d H:i:s'));
+            $f2 = substr($f,0,4)."/".substr($f,5,2)."/".substr($f,8,2);
             foreach ( $transacciones AS $item )
             {
                 $plano = new Plano700;
@@ -209,7 +212,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                 array_push($listaplanos, $plano);
                 $i++;
             }
-                Guardar700($listaplanos, $conexion);
+                Guardar700($listaplanos, $conexion, $f2);
         }
         catch (Exception $ex)
         {
@@ -222,6 +225,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
         try
         {
             $listaplanos = array();
+            $f=strval(date('Y-m-d H:i:s'));
+            $f2 = substr($f,0,4)."/".substr($f,5,2)."/".substr($f,8,2);
             foreach ( $transacciones AS $item )
             {
                 $plano = new Plano800;
@@ -244,7 +249,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                 $plano->CodigoResultado= $item->CodigoResultado;
                 array_push($listaplanos, $plano);
             }
-                Guardar800($listaplanos, $conexion);
+                Guardar800($listaplanos, $conexion, $f2);
         }
         catch (Exception $ex)
         {
@@ -334,11 +339,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
         public $Status;
     }
 
-    function Guardar200( $listaplano, $conexion){
+    function Guardar200( $listaplano, $conexion, $f2){
         $regs ="";
         $first = true;
         $i = 0; 
         if (empty($listaplano)) { return; }
+        $sql = "DELETE FROM plano200 WHERE FECHA = '{$f2}';";
+        mysql_query($sql, $conexion) or die(mysql_error());
         foreach ( $listaplano AS $plano  ){
             $i++;
             if ($first == true){
@@ -351,7 +358,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
             if ($i == 400){
                 $qwery = "INSERT INTO `plano200`( `VALORCONSTATE`, `GRUPO`, `CUENTA`, `FECHA`, `HORA`, `SECUENCIA`, `CODIGOACCION`, `RESULTADO`, `CODIGOCARTA`, `IDEMPEX`, `COMENTARIO`, `TELEFONO`, `IDGESTOR`, `VCDIAL`) VALUES" . $regs .";";
                 $resultados = mysql_query($qwery, $conexion) or die(mysql_error());
-                echo $qwery;
+                //echo $qwery;
                 $first = true;
                 $i = 0; 
                 $qwery = "";
@@ -361,7 +368,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
         $qwery = "INSERT INTO `plano200`( `VALORCONSTATE`, `GRUPO`, `CUENTA`, `FECHA`, `HORA`, `SECUENCIA`, `CODIGOACCION`, `RESULTADO`, `CODIGOCARTA`, `IDEMPEX`, `COMENTARIO`, `TELEFONO`, `IDGESTOR`, `VCDIAL`) VALUES" . $regs .";";
         //$Respuesta = mysqli_query($conexion ,$qwery);
                 $resultados = mysql_query($qwery, $conexion) or die(mysql_error());
-        echo $qwery;
+        //echo $qwery;
     }
     class Plano200
     {
@@ -380,11 +387,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
         public  $IdGestor;
         Public  $VCDIAL;
     }
-    function Guardar600($listaplano, $conexion){
+    function Guardar600($listaplano, $conexion, $f2){
         $regs ="";
         $first = true;
         $i = 0; 
         if (empty($listaplano)) { return; }
+        $sql = "DELETE FROM plano600 WHERE FECHA = '{$f2}';";
+        mysql_query($sql, $conexion) or die(mysql_error());
         foreach ( $listaplano AS $plano  ){
             $i++;
             if ($first == true){
@@ -398,7 +407,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                 $qwery = "INSERT INTO `plano600`(`VALORCONSTANTE`, `GRUPO`, `CUENTA`, `IDEMPEX`, `ACCION`, `FECHA`, `PROMNO`, `PROMAI`, `FECHAVENCPROM`, `PROMMONTO`, `VCDIAL`, `RESULTADO`) VALUES ". $regs .";";
                 //$Respuesta = mysqli_query($conexion ,$qwery);
                 $resultados = mysql_query($qwery, $conexion) or die(mysql_error());
-                echo $qwery;
+                //echo $qwery;
                 //echo $Respuesta;
                 $first = true;
                 $i = 0; 
@@ -409,7 +418,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
         $qwery = "INSERT INTO `plano600`(`VALORCONSTANTE`, `GRUPO`, `CUENTA`, `IDEMPEX`, `ACCION`, `FECHA`, `PROMNO`, `PROMAI`, `FECHAVENCPROM`, `PROMMONTO`, `VCDIAL`, `RESULTADO`) VALUES ". $regs .";";
         //$Respuesta = mysqli_query($conexion ,$qwery);
         $resultados = mysql_query($qwery, $conexion) or die(mysql_error());
-        echo $qwery;
+        //echo $qwery;
         //echo $Respuesta;
     }
     class Plano600
@@ -430,11 +439,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
        
     }
     
-    function Guardar700($listaplano, $conexion){
+    function Guardar700($listaplano, $conexion, $f2){
         $regs ="";
         $first = true;
         $i = 0; 
         if (empty($listaplano)) { return; }
+        $sql = "DELETE FROM plano700 WHERE DATE_FORMAT(FECHINGRESO, '%Y%m%d') = DATE_FORMAT('{$f2}', '%Y%m%d');";
+        mysql_query($sql, $conexion) or die(mysql_error());
         foreach ( $listaplano AS $plano  ){
             $i++;
             if ($first == true){
@@ -459,7 +470,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
         $qwery = "INSERT INTO `plano700`(`VALORCONSTANTE`, `GRUPO`, `CUENTA`, `IDCLIENTE`, `TIPOTELEFONO`, `AREACODE`, `TELEFONO`, `FONOEXTEN`, `IDEMPEX`, `VCDIAL`, `CODIGOACCION`, `RESULTADO`) VALUES ". $regs .";";
         //$Respuesta = mysqli_query($conexion ,$qwery);
         $resultados = mysql_query($qwery, $conexion) or die(mysql_error());
-        echo $qwery;
+        //echo $qwery;
         //echo $Respuesta;
     }
     class Plano700
@@ -477,11 +488,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
         public  $CodigoAccion;
         public  $CodigoResultado;     
     }
-    function Guardar800($listaplano, $conexion){
+    function Guardar800($listaplano, $conexion, $f2){
         $regs ="";
         $first = true;
         $i = 0; 
         if (empty($listaplano)) { return; }
+        $sql = "DELETE FROM plano800 WHERE DATE_FORMAT(FECHINGRESO, '%Y%m%d') = DATE_FORMAT('{$f2}', '%Y%m%d');";
+        mysql_query($sql, $conexion) or die(mysql_error());
         foreach ( $listaplano AS $plano  ){
             $i++;
             if ($first == true){
@@ -495,7 +508,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                 $qwery = "INSERT INTO `plano800`( `VALORCONSTANTE`, `GRUPO`, `CUENTA`, `IDCLIENTE`, `TIPDIRECC`, `DOMICILIO`, `COMUNA`, `REGION`, `CIUDAD`, `DIRESTADO`, `POSTALCODE`, `IDEMPREX`, `ESTADO`, `VCDIAL`, `CODIGOACCION`, `RESULTADO`) VALUES" . $regs .";";
                 //$Respuesta = mysqli_query($conexion ,$qwery);$regs ="";
                 $resultados = mysql_query($qwery, $conexion) or die(mysql_error());
-                echo $qwery;
+                //echo $qwery;
                 //echo $Respuesta;
                 $first = true;
                 $i = 0; 
@@ -506,7 +519,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
         $qwery = "INSERT INTO `plano800`( `VALORCONSTANTE`, `GRUPO`, `CUENTA`, `IDCLIENTE`, `TIPDIRECC`, `DOMICILIO`, `COMUNA`, `REGION`, `CIUDAD`, `DIRESTADO`, `POSTALCODE`, `IDEMPREX`, `ESTADO`, `VCDIAL`, `CODIGOACCION`, `RESULTADO`) VALUES" . $regs .";";
         //$Respuesta = mysqli_query($conexion ,$qwery);
         $resultados = mysql_query($qwery, $conexion) or die(mysql_error());
-        echo $qwery;
+        //echo $qwery;
         //echo $Respuesta;
     }
     class Plano800
@@ -530,13 +543,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
     }
 	
 ?>
-
+<style>
+   #page-loader {
+   position: absolute;
+   top: 0;
+   bottom: 0%;
+   left: 0;
+   right: 0%;
+   background-color: white;
+   z-index: 99;
+   display: none;
+   text-align: center;
+   width: 100%;
+   padding-top: 25px;
+   }
+</style>
 
 <!-- ============================================================== -->
 <!-- Start right Content here -->
 <!-- ============================================================== -->
 
-<form action="?" method="post" enctype="multipart/form-data">
+<form name="form" action="?" method="post" enctype="multipart/form-data">
 <div class="content-page">
     <!-- Start content -->
     <div class="content">
@@ -545,7 +572,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
             <div class="row">
                 <div class="col-xs-12">
                     <div class="page-title-box">
-                        <h3 class="page-title">Archivos Extrajudiciales Cargar</h3>
+                        <h3 class="page-title">Archivos Extra Judiciales</h3>
                         <div class="clearfix"></div>
                     </div>
                 </div>
@@ -557,6 +584,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
 					<div class="card">
 						<div class="card-header">Cargar Archivo</div>						
 							<div class="card-block">
+                                <div id="page-loader">
+                                    <h3>Cargando Archivo Extra Judicial...</h3>
+                                    <img src="./images/gif-load.gif" alt="loader">
+                                    <h3>...por favor espere</h3>
+                                </div>
 								<div class="row">
 									<div class="form-group col-sm-6">
 											<label>Archivo</label><br>
@@ -566,15 +598,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
 								</div>
 								<div class="row">
 									<div class="form-group col-sm-6">
-											<button type="submit" class="btn btn-rounded btn-primary">Subir</button>
+											<button type="submit" class="btn btn-rounded btn-primary" id="subir">Subir</button>
 											<button type="button" class="btn btn-rounded btn-danger" onClick="location='principal.php'">Volver</button>
 									</div>
 								</div>
 							</div>
 						</div>
         			</div>
-				</div>	
-			</div>
+                </div>	
+                <?php if ($finalizo == true) { ?>
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <div class="alert alert-success alert-dismissible" role="alert">
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">×</span>
+                                </button>
+                                <strong>Bien Hecho!</strong> Archivo extrajudicial cargado con exito.
+                            </div></div>
+                        </div>
+                    </div>
+                <?php } ?>
 			<!-- end row -->
         </div> <!-- container -->
     </div> <!-- content -->
@@ -591,5 +634,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
 <?php require 'includes/footer_end.php' ?>
 
 <script type="text/javascript">
-
+    $(document).ready(function () {
+        $('#subir').click(function(e) {
+            if (document.form.file.value == "") {
+                alert('Debe seleccionar un archivo');
+                return false;
+            }
+            document.getElementById('page-loader').style.display='block';
+        });
+   });
 </script>

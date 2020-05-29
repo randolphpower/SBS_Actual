@@ -8,15 +8,15 @@ switch ($_GET["opcion"]) {
         echo "error al conectarse a la base de datos";
     }
     else {
-        echo "conexion exitosa";
+        echo "conexion exitosa</br>";
         $a = GenerarPlano200($conexion);
-        //$b = GenerarPlano600($conexion);
-        //$c = GenerarPlano700($conexion);
-        //$d = GenerarPlano800($conexion);
-        //zipear($a, $b, $c, $d);
-        //marcar todo como generado en base de datos
-        //llenaeFTP($a, $b, $c, $d);
+        $b = GenerarPlano600($conexion);
+        $c = GenerarPlano700($conexion);
+        $d = GenerarPlano800($conexion);
+
+        llenaeFTP($a, $b, $c, $d);
         $now = strval(date("Y-m-d"));
+        //marcar todo como generado en base de datos
         $qwery = "UPDATE `plano200` SET `CESENDDT`= '". $now . "' WHERE `CESENDDT` = '0000-00-00';";
         $Respuesta = mysqli_query($conexion ,$qwery);
         $qwery = "UPDATE `plano600` SET `CESENDDT`= '". $now . "' WHERE `CESENDDT` = '0000-00-00';";
@@ -38,8 +38,8 @@ function  GenerarPlano200( $conexion)
             $qwery = "SELECT * FROM `plano200` WHERE`CESENDDT`= '0000-00-00'";
             $Respuesta = mysqli_query($conexion ,$qwery);
             $transacciones = $Respuesta;
-            $nombre = "../docs/traSERVICOB_".strval(date("Ymd")).".txt";
-            $ar =fopen($nombre,"a") or die ("error al crear");
+            $nombre = "traSERVICOB_".date('Ymd', strtotime('+1 days')).".txt";
+            $ar =fopen($nombre,"w") or die ("error al crear");
             $i = 2;
             foreach ( $transacciones AS $item )
             {
@@ -57,12 +57,12 @@ function  GenerarPlano200( $conexion)
                 $linea = $linea . str_pad($item["IDEMPEX"], 8, " ", STR_PAD_RIGHT); //Id 
                 $linea = $linea . str_pad($item["COMENTARIO"], 56, " ", STR_PAD_RIGHT); //Comentario
                 if (strlen($item["TELEFONO"]) == 8){
-                    $linea = $linea . "2" . str_pad($item["TELEFONO"], 12, " ", STR_PAD_RIGHT); //TELEFONO
+                    $linea = $linea . str_pad("2".$item["TELEFONO"], 13, " ", STR_PAD_RIGHT); //TELEFONO
                 }
                 else {
-                    $linea = $linea . str_pad($item["TELEFONO"], 12, " ", STR_PAD_RIGHT); //TELEFONO
+                    $linea = $linea . str_pad($item["TELEFONO"], 13, " ", STR_PAD_RIGHT); //TELEFONO
                 }
-                
+                 
                 $linea = $linea . str_pad($item["IDGESTOR"], 8, " ", STR_PAD_RIGHT); //IDGESTOR
                 fwrite($ar, $linea);
                 fwrite($ar, "\n");
@@ -86,8 +86,8 @@ function  GenerarPlano200( $conexion)
             $qwery = "SELECT * FROM `plano600` WHERE`CESENDDT`= '0000-00-00'";
             $Respuesta = mysqli_query($conexion ,$qwery);
             $transacciones = $Respuesta;
-            $nombre = "../docs/600SERVICOB_".strval(date("Ymd")).".txt";
-            $ar =fopen($nombre,"a") or die ("error al crear");
+            $nombre = "600SERVICOB_".date('Ymd', strtotime('+1 days')).".txt";
+            $ar =fopen($nombre,"w") or die ("error al crear");
 
             foreach ( $transacciones AS $item )
             {
@@ -125,8 +125,8 @@ function  GenerarPlano200( $conexion)
             $Respuesta = mysqli_query($conexion ,$qwery);
             $transacciones = $Respuesta;
             $listaLineas = array();
-            $nombre = "../docs/telSERVICOB_".strval(date("Ymd")).".txt";
-            $ar =fopen($nombre,"a") or die ("error al crear");
+            $nombre = "telSERVICOB_".date('Ymd', strtotime('+1 days')).".txt";
+            $ar =fopen($nombre,"w") or die ("error al crear");
 
             foreach ( $transacciones AS $item )
             {
@@ -161,8 +161,8 @@ function  GenerarPlano200( $conexion)
             $Respuesta = mysqli_query($conexion ,$qwery);
             $transacciones = $Respuesta;
             $listaLineas = array();
-            $nombre = "../docs/dirSERVICOB_".strval(date("Ymd")).".txt";
-            $ar =fopen($nombre,"a") or die ("error al crear");
+            $nombre = "dirSERVICOB_".date('Ymd', strtotime('+1 days')).".txt";
+            $ar =fopen($nombre,"w") or die ("error al crear");
             foreach ( $transacciones AS $item )
             {
                 $linea = "";
@@ -196,31 +196,18 @@ function  GenerarPlano200( $conexion)
 
     function llenaeFTP($a, $b, $c, $d) {
 
-
-
-        include 'Net/SFTP.php';
-
-        $sftp = new Net_SFTP('');
-        if (!$sftp->login('', '')) {
-           echo "error de login";
-        }else {
-
-            $sftp->put($a, $a, NET_SFTP_LOCAL_FILE);
-            $sftp->put($b, $b, NET_SFTP_LOCAL_FILE);
-            $sftp->put($c, $c, NET_SFTP_LOCAL_FILE);
-            $sftp->put($d, $d, NET_SFTP_LOCAL_FILE);
-        }
-    }
-    function zipear($a, $b, $c, $d)
-    { 
         $zipa = new ZipArchive();
         $zipb = new ZipArchive();
         $zipc = new ZipArchive();
         $zipd = new ZipArchive();
-        $zipa->open(substr($a,0, -4) . ".zip", ZipArchive::CREATE);
-        $zipb->open(substr($b,0, -4) . ".zip", ZipArchive::CREATE);
-        $zipc->open(substr($c,0, -4) . ".zip", ZipArchive::CREATE);
-        $zipd->open(substr($d,0, -4) . ".zip", ZipArchive::CREATE);
+        $nombreZipa = substr($a,0, -4) . ".zip";
+        $nombreZipb = substr($b,0, -4) . ".zip";
+        $nombreZipc = substr($c,0, -4) . ".zip";
+        $nombreZipd = substr($d,0, -4) . ".zip";
+        $zipa->open($nombreZipa, ZipArchive::CREATE);
+        $zipb->open($nombreZipb, ZipArchive::CREATE);
+        $zipc->open($nombreZipc, ZipArchive::CREATE);
+        $zipd->open($nombreZipd, ZipArchive::CREATE);
         $zipa->addFile($a,substr($a,8,24));
         $zipb->addFile($b,substr($b,8,24));
         $zipc->addFile($c,substr($c,8,24));
@@ -229,5 +216,21 @@ function  GenerarPlano200( $conexion)
         $zipb->close();
         $zipc->close();
         $zipd->close();
+
+        /*include 'Net/SFTP.php';
+        $sftp = new Net_SFTP('200.53.142.68');
+        if (!$sftp->login('servicob', '53rv1c0b_2017')) {
+           echo "error de login";
+        }else {
+            $sftp->put($a, $a, NET_SFTP_LOCAL_FILE);
+            $sftp->put($nombreZipa, $nombreZipa, NET_SFTP_LOCAL_FILE);
+            $sftp->put($b, $b, NET_SFTP_LOCAL_FILE);
+            $sftp->put($nombreZipb, $nombreZipb, NET_SFTP_LOCAL_FILE);
+            $sftp->put($c, $c, NET_SFTP_LOCAL_FILE);
+            $sftp->put($nombreZipc, $nombreZipc, NET_SFTP_LOCAL_FILE);
+            $sftp->put($d, $d, NET_SFTP_LOCAL_FILE);
+            $sftp->put($nombreZipd, $nombreZipd, NET_SFTP_LOCAL_FILE);
+        }*/
     }
+
 	
