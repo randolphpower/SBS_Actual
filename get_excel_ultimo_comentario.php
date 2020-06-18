@@ -30,7 +30,7 @@ $sql = "SELECT num, ACACCT, DATE, CODIGO_ACCION, COMENTARIO, CODIGO_RESPUESTA, `
 $sql .= "informe_datos.FECHA_INSERT, ";
 $sql .= "codigo_accion.DESCRIPCION AS ACCION, ";
 $sql .= "codigo_result.DESCRIPCION AS RESPUESTA, "; 
-$sql .= "NUM_JUICIO,ID_CLIENTE,CECRTID,CEDOSSIERID ";
+$sql .= "NUM_JUICIO,ID_CLIENTE,CECRTID,CEDOSSIERID,PROCURADOR ";
 $sql .= "FROM `temp_comentario`, ";
 $sql .= "informe_datos, ";
 $sql .= "codigo_accion, ";
@@ -59,7 +59,7 @@ if (!($resultado = $mysqli->query($sql))) {
     echo "Falló SELECT: (" . $mysqli->errno . ") " . $mysqli->error;
 }
 
-$title = "Reporte Documentos - Fecha de Inicio: {$min}, Termino: {$max}";
+$title = "Reporte Ultimo Comentario - Fecha de Inicio: {$min}, Termino: {$max}";
 
 // Create new Spreadsheet object
 $spreadsheet = new Spreadsheet();
@@ -80,7 +80,10 @@ $spreadsheet->setActiveSheetIndex(0)
             ->setCellValue('C1', 'Juzgado')
             ->setCellValue('D1', 'Rol')
             ->setCellValue('E1', 'Comentario')
-            ->setCellValue('F1', 'Fecha Comentario');
+            ->setCellValue('F1', 'Fecha Comentario')
+            ->setCellValue('G1', 'Código de Acción')
+            ->setCellValue('H1', 'Código Resultado')
+            ->setCellValue('I1', 'Procurador');
             
 $spreadsheet->getActiveSheet()->getStyle("F1")->getNumberFormat()->setFormatCode("dd-mm-yyyy");
             
@@ -102,7 +105,10 @@ while ($resul = $resultado->fetch_row()) {
         ->setCellValue("C".$pos, $resul[12])
         ->setCellValue("D".$pos, $resul[13])
         ->setCellValue("E".$pos, $resul[4])
-        ->setCellValue("F".$pos, $date);         
+        ->setCellValue("F".$pos, $date)
+        ->setCellValue("G".$pos, $resul[8])
+        ->setCellValue("H".$pos, $resul[9])
+        ->setCellValue("I".$pos, $resul[14]);         
 }
 
 $spreadsheet->getActiveSheet()->setTitle('Main');
