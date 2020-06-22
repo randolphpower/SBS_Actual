@@ -29,10 +29,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
         array_push($lineas,fgets($fp));
     }
     fclose($fp);
-    $_SESSION['sesion_matriz'] = $lineas;
+    
     $matriz = array();
      
-
+    echo $_SESSION['sesion_matriz'];
     $fech_filter = array();
         foreach ($lineas as $lineaarray){
         
@@ -47,7 +47,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
             //echo $lineaarray . "<br>";
             $finalizo = true;
         }
-       
+
+    echo $lineas;
+    $_SESSION['sesion_matriz'] = $lineas;  
+
     //GenerarPlano200($matriz, $conexion);
     //GenerarPlano600($matriz, $conexion);
     //GenerarPlano700($matriz, $conexion);
@@ -152,7 +155,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                                                             </label>
                                                         </div>
 
-                                                    <?php } ?>
+                                                    <?php 
+                                                }
+                                                //echo sizeof($_SESSION['sesion_matriz']);
+                                                ?>
                                             </div>
 
                                         </div>
@@ -221,7 +227,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
             });
             fechas = fechas.replace(",,"," ");
             fechas = $.trim(fechas);
-
+            
             $.ajax({
                 type: "POST",
                 url: "archivos_extrajudiciales_carga_ajax.php",
@@ -231,6 +237,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                     location.href = "archivos_extrajudiciales_carga.php";
                 }
             });
+            
         }else{
             alert('Debe seleccionar al menos una fecha');
         }

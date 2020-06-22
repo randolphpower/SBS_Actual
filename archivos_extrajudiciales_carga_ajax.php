@@ -3,10 +3,10 @@
     session_start();
     require_once("/modelo/consultaSQL.php");
 	require_once("/modelo/conectarBD.php");
-/*
+
     echo $_SESSION['sesion_matriz'];
     echo  "2".sizeof($_SESSION['sesion_matriz']);
-*/  
+
     $qwery = "SELECT * FROM `vcdials`";
     $Respuesta = mysql_query($qwery, $conexion) or die(mysql_error());
     $cont = 0;
@@ -34,9 +34,10 @@
         $parts = preg_split('/\t/', $lineaarray);
         foreach($array_fechas as $fech){
             if(trim(substr($parts[2],0,10)) == $fech){
+                //echo $fech;
                 $reg = llenartrans($parts);
                 array_push($matriz,$reg);
-                //echo $reg;             
+                //echo sizeof($matriz);             
             }   
         }
         /*
@@ -45,13 +46,14 @@
        // echo $lineaarray;
     }
 
+   
 
-    //session_reset();
-    //GenerarPlano200($matriz, $conexion);
-    //GenerarPlano600($matriz, $conexion);
-    //GenerarPlano700($matriz, $conexion);
-    //GenerarPlano800($matriz, $conexion);
-
+    //
+    GenerarPlano200($matriz, $conexion);
+    GenerarPlano600($matriz, $conexion);
+    GenerarPlano700($matriz, $conexion);
+    GenerarPlano800($matriz, $conexion);
+    session_reset();
 
 
 

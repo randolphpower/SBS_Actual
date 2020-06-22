@@ -105,12 +105,12 @@
 						}
 					}*/
 					$rut_demandado = $worksheet->getCell('B'.$row)->getValue();
-					$cuenta = $worksheet->getCell('A'.$row)->getValue();
+					$id_juicio = $worksheet->getCell('A'.$row)->getValue();
 					$nombre_demandado = "";
 					//$rut_demandado = substr($rut_demandado,0,strpos($rut_demandado, '-'));
 	
 					$sql_search = "SELECT * FROM juicios_dato_inicial WHERE rut = '".$rut_demandado."' 
-								   AND cuenta = '".$cuenta."';";
+								   AND id_juicio = '".$id_juicio."';";
 					$datos = call_select($sql_search, "");	
 					//echo $sql_search;
 					$tribunal = $worksheet->getCell('C'.$row)->getValue();
