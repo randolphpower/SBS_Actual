@@ -177,16 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                     </div>
                 <?php } ?>
                 <?php if ($finalizo == true) { ?>
-                    <div class="row">
-                        <div class="col-xs-12">
-                            <div class="alert alert-success alert-dismissible" role="alert">
-                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                    <span aria-hidden="true">×</span>
-                                </button>
-                                <strong>Bien Hecho!</strong> Archivo extrajudicial cargado con exito.
-                            </div></div>
-                        </div>
-                    </div>
+                  
                 <?php } ?>
 			<!-- end row -->
         </div> <!-- container -->
