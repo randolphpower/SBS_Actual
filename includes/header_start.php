@@ -26,6 +26,7 @@ require("controlador/session.php");
 
     <!-- Switchery css -->
     <link href="assets/plugins/switchery/switchery.min.css" rel="stylesheet" />
+    <link href="assets/css/sweetalert.css" rel="stylesheet" />
 
     
 

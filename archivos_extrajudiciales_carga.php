@@ -192,6 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
 
 <?php require 'includes/footer_start.php' ?>
 <!-- extra js -->
+<script src="assets/js/sweetalert.min.js"></script>
 <?php require 'includes/footer_end.php' ?>
 
 <script type="text/javascript">
@@ -224,8 +225,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                 url: "archivos_extrajudiciales_carga_ajax.php",
                 data: { fechas : fechas},
                 success: function() {
-                    alert('Se realizo bien la carga');
-                    location.href = "archivos_extrajudiciales_carga.php";
+                    
+                    swal({
+                        title: "Good job!",
+                        text: "Su solicitud se realizo correctamente!",
+                        type: "success",
+                      
+                        },
+                        function(){
+                            window.location = "archivos_extrajudiciales_carga.php";
+                        });
                 }
             });
             
