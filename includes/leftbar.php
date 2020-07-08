@@ -52,6 +52,7 @@
                     <a href="javascript:void(0);" class="waves-effect"><i class="zmdi zmdi-file"></i>
                         <span> Reportes </span> <span class="menu-arrow"></span></a>
                     <ul class="list-unstyled">
+                    <li><a href="reporte_extra_judicial.php" class="waves-effect"><i class="zmdi zmdi-file"></i><span> Extra Judicial</span></a></li>
                     	<li><a href="reporte.php" class="waves-effect"><i class="zmdi zmdi-file"></i><span>Datos</span></a></li>
                     	<li><a href="reporte_ultimo_comentario.php" class="waves-effect"><i class="zmdi zmdi-file"></i><span>Ultimo Comentario</span></a></li>                    	
                     </ul>    

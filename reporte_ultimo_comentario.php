@@ -3,6 +3,9 @@
 	require 'includes/header_start.php';
 	include("modelo/conectarBD.php");
 	include("modelo/consultaSQL.php");
+
+	date_default_timezone_set('UTC');
+
 	$sql_admin = $var_select_asterisk_from."usuarios ".$var_where."US_USUARIO='".$_SESSION['username']."' AND rol='administrador'";
 	$datos_admin = call_select($sql_admin, "");
 	$reg_fil = $datos_admin['num_filas'];
