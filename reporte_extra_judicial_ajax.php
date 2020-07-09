@@ -16,6 +16,6 @@ while($row  = $resultado->fetch_assoc()){
     $result .="<option value=".$row['cod_respuesta'].">".$row['nom_respuesta']."</option>";
     
  } 
-echo $result;
+echo '<option value="" selected>-- SELECCIONE -- </option>'.$result;
 
 ?>

@@ -4,7 +4,7 @@
 	include("modelo/conectarBD.php");
 	include("modelo/consultaSQL.php");
 	$mysqli = new mysqli($host, $usuario, $password, $basedatos);
-    $sql = $var_select_asterisk_from."vcdials where nom_vcdial <> 'Seleccione' ";
+    $sql = "SELECT distinct nom_vcdial,cod_accion FROM vcdials where nom_vcdial <> 'Seleccione' ";
     
     $resultado = $mysqli->query($sql);
    
@@ -52,12 +52,15 @@
                     <div class="card-box">
                         <div class="row">
                             <div class="col-lg-4">
+                            
                                 <div class="form-group">
+                                    <label for="accion">Fecha Desde - Hasta</label>
                                     <input type="text" name="daterange" class="form-control" value="<?php echo date('d-m-Y') - date('d-m-Y')?>'" />
                                 </div>
                                 <div class="form-group">
-
+                                    <label for="accion">Accion</label>
                                     <select name="accion" id="accion" class="form-control">
+                                        <option value="" disabled selected>-- SELECCIONE -- </option>
                                         <?php	while($row  = $resultado->fetch_assoc()){ ?>
                                         <option value="<?php echo $row['cod_accion']; ?>"><?php echo $row['nom_vcdial'] ?></option>
                                         <?php } ?>
@@ -123,7 +126,7 @@
                     data: { accion : $("#accion").val() }
                 }).done(function( msg ) {
                     //alert(msg);
-                    $("#contenido").html('<div class="form-group"><select name="respuesta" id="respuesta" class="form-control">'+msg+'</select></div>');
+                    $("#contenido").html('<div class="form-group"><label for="respuesta">Respuesta</label><select name="respuesta" id="respuesta" class="form-control">'+msg+'</select></div>');
                 });
 	
             });
