@@ -17,7 +17,7 @@ include("modelo/conectarBD.php");
 include("modelo/consultaSQL.php");
 $mysqli = new mysqli($host, $usuario, $password, $basedatos);
 
-$sql = "SELECT * FROM  servicobranza.plano200 as sp inner join  vcdials as vc ON sp.VCDIAL = vc.cod_vcdial WHERE ";
+$sql = "SELECT * FROM  servicobranza.plano200 as sp inner join servicobranza.vcdials as vc ON sp.VCDIAL = vc.cod_vcdial WHERE ";
 
 if (trim($_GET['min']) != "") {
 
@@ -33,11 +33,11 @@ if (trim($_GET['max']) != "") {
     $sql .= "AND DATE(FECHINGRESO) <= '{$max}' ";
 }
 
-if($_POST['accion'] != ""){
+if($_GET['accion'] != ""){
     $sql .= "AND CODIGOACCION = '{$_GET['accion']}' ";
 }
 
-if($_POST['respuesta'] != ""){
+if($_GET['respuesta'] != ""){
     $sql .= "AND RESULTADO = '{$_GET['respuesta']}' ";
 }
 
