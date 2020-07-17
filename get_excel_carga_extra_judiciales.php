@@ -33,14 +33,13 @@ if (trim($_GET['max']) != "") {
     $sql .= "AND DATE(FECHINGRESO) <= '{$max}' ";
 }
 
-if($_GET['accion'] != ""){
+if($_GET['accion'] != "" && $_GET['accion'] != "undefined" && $_GET['accion'] != "null"){
     $sql .= "AND CODIGOACCION = '{$_GET['accion']}' ";
 }
 
-if($_GET['respuesta'] != ""){
+if($_GET['respuesta'] != "" && $_GET['respuesta'] != "undefined" && $_GET['accion'] != "null"){
     $sql .= "AND RESULTADO = '{$_GET['respuesta']}' ";
 }
-
 
 
 

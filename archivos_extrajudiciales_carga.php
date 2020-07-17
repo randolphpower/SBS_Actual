@@ -227,7 +227,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                 success: function() {
                     
                     swal({
-                        title: "Good job!",
+                        title: "Bien hecho!",
                         text: "Su solicitud se realizo correctamente!",
                         type: "success",
                       

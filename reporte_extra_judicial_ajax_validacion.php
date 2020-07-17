@@ -29,7 +29,6 @@ $mysqli = new mysqli($host, $usuario, $password, $basedatos);
  if($_GET['respuesta'] != ""){
      $sql .= "AND RESULTADO = '{$_GET['respuesta']}' ";
  }
- 
 $resultado = $mysqli->query($sql);
  
 $r = mysqli_num_rows($resultado);
