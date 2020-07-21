@@ -270,7 +270,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                     $('#contenido_fechas').css('display','none');
                     
                     swal({
-                        title: "Good job!",
+                        title: "Bien hecho!",
                         text: "Su solicitud se realizo correctamente!",
                         type: "success",
                       

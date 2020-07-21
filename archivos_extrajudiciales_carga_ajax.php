@@ -139,8 +139,12 @@
                 $plano->Comentario= str_pad($item->Descripcion,56," ", STR_PAD_RIGHT);
                 if (strlen($item->Telefono) != ""){}
                 $plano->telefono= substr($item->Telefono,0,8);
-                if (strlen($item->Gestor) != ""){}
-                $plano->IdGestor= strtoupper(str_pad($item->Gestor, 8, " ", STR_PAD_RIGHT));
+                if (strlen($item->Gestor) != ""){
+                    $plano->IdGestor= strtoupper(str_pad($item->Gestor, 8, " ", STR_PAD_RIGHT));
+                } else {
+                    $plano->IdGestor= strtoupper(str_pad("MARIBEL", 8, " ", STR_PAD_RIGHT));
+                }
+                
 
                 $plano->VCDIAL = $item->Status;   
                 array_push($listaplanos, $plano);
