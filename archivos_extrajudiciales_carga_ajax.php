@@ -4,11 +4,16 @@
     require_once("/modelo/consultaSQL.php");
 	require_once("/modelo/conectarBD.php");
 
-    echo $_SESSION['sesion_matriz'];
-    echo  "2".sizeof($_SESSION['sesion_matriz']);
+    //echo $_SESSION['sesion_matriz'];
+    //echo  "2".sizeof($_SESSION['sesion_matriz']);
 
     $qwery = "SELECT * FROM `vcdials`";
     $Respuesta = mysql_query($qwery, $conexion) or die(mysql_error());
+
+    $queryresul = "SELECT * FROM `juicios_dato_inicial`";
+
+    $resulsetJuicios = mysql_query($queryresul, $conexion) or die(mysql_error());
+
     $cont = 0;
     while ($item = mysql_fetch_assoc($Respuesta))
     {
@@ -26,33 +31,58 @@
     $array_fechas = preg_split('/,/',$fechas);
     $matriz = array();
 
+    $tabla_no = array();
+
+    $valores = array();
+
     $lineas = array();
 
     $lineas = $_SESSION['sesion_matriz'];
     //echo  sizeof($matriz);
     foreach($lineas as $lineaarray){
         $parts = preg_split('/\t/', $lineaarray);
+        
         foreach($array_fechas as $fech){
             if(trim(substr($parts[2],0,10)) == $fech){
                 //echo $fech;
-                $reg = llenartrans($parts);
-                array_push($matriz,$reg);
+                $rutCortado =  preg_split('/-/',trim(substr($parts[5],0,12)));
+                while($row = mysql_fetch_assoc($resulsetJuicios)){ 
+                   //echo var_dump($row);                 
+                    if(trim($rutCortado[0]) == $row['rut']){
+                        //echo trim(substr($parts[5],0,12));
+                        $reg = llenartrans($parts);
+                        array_push($matriz,$reg);
+                    }else{
+                        $arrayy = array(
+                            "rut" => $row['rut'],
+                            "cuenta" => $row['cuenta']
+                        );
+                        // echo $row['rut']; 
+                      array_push($tabla_no,$arrayy);
+                    }
+                }
+                //$reg = llenartrans($parts);
+                //array_push($matriz,$reg);
                 //echo sizeof($matriz);             
             }   
         }
+        //
         /*
        
         */
        // echo $lineaarray;
     }
-
-   
-
+    //echo var_dump($tabla_no);
+    foreach($tabla_no as $t){
+         $result .='<tr><td>'.$t['cuenta'].'</td>'.
+            '<td>'.$t['rut'].'</td></tr>';
+    }
+    echo $result;
     //
-    GenerarPlano200($matriz, $conexion);
-    GenerarPlano600($matriz, $conexion);
-    GenerarPlano700($matriz, $conexion);
-    GenerarPlano800($matriz, $conexion);
+    //GenerarPlano200($matriz, $conexion);
+    //GenerarPlano600($matriz, $conexion);
+    //GenerarPlano700($matriz, $conexion);
+    //GenerarPlano800($matriz, $conexion);
     session_reset();
 
 

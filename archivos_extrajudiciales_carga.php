@@ -78,6 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
    }
 </style>
 
+
 <!-- ============================================================== -->
 <!-- Start right Content here -->
 <!-- ============================================================== -->
@@ -130,55 +131,83 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                     </div>	
                 </div>
                 <?php }else{ ?>
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <div class="card">
-                                <div class="card-header">Fecha encontradas</div>						
-                                    <div class="card-block">
-                                        <div id="page-loader">
-                                            <h3>Cargando Archivo Extra Judicial...</h3>
-                                            <img src="./images/gif-load.gif" alt="loader">
-                                            <h3>...por favor espere</h3>
-                                        </div>
-                                        <div class="row">
-                                            <div class="form-group col-sm-6">
-                                                    <?php 
-                                                    $con = 0;
-                                                    foreach($fech_filter as $fech){
+                    <div id="contenido_fechas">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="card">
+                                    <div class="card-header">Fecha encontradas</div>						
+                                        <div class="card-block">
+                                            <div id="page-loader">
+                                                <h3>Cargando Archivo Extra Judicial...</h3>
+                                                <img src="./images/gif-load.gif" alt="loader">
+                                                <h3>...por favor espere</h3>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group col-sm-6">
+                                                        <?php 
+                                                        $con = 0;
+                                                        foreach($fech_filter as $fech){
 
-                                                        $con++;
+                                                            $con++;
+                                                        ?>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input checkesito" type="checkbox" value="<?=$fech?>" name="fechas_check" id="defaultCheck<?=con?>">
+                                                                <label class="form-check-label" for="defaultCheck<?=con?>">
+                                                                <?php echo $fech; ?>
+                                                                </label>
+                                                            </div>
+
+                                                        <?php 
+                                                    }
+                                                    //echo sizeof($_SESSION['sesion_matriz']);
                                                     ?>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input checkesito" type="checkbox" value="<?=$fech?>" name="fechas_check" id="defaultCheck<?=con?>">
-                                                            <label class="form-check-label" for="defaultCheck<?=con?>">
-                                                            <?php echo $fech; ?>
-                                                            </label>
-                                                        </div>
+                                                </div>
 
-                                                    <?php 
-                                                }
-                                                //echo sizeof($_SESSION['sesion_matriz']);
-                                                ?>
                                             </div>
-
+                                            <div class="row">
+                                                <div class="form-group col-sm-6">
+                                                    <button type="button" class="btn btn-rounded btn-primary" onclick="javascript:enviar();" >Enviar</button>
+                                                </div>
+                                            </div>                
                                         </div>
-                                        <div class="row">
-                                            <div class="form-group col-sm-6">
-                                                <button type="button" class="btn btn-rounded btn-primary" onclick="javascript:enviar();" >Enviar</button>
-                                            </div>
-                                        </div>                
-                                    
-                                        
-                                        
                                     </div>
                                 </div>
-                            </div>
-                        </div>	    
+                            </div>	    
+                        </div>                           
+                <?php } ?>
+                    <div id="contenido-tabla" style="display:none;">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="card">
+                                    <div class="card-header">Los siguientes datos no se procesaron debido a que el numero de cuenta no se encontro en el sistema</div>						
+                                        <div class="card-block">
+                                            <div class="row">
+                                                <div class="form-group col-sm-6">
+                                                    <button type="button" class="btn btn-rounded btn-primary" onclick="window.location='archivos_extrajudiciales_carga.php';" >Volver</button>
+
+                                                </div>
+                                            </div>       
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <table id="table_id" class="display">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Cuenta </th>
+                                                                <th>Rut </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>	    
                     </div>
-                <?php } ?>
-                <?php if ($finalizo == true) { ?>
-                  
-                <?php } ?>
+                   </div>
 			<!-- end row -->
         </div> <!-- container -->
     </div> <!-- content -->
@@ -192,11 +221,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
 
 <?php require 'includes/footer_start.php' ?>
 <!-- extra js -->
+  
 <script src="assets/js/sweetalert.min.js"></script>
 <?php require 'includes/footer_end.php' ?>
-
+<script type="text/javascript"  src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
+<script type="text/javascript"  src="https://cdn.datatables.net/buttons/1.6.2/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript"  src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.flash.min.js"></script>
+<script type="text/javascript"  src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.print.min.js"></script>
 <script type="text/javascript">
     $(document).ready(function () {
+      
         $('#subir').click(function(e) {
             if (document.form.file.value == "") {
                 alert('Debe seleccionar un archivo');
@@ -215,7 +253,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
             
             fechas = fechas+","+$(this).val();
             
-            console.log(fechas);
+            //console.log(fechas);
             });
             fechas = fechas.replace(",,"," ");
             fechas = $.trim(fechas);
@@ -224,18 +262,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                 type: "POST",
                 url: "archivos_extrajudiciales_carga_ajax.php",
                 data: { fechas : fechas},
-                success: function() {
+                success: function(respuesta) {
+                    //console.log(respuesta);
+                    $('#contenido-tabla #table_id tbody').html(respuesta);
+                        
+                    $('#contenido-tabla').css('display','block');
+                    $('#contenido_fechas').css('display','none');
                     
                     swal({
                         title: "Good job!",
                         text: "Su solicitud se realizo correctamente!",
                         type: "success",
                       
-                        },
-                        function(){
-                            window.location = "archivos_extrajudiciales_carga.php";
-                        });
+                    });
+                    
                 }
+            }).done(function() {
+                $('#table_id').DataTable({
+                    responsive: true,
+                    dom: 'Bfrtip',
+                    buttons: [
+                        'copy', 'csv', 'excel', 'pdf', 'print'
+                    ]
+                }); 
             });
             
         }else{

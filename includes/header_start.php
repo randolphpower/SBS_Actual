@@ -27,6 +27,9 @@ require("controlador/session.php");
     <!-- Switchery css -->
     <link href="assets/plugins/switchery/switchery.min.css" rel="stylesheet" />
     <link href="assets/css/sweetalert.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.6.2/css/buttons.dataTables.min.css">
+
 
     
 
