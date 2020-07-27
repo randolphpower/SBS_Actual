@@ -3,7 +3,7 @@
     session_start();
     require_once("/modelo/consultaSQL.php");
 	require_once("/modelo/conectarBD.php");
-
+    
     //echo $_SESSION['sesion_matriz'];
     //echo  "2".sizeof($_SESSION['sesion_matriz']);
 
@@ -28,6 +28,8 @@
     }
 
     $fechas = $_POST['fechas'];
+    $confirmo = $_POST['confirmo'];
+
     $array_fechas = preg_split('/,/',$fechas);
     $matriz = array();
 
@@ -37,57 +39,78 @@
 
     $lineas = array();
 
+    //$tabla_no2 =  array();
+
     $lineas = $_SESSION['sesion_matriz'];
     //echo  sizeof($matriz);
+    
     foreach($lineas as $lineaarray){
         $parts = preg_split('/\t/', $lineaarray);
         
+        $rutCortado =  preg_split('/-/',trim(substr($parts[5],0,12)));
+        //echo $fech ."----".$rutCortado[0]."-";
+        $addres2 = substr($parts[17],0,16);
+        
         foreach($array_fechas as $fech){
-            if(trim(substr($parts[2],0,10)) == $fech){
-                //echo $fech;
-                $rutCortado =  preg_split('/-/',trim(substr($parts[5],0,12)));
+            $rut = ""; 
+            $var = 0;     
+            if(trim(substr($parts[2],0,10)) == $fech){  
+                
+
+                //echo json_encode($resulsetJuicios);
+                //echo gettype($row['rut']);
+                //echo $fech ."----".$rutCortado[0]."-";
+                $rut = $rutCortado[0];
+                
                 while($row = mysql_fetch_assoc($resulsetJuicios)){ 
-                   //echo var_dump($row);                 
-                    if(trim($rutCortado[0]) == $row['rut']){
-                        //echo trim(substr($parts[5],0,12));
-                        $reg = llenartrans($parts);
-                        array_push($matriz,$reg);
-                    }else{
-                        $arrayy = array(
-                            "rut" => $row['rut'],
-                            "cuenta" => $row['cuenta']
-                        );
-                        // echo $row['rut']; 
-                      array_push($tabla_no,$arrayy);
-                    }
+                    $rows[] = $row;
+          
                 }
-                //$reg = llenartrans($parts);
-                //array_push($matriz,$reg);
-                //echo sizeof($matriz);             
+                foreach($rows as $row)
+                {
+                    if($row['rut'] == $rut && $row['cuenta'] == $addres2){
+                        $reg = llenartrans($parts);
+                        //echo $var;
+                        array_push($matriz,$reg);   
+                        $var++;       
+                        break;
+                    }
+                    
+                }
+                if($var == 0){
+                    $cc = array(
+                        'rut' => $rut,
+                        'cuenta' => $addres2
+                    );
+                    array_push($tabla_no,$cc);
+                }
+
+               
             }   
-        }
-        //
-        /*
-       
-        */
-       // echo $lineaarray;
+        }        
     }
+    //echo json_encode($resulsetJuicios);
+    //echo sizeof($tabla_no2);
+    //echo sizeof($matriz)." Tabla  ".sizeof($tabla_no2);
     //echo var_dump($tabla_no);
+    
     foreach($tabla_no as $t){
          $result .='<tr><td>'.$t['cuenta'].'</td>'.
             '<td>'.$t['rut'].'</td></tr>';
     }
-    echo $result;
-    //
-    //GenerarPlano200($matriz, $conexion);
-    //GenerarPlano600($matriz, $conexion);
-    //GenerarPlano700($matriz, $conexion);
-    //GenerarPlano800($matriz, $conexion);
+    
+    //*/
+    
+    GenerarPlano200($matriz, $conexion,$confirmo);
+    GenerarPlano600($matriz, $conexion,$confirmo);
+    GenerarPlano700($matriz, $conexion,$confirmo);
+    GenerarPlano800($matriz, $conexion,$confirmo);
+    
     session_reset();
 
+    echo $result;
 
-
-    function  GenerarPlano200($transacciones, $conexion)
+    function  GenerarPlano200($transacciones, $conexion,$confirmo)
     {
         try
         {
@@ -150,7 +173,9 @@
                 array_push($listaplanos, $plano);
 
             }
-            Guardar200($listaplanos, $conexion, $f2);
+
+            Guardar200($listaplanos, $conexion, $f2,$confirmo);
+            return $f2;
         }
         catch (Exception $ex)
         {
@@ -159,7 +184,7 @@
         }
     
     }
-    function GenerarPlano600($transacciones, $conexion)
+    function GenerarPlano600($transacciones, $conexion,$confirmo)
     {
         try
         {
@@ -212,7 +237,7 @@
                 $plano->CodigoResultado= $item->CodigoResultado;
                 array_push($listaplanos, $plano);
             }
-                Guardar600($listaplanos, $conexion, $f2);
+                Guardar600($listaplanos, $conexion, $f2,$confirmo);
         }
         catch (Exception $ex)
         {
@@ -221,7 +246,7 @@
         }
     }
     
-    function GenerarPlano700($transacciones, $conexion)
+    function GenerarPlano700($transacciones, $conexion,$confirmo)
     {
         try
         {
@@ -248,7 +273,7 @@
                 array_push($listaplanos, $plano);
                 $i++;
             }
-                Guardar700($listaplanos, $conexion, $f2);
+                Guardar700($listaplanos, $conexion, $f2,$confirmo);
         }
         catch (Exception $ex)
         {
@@ -256,7 +281,7 @@
            // throw;
         }
     }
-    function GenerarPlano800($transacciones, $conexion)
+    function GenerarPlano800($transacciones, $conexion,$confirmo)
     {
         try
         {
@@ -285,7 +310,7 @@
                 $plano->CodigoResultado= $item->CodigoResultado;
                 array_push($listaplanos, $plano);
             }
-                Guardar800($listaplanos, $conexion, $f2);
+                Guardar800($listaplanos, $conexion, $f2,$confirmo);
         }
         catch (Exception $ex)
         {
@@ -375,13 +400,15 @@
         public $Status;
     }
 
-    function Guardar200( $listaplano, $conexion, $f2){
+    function Guardar200( $listaplano, $conexion, $f2,$c){
         $regs ="";
         $first = true;
         $i = 0; 
         if (empty($listaplano)) { return; }
-        $sql = "DELETE FROM plano200 WHERE FECHA = '{$f2}';";
-        mysql_query($sql, $conexion) or die(mysql_error());
+        if($c == 1){
+            $sql = "DELETE FROM plano200 WHERE FECHA = '{$f2}';";
+            mysql_query($sql, $conexion) or die(mysql_error());
+        }
         foreach ( $listaplano AS $plano  ){
             $i++;
             if ($first == true){
@@ -423,13 +450,15 @@
         public  $IdGestor;
         Public  $VCDIAL;
     }
-    function Guardar600($listaplano, $conexion, $f2){
+    function Guardar600($listaplano, $conexion, $f2,$confirmo){
         $regs ="";
         $first = true;
         $i = 0; 
         if (empty($listaplano)) { return; }
-        $sql = "DELETE FROM plano600 WHERE FECHA = '{$f2}';";
-        mysql_query($sql, $conexion) or die(mysql_error());
+        if($confirmo == 1){
+            $sql = "DELETE FROM plano600 WHERE FECHA = '{$f2}';";
+            mysql_query($sql, $conexion) or die(mysql_error());
+        }
         foreach ( $listaplano AS $plano  ){
             $i++;
             if ($first == true){
@@ -475,13 +504,16 @@
        
     }
     
-    function Guardar700($listaplano, $conexion, $f2){
+    function Guardar700($listaplano, $conexion, $f2,$c){
         $regs ="";
         $first = true;
         $i = 0; 
         if (empty($listaplano)) { return; }
-        $sql = "DELETE FROM plano700 WHERE DATE_FORMAT(FECHINGRESO, '%Y%m%d') = DATE_FORMAT('{$f2}', '%Y%m%d');";
-        mysql_query($sql, $conexion) or die(mysql_error());
+
+        if($c == 1){
+            $sql = "DELETE FROM plano700 WHERE DATE_FORMAT(FECHINGRESO, '%Y%m%d') = DATE_FORMAT('{$f2}', '%Y%m%d');";
+            mysql_query($sql, $conexion) or die(mysql_error());
+        }
         foreach ( $listaplano AS $plano  ){
             $i++;
             if ($first == true){
@@ -524,13 +556,15 @@
         public  $CodigoAccion;
         public  $CodigoResultado;     
     }
-    function Guardar800($listaplano, $conexion, $f2){
+    function Guardar800($listaplano, $conexion, $f2,$c){
         $regs ="";
         $first = true;
         $i = 0; 
         if (empty($listaplano)) { return; }
-        $sql = "DELETE FROM plano800 WHERE DATE_FORMAT(FECHINGRESO, '%Y%m%d') = DATE_FORMAT('{$f2}', '%Y%m%d');";
-        mysql_query($sql, $conexion) or die(mysql_error());
+        if($c == 1){
+            $sql = "DELETE FROM plano800 WHERE DATE_FORMAT(FECHINGRESO, '%Y%m%d') = DATE_FORMAT('{$f2}', '%Y%m%d');";
+            mysql_query($sql, $conexion) or die(mysql_error());
+        }
         foreach ( $listaplano AS $plano  ){
             $i++;
             if ($first == true){

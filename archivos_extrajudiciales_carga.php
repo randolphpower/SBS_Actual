@@ -257,36 +257,125 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
             });
             fechas = fechas.replace(",,"," ");
             fechas = $.trim(fechas);
-            
+
+
             $.ajax({
                 type: "POST",
-                url: "archivos_extrajudiciales_carga_ajax.php",
+                url: "ayuda.php",
                 data: { fechas : fechas},
                 success: function(respuesta) {
                     //console.log(respuesta);
-                    $('#contenido-tabla #table_id tbody').html(respuesta);
+                    if(respuesta != 0 ){
+                        swal({
+                            title: "Existen Datos Cargados ",
+                            text: "Existen datos cargados para el día de hoy ¿Desea eliminarlos?",
+                            type: "warning",
+                            showCancelButton: true,
+                            confirmButtonClass: "btn-danger",
+                            confirmButtonText: "Si, Quiero eliminarlo!",
+                            cancelButtonText: "No, No eliminar!",
+                            closeOnConfirm: false,
+                            closeOnCancel: false
+                            },
+                        function(isConfirm) {
+                            if (isConfirm) {
+                                
+                                $.ajax({
+                                    type: "POST",
+                                    url: "archivos_extrajudiciales_carga_ajax.php",
+                                    data: { fechas : fechas, confirmo : 1},
+                                    success: function(respuesta) {
+                                        console.log(respuesta);
+                                        $('#contenido-tabla #table_id tbody').html(respuesta);
+                                            
+                                        $('#contenido-tabla').css('display','block');
+                                        $('#contenido_fechas').css('display','none');
+                                        
+                                        swal({
+                                            title: "Bien hecho!",
+                                            text: "Su solicitud se realizo correctamente!",
+                                            type: "success",
+                                        
+                                        });
+                                        
+                                    }
+                                }).done(function() {
+                                    $('#table_id').DataTable({
+                                        responsive: true,
+                                        dom: 'Bfrtip',
+                                        buttons: [
+                                            'copy', 'csv', 'excel', 'pdf', 'print'
+                                        ]
+                                    }); 
+                                });
+                            } else {
+                                $.ajax({
+                                    type: "POST",
+                                    url: "archivos_extrajudiciales_carga_ajax.php",
+                                    data: { fechas : fechas, confirmo : 2},
+                                    success: function(respuesta) {
+                                        console.log(respuesta);
+                                        $('#contenido-tabla #table_id tbody').html(respuesta);
+                                            
+                                        $('#contenido-tabla').css('display','block');
+                                        $('#contenido_fechas').css('display','none');
+                                        
+                                        swal({
+                                            title: "Bien hecho!",
+                                            text: "Su solicitud se realizo correctamente!",
+                                            type: "success",
+                                        
+                                        });
+                                        
+                                    }
+                                }).done(function() {
+                                    $('#table_id').DataTable({
+                                        responsive: true,
+                                        dom: 'Bfrtip',
+                                        buttons: [
+                                            'copy', 'csv', 'excel', 'pdf', 'print'
+                                        ]
+                                    }); 
+                                });
+                            }
+                        });
+                    }else{
                         
-                    $('#contenido-tabla').css('display','block');
-                    $('#contenido_fechas').css('display','none');
+                        $.ajax({
+                            type: "POST",
+                            url: "archivos_extrajudiciales_carga_ajax.php",
+                            data: { fechas : fechas, confirmo : 2},
+                            success: function(respuesta) {
+                                console.log(respuesta);
+                                $('#contenido-tabla #table_id tbody').html(respuesta);
+                                    
+                                $('#contenido-tabla').css('display','block');
+                                $('#contenido_fechas').css('display','none');
+                                
+                                swal({
+                                    title: "Bien hecho!",
+                                    text: "Su solicitud se realizo correctamente!",
+                                    type: "success",
+                                
+                                });
+                                
+                            }
+                        }).done(function() {
+                            $('#table_id').DataTable({
+                                responsive: true,
+                                dom: 'Bfrtip',
+                                buttons: [
+                                    'copy', 'csv', 'excel', 'pdf', 'print'
+                                ]
+                            }); 
+                        });
                     
-                    swal({
-                        title: "Bien hecho!",
-                        text: "Su solicitud se realizo correctamente!",
-                        type: "success",
-                      
-                    });
-                    
+                    }
                 }
-            }).done(function() {
-                $('#table_id').DataTable({
-                    responsive: true,
-                    dom: 'Bfrtip',
-                    buttons: [
-                        'copy', 'csv', 'excel', 'pdf', 'print'
-                    ]
-                }); 
-            });
-            
+            })
+            /*
+           
+            */
         }else{
             alert('Debe seleccionar al menos una fecha');
         }
