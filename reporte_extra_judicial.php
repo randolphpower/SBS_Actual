@@ -60,7 +60,7 @@
                                 <div class="form-group">
                                     <label for="accion">Accion</label>
                                     <select name="accion" id="accion" class="form-control">
-                                        <option value="" disabled selected>-- SELECCIONE -- </option>
+                                        <option value="" disabled selected>-- TODAS -- </option>
                                         <?php	while($row  = $resultado->fetch_assoc()){ ?>
                                         <option value="<?php echo $row['cod_accion']; ?>"><?php echo $row['nom_accion'] ?></option>
                                         <?php } ?>
