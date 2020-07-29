@@ -222,16 +222,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
 <?php require 'includes/footer_start.php' ?>
 <!-- extra js -->
   
-<script src="assets/js/sweetalert.min.js"></script>
+
 <?php require 'includes/footer_end.php' ?>
-<script type="text/javascript"  src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
-<script type="text/javascript"  src="https://cdn.datatables.net/buttons/1.6.2/js/dataTables.buttons.min.js"></script>
+<script src="assets/js/sweetalert.min.js"></script>
+<script type="text/javascript"  src="assets/plugins/datatables/jquery.dataTables.min.js"></script>
+<script type="text/javascript"  src="assets/plugins/datatables/dataTables.buttons.min.js"></script>
 <script type="text/javascript"  src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.flash.min.js"></script>
-<script type="text/javascript"  src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-<script src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.print.min.js"></script>
+<script type="text/javascript"  src="assets/plugins/datatables/jszip.min.js"></script>
+<script src="assets/plugins/datatables/pdfmake.min.js"></script>
+<script src="assets/plugins/datatables/vfs_fonts.js"></script>
+<script src="assets/plugins/datatables/buttons.html5.min.js"></script>
+<script src="assets/plugins/datatables/buttons.print.min.js"></script>
 <script type="text/javascript">
     $(document).ready(function () {
       
@@ -285,7 +286,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                                     url: "archivos_extrajudiciales_carga_ajax.php",
                                     data: { fechas : fechas, confirmo : 1},
                                     success: function(respuesta) {
-                                        console.log(respuesta);
+                                        //console.log(respuesta);
                                         $('#contenido-tabla #table_id tbody').html(respuesta);
                                             
                                         $('#contenido-tabla').css('display','block');
@@ -314,7 +315,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                                     url: "archivos_extrajudiciales_carga_ajax.php",
                                     data: { fechas : fechas, confirmo : 2},
                                     success: function(respuesta) {
-                                        console.log(respuesta);
+                                        //console.log(respuesta);
                                         $('#contenido-tabla #table_id tbody').html(respuesta);
                                             
                                         $('#contenido-tabla').css('display','block');
@@ -346,7 +347,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                             url: "archivos_extrajudiciales_carga_ajax.php",
                             data: { fechas : fechas, confirmo : 2},
                             success: function(respuesta) {
-                                console.log(respuesta);
+                                //console.log(respuesta);
                                 $('#contenido-tabla #table_id tbody').html(respuesta);
                                     
                                 $('#contenido-tabla').css('display','block');
