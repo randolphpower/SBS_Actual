@@ -66,17 +66,24 @@
                     $rows[] = $row;
           
                 }
+                //echo count($rows);
                 foreach($rows as $row)
                 {
-                    if($row['rut'] == $rut && $row['cuenta'] == $addres2){
-                        $reg = llenartrans($parts);
-                        //echo $var;
+                    //echo $row['rut']."*".$rut;
+                    //echo $row['cuenta']."*".$addres2."<br>";
+                    //if ($addres2 == "304111453" && $row['cuenta'] == "00304111453"){
+                        //echo $row['cuenta']."<br>";
+                    //}
+                    //if($row['rut'] == $rut && $row['cuenta'] == $addres2){
+                    if(strcmp($row['rut'],$rut) == 0 && strcmp($row['cuenta'],$addres2) == 0){
+                        $reg = llenartrans($parts);                        
                         array_push($matriz,$reg);   
                         $var++;       
                         break;
                     }
                     
                 }
+                //echo $var;
                 if($var == 0){
                     $cc = array(
                         'rut' => $rut,
@@ -95,13 +102,14 @@
     //echo var_dump($tabla_no);
     
     foreach($tabla_no as $t){
-         $result .='<tr><td>'.$t['cuenta'].'</td>'.
+         $result .='<tr><td>CUENTA Y RUT NO EXISTE EN SISTEMA</td><td>'.$t['cuenta'].'</td>'.
             '<td>'.$t['rut'].'</td></tr>';
     }
     
     //*/
     
-    GenerarPlano200($matriz, $conexion,$confirmo);
+    $accionNoEncontrada = GenerarPlano200($matriz, $conexion,$confirmo);
+    $result .= $accionNoEncontrada;
     GenerarPlano600($matriz, $conexion,$confirmo);
     GenerarPlano700($matriz, $conexion,$confirmo);
     GenerarPlano800($matriz, $conexion,$confirmo);
@@ -110,10 +118,11 @@
 
     echo $result;
 
-    function  GenerarPlano200($transacciones, $conexion,$confirmo)
+    function GenerarPlano200($transacciones, $conexion,$confirmo)
     {
         try
         {
+            $accionNoEncontrada = "";
             $listaplanos = array();
             $f=strval(date('Y-m-d H:i:s'));
             $f2 = substr($f,5,2) . substr($f,8,2) . substr($f,0,4);
@@ -133,7 +142,8 @@
                     $plano->CodigoAccion= $item->CodigoAccion;
                 }
                 else{
-                    continue;
+                    $accionNoEncontrada .='<tr><td>CODIGO VCDIAL NO EXISTE EN SISTEMA</td><td>'.$plano->Cuenta.'</td>'.
+                    '<td>'.$item->Rut.'</td></tr>';
                 }
                 if (strlen($item->Respuesta) == ""){
                     continue;
@@ -175,7 +185,7 @@
             }
 
             Guardar200($listaplanos, $conexion, $f2,$confirmo);
-            return $f2;
+            return $accionNoEncontrada;
         }
         catch (Exception $ex)
         {

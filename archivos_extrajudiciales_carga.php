@@ -192,6 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                                                     <table id="table_id" class="display">
                                                         <thead>
                                                             <tr>
+                                                                <th>Motivo </th>
                                                                 <th>Cuenta </th>
                                                                 <th>Rut </th>
                                                             </tr>
@@ -265,7 +266,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                 url: "ayuda.php",
                 data: { fechas : fechas},
                 success: function(respuesta) {
-                    //console.log(respuesta);
+                    console.log(respuesta);
                     if(respuesta != 0 ){
                         swal({
                             title: "Existen Datos Cargados ",
@@ -286,7 +287,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                                     url: "archivos_extrajudiciales_carga_ajax.php",
                                     data: { fechas : fechas, confirmo : 1},
                                     success: function(respuesta) {
-                                        //console.log(respuesta);
+                                        console.log(respuesta);
                                         $('#contenido-tabla #table_id tbody').html(respuesta);
                                             
                                         $('#contenido-tabla').css('display','block');
@@ -315,7 +316,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                                     url: "archivos_extrajudiciales_carga_ajax.php",
                                     data: { fechas : fechas, confirmo : 2},
                                     success: function(respuesta) {
-                                        //console.log(respuesta);
+                                        console.log(respuesta);
                                         $('#contenido-tabla #table_id tbody').html(respuesta);
                                             
                                         $('#contenido-tabla').css('display','block');
@@ -347,7 +348,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                             url: "archivos_extrajudiciales_carga_ajax.php",
                             data: { fechas : fechas, confirmo : 2},
                             success: function(respuesta) {
-                                //console.log(respuesta);
+                                console.log(respuesta);
                                 $('#contenido-tabla #table_id tbody').html(respuesta);
                                     
                                 $('#contenido-tabla').css('display','block');

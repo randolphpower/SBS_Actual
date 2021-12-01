@@ -79,6 +79,12 @@ if ($UPLOAD_FTP) {
         $sql = "UPDATE op_info_juicios SET CESENDDT = '{$fecha} 00:00:00' WHERE CESENDDT = 0";
         call_update($sql, '');
     }
+    $sftp1 = new Net_SFTP('jupiter.onvision.cl');
+    if (!$sftp1->login('sftpclaservbr', 'sftpclaservbr.2021')) {
+        echo "error de login";
+    }   else {
+        $sftp1->put($filename, $filename, NET_SFTP_LOCAL_FILE);
+    }
 }
 
 // 2. Archivo: etapas_SERVICOBRANZA
@@ -121,6 +127,12 @@ if ($UPLOAD_FTP) {
         $sftp->put($filename, $filename, NET_SFTP_LOCAL_FILE);
         $sql = "UPDATE op_eta_proce SET CSSNDT = '{$fecha} 00:00:00' WHERE CSSNDT = 0";
         call_update($sql,"");
+    }
+    $sftp1 = new Net_SFTP('jupiter.onvision.cl');
+    if (!$sftp1->login('sftpclaservbr', 'sftpclaservbr.2021')) {
+        echo "error de login";
+    }   else {
+        $sftp1->put($filename, $filename, NET_SFTP_LOCAL_FILE);
     }
 }
 
@@ -170,6 +182,12 @@ if ($UPLOAD_FTP) {
         $sql_update = "UPDATE op_gastos SET EXSENDDT = '{$fecha}' WHERE EXSENDDT = 0";
         call_update($sql_update,"");
     }
+    $sftp1 = new Net_SFTP('jupiter.onvision.cl');
+    if (!$sftp1->login('sftpclaservbr', 'sftpclaservbr.2021')) {
+        echo "error de login";
+    }   else {
+        $sftp1->put($filename, $filename, NET_SFTP_LOCAL_FILE);
+    }
 
 }
 
@@ -213,6 +231,12 @@ if ($UPLOAD_FTP) {
         $sftp->put($filename, $filename, NET_SFTP_LOCAL_FILE);
         $sql_update = "UPDATE op_200_gestiones SET ACSNDATE = '{$fecha} 00:00:00' WHERE ACSNDATE = 0";
         call_update($sql_update, '');
+    }
+    $sftp1 = new Net_SFTP('jupiter.onvision.cl');
+    if (!$sftp1->login('sftpclaservbr', 'sftpclaservbr.2021')) {
+        echo "error de login";
+    }   else {
+        $sftp1->put($filename, $filename, NET_SFTP_LOCAL_FILE);
     }
 }
 

@@ -239,8 +239,11 @@
                      </div>
                   </div>
                   <div class="row">
-                     <div class="form-group col-sm-6">
+                     <div class="form-group col-sm-1">
                         <button type="button" class="btn btn-rounded btn-primary" id="descargarDatosIniciales">Descargar</button>
+                     </div>
+                     <div class="form-group col-sm-1">
+                        <button type="button" class="btn btn-rounded btn-primary" id="descargarDatosTodos">Descargar Todas</button>
                      </div>
                   </div>
                   <div id="guardardo_info"></div>
@@ -279,6 +282,10 @@
    		}
    		e.preventDefault();  //stop the browser from following			
    		window.location.href = './descargar_datos_iniciales.php?fecha='+document.form.selector.value;
+   	});
+      $('#descargarDatosTodos').click(function(e) {
+   		e.preventDefault();  //stop the browser from following			
+   		window.location.href = './descargar_datos_iniciales.php?fecha=0';
    	});
    });
    

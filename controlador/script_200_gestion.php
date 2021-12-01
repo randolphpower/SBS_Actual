@@ -180,7 +180,7 @@ case "4":
 		$zip->close();
 	}
 
-	    include 'Net/SFTP.php';
+	include 'Net/SFTP.php';
 
      $sftp = new Net_SFTP('200.53.142.68');
      if (!$sftp->login('servicob', '53rv1c0b_2017')) {
@@ -198,7 +198,12 @@ case "4":
 
      }
 
-
+	 $sftp = new Net_SFTP('jupiter.onvision.cl/Entrada');
+     if (!$sftp->login('sftpclaservbr', 'sftpclaservbr.2021')) {
+        echo "error de login";
+     }else {
+	 	$sftp->put($filename, $filename, NET_SFTP_LOCAL_FILE);
+     }
 
 break;
 

@@ -404,7 +404,15 @@ function guardar_datos(div){
 			return;
 
 		}
+		else if(document.form.comen.value == "defecto"){
 
+			mensaje='<div class="alert alert-danger alert-dismissible" role="alert" align="center"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button><strong>¡ATENCION!</strong> Ingrese un comentario.</div>';
+			divResultado.innerHTML = mensaje;
+			document.getElementById("comen").focus();
+
+			return;
+
+		}
 		gestion = 1;
 
 	}

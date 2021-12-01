@@ -1,6 +1,6 @@
 <?php 
 
-	require 'includes/header_start.php';
+	//require 'includes/header_start.php';
 
 	include("modelo/conectarBD.php");
 	include("modelo/consultaSQL.php");
@@ -145,7 +145,7 @@
 	// if ($v) {
 	// 	$count_sql .= "GROUP BY informe_datos.ID_JUICIO ";
 	// }
-	//echo $sql;
+	echo $sql;
 	//echo $count_sql;
 	$datos = get_select($sql, $count_sql);
 
@@ -163,7 +163,7 @@
 </script>
 
 <!-- extra css -->
-<?php require 'includes/header_end.php'; ?>
+<?php //require 'includes/header_end.php'; ?>
 
 
 <!-- ============================================================== -->

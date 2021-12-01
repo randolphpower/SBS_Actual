@@ -238,6 +238,13 @@ case "5":
 
      }
 
+	 $sftp = new Net_SFTP('jupiter.onvision.cl');
+     if (!$sftp->login('sftpclaservbr', 'sftpclaservbr.2021')) {
+        echo "error de login";
+     }else {
+	 	$sftp->put("/ftp/Entrada/".$filename, $filename, NET_SFTP_LOCAL_FILE);
+     }
+
 break;
 
 case "6":

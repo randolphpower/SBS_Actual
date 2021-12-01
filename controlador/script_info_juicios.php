@@ -144,7 +144,7 @@ case "4":
 
 	$datos = array();
 	$datos = call_select($sql_consulta, "");
-
+    //echo $sql_consulta;
 	/*echo $result1["CELSTACT"]." ".$result1["CELASTAC"]." ".$result1["CELASTRC"]." ?>?> ".utf8_encode($result1["DESCRIPCION"])."<>? ".utf8_encode($result2["DESCRIPCION"]);*/
 
 	// Fecha , codigo accion, codigo resultado, descripcion codigo accion, descripcion codigo resultado
@@ -182,7 +182,7 @@ case "4":
 	}
 
 	//output the response
-	//echo $sql_consulta;
+	echo $hint;
 	
 break;
 
@@ -349,6 +349,13 @@ case "7":
 
 
 		     }
+	
+	 $sftp = new Net_SFTP('jupiter.onvision.cl');
+     if (!$sftp->login('sftpclaservbr', 'sftpclaservbr.2021')) {
+        echo "error de login";
+     }else {
+	 	$sftp->put("/ftp/Entrada/".$filename, $filename, NET_SFTP_LOCAL_FILE);
+     }
 
 
 break;
